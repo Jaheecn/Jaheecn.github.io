@@ -23,11 +23,11 @@ const { renderSearchXml, renderSitemap, renderAtom } = require('./lib/feeds')
 
 function tagLdjson(tagName) {
   const tagUrl = encodeURI(SITE + '/articles/' + tagName + '/')
-  return '<script type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","@id":"' + tagUrl + '#webpage","name":"' + tagName + '","url":"' + tagUrl + '","description":"浏览 Yibao 博客中标记为\u201c' + tagName + '\u201d的文章与学习记录。","inLanguage":"zh-CN","isPartOf":{"@type":"WebSite","@id":"' + SITE + '/#website","url":"' + SITE + '/","name":"Yibao"}}</script>'
+  return '<script type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","@id":"' + tagUrl + '#webpage","name":"' + tagName + '","url":"' + tagUrl + '","description":"浏览 Jahee 博客中标记为\u201c' + tagName + '\u201d的文章与学习记录。","inLanguage":"zh-CN","isPartOf":{"@type":"WebSite","@id":"' + SITE + '/#website","url":"' + SITE + '/","name":"Jahee"}}</script>'
 }
 
 function idxLdjson() {
-  return '<script type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","@id":"' + SITE + '/articles/#webpage","name":"\u6587\u7ae0","url":"' + SITE + '/articles/","description":"\u901a\u8fc7\u6587\u7ae0\u67e5\u627e Yibao \u535a\u5ba2\u4e2d\u7684\u6280\u672f\u7b14\u8bb0\u3001\u7b97\u6cd5\u7ec3\u4e60\u4e0e\u5b66\u4e60\u8bb0\u5f55\u3002","inLanguage":"zh-CN","isPartOf":{"@type":"WebSite","@id":"' + SITE + '/#website","url":"' + SITE + '/","name":"Yibao"}}</script>'
+  return '<script type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","@id":"' + SITE + '/articles/#webpage","name":"\u6587\u7ae0","url":"' + SITE + '/articles/","description":"\u901a\u8fc7\u6587\u7ae0\u67e5\u627e Jahee \u535a\u5ba2\u4e2d\u7684\u6280\u672f\u7b14\u8bb0\u3001\u7b97\u6cd5\u7ec3\u4e60\u4e0e\u5b66\u4e60\u8bb0\u5f55\u3002","inLanguage":"zh-CN","isPartOf":{"@type":"WebSite","@id":"' + SITE + '/#website","url":"' + SITE + '/","name":"Jahee"}}</script>'
 }
 
 hexo.extend.generator.register('nova-tags', async function (locals) {

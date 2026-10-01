@@ -58,7 +58,7 @@ function dlHref(p) {
 
 function projectLdjson() {
   const url = encodeURI(SITE + '/projects/')
-  return '<script type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","@id":"' + url + '#webpage","name":"\u5de5\u7a0b","url":"' + url + '","description":"\u8f6f\u4ef6\u5b66\u4e60\u8bb0\u5f55\uff1a\u4ece\u5b89\u88c5\u914d\u7f6e\u5230\u52a8\u624b\u5b9e\u8df5\u3002","inLanguage":"zh-CN","isPartOf":{"@type":"WebSite","@id":"' + SITE + '/#website","url":"' + SITE + '/","name":"Yibao"}}</script>'
+  return '<script type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","@id":"' + url + '#webpage","name":"\u5de5\u7a0b","url":"' + url + '","description":"\u8f6f\u4ef6\u5b66\u4e60\u8bb0\u5f55\uff1a\u4ece\u5b89\u88c5\u914d\u7f6e\u5230\u52a8\u624b\u5b9e\u8df5\u3002","inLanguage":"zh-CN","isPartOf":{"@type":"WebSite","@id":"' + SITE + '/#website","url":"' + SITE + '/","name":"Jahee"}}</script>'
 }
 
 hexo.extend.generator.register('nova-projects', function () {

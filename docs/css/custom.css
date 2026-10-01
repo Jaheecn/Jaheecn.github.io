@@ -1,5 +1,5 @@
 /* ============================================================================
-   Yibao-web 全站覆盖样式 custom.css (Butterfly 主题覆盖层, ~56KB)
+   Jahee-web 全站覆盖样式 custom.css (Butterfly 主题覆盖层, ~56KB)
 
    规范:
    - 本文件 = 全站覆盖的唯一去处(上游 index.css 勿改)
@@ -362,7 +362,7 @@ body.nova-loading-active {
   transition: opacity 220ms ease;
 }
 
-/* 退场时 Yibao 内容先快速淡出,避免标记残留 */
+/* 退场时 Jahee 内容先快速淡出,避免标记残留 */
 .nova-page-loading.is-leaving .nova-page-loading__inner {
   opacity: 0;
   transition: opacity 260ms ease;

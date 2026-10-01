@@ -3,7 +3,7 @@ extends ./base.pug
 block headOpts
   - page.bodyClass = 'nova-tag-route'
   - var tagUrl = encodeURI(siteUrl + '/articles/' + page.tagName + '/')
-  - page.headOpts = { title: '文章: ' + page.tagName + ' | Yibao', siteTitle: '文章: ' + page.tagName, description: '浏览 Yibao 博客中标记为“' + page.tagName + '”的文章与学习记录。', ogUrl: tagUrl, canonical: tagUrl, pageType: 'tag', extraHead: page.ldjson }
+  - page.headOpts = { title: '文章: ' + page.tagName + ' | Jahee', siteTitle: '文章: ' + page.tagName, description: '浏览 Jahee 博客中标记为“' + page.tagName + '”的文章与学习记录。', ogUrl: tagUrl, canonical: tagUrl, pageType: 'tag', extraHead: page.ldjson }
 
 block content
   != page.shellTop

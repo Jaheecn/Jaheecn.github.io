@@ -4,19 +4,19 @@
 # replaced with your own identity later.
 
 # Site
-title: Yibao
+title: Jahee
 subtitle: ''
 description: '技术笔记、软件环境搭建与安全练习的个人记录。'
 keywords:
-author: Yibao
+author: Jahee
 language: zh-CN
 timezone: Asia/Shanghai
 
 # URL
-url: https://yibao11.github.io/
+url: https://jaheecn.github.io/
 # 站点资源版本号(单源): 生成器与模板引用会自动跟随。
 # 规则 YYYYMMDD-pNN —— 20260831 是起始版本, pNN 为递增序号(每次改动被引用的 css/js 就 +1)。
-version: 20260831-p48
+version: 20260831-p49
 permalink: posts/:title/
 permalink_defaults:
 pretty_urls:
@@ -96,7 +96,7 @@ theme: nova
 # Deployment
 deploy:
   type: git
-  repo: https://github.com/yibao11/yibao11.github.io.git
+  repo: https://github.com/Jaheecn/Jaheecn.github.io.git
   branch: public
   ignore_hidden: false
 

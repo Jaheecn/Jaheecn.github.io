@@ -1,6 +1,6 @@
 # 变更日志
 
-本文件记录 Yibao-web 的完整开发历史。按时间**倒序**排列，最新在上。
+本文件记录 Jahee-web 的完整开发历史。按时间**倒序**排列，最新在上。
 
 > 面向读者：想了解站点如何一步步演化的人 / 需要追溯某处改动原因的人。
 > 只想上手使用请看 [`README.md`](README.md)；AI/Agent 维护请看 [`AGENT.md`](AGENT.md)。
@@ -28,7 +28,7 @@
 | 2026-09-11 | **阶段 5 加载优化**：① 5.2 粒子发光改离屏 sprite 缓存 —— 每帧 `createRadialGradient` 93→0 次、`arc` −60%、JS 堆增长 −61%（帧率不变，瓶颈在像素填充）；② 5.3 视口变化改为**按比例缩放**已有粒子，不再重建（消除拖动窗口时的整片跳变）；③ 5.1 页级 CSS 按需注入**取消** —— 实测真实传输口径只省约 2.6%，且需改 PJAX 引入裸渲染风险 | `source/rose-galaxy/animation/galaxy-canvas.js` |
 | 2026-09-11 | **P0 加载性能专项**：① **CDN 全部本地化**（FontAwesome / pjax / medium-zoom / infinitegrid → `source/rose-galaxy/vendor/`，jsdelivr 引用 5→0，外部域名请求 7→2）；② **图片压缩 9 张**（1.94 MB→1.07 MB，省 891 KB；hero `day/night` 压至 q80）；③ 删除 **10.54 MB 未被引用**的 `preview-*.png`；④ 首页 hero 大图**按主题 preload**（`night.webp` 加载起点 8443ms→206ms） | `_config.butterfly.yml`、`themes/butterfly/layout/_partials/head.pug`、`parts-common/footer.html`、`scripts/inject-theme.js`、`source/rose-galaxy/vendor/`(新)、`source/img/*` |
 | 2026-09-11 | **P1 主题升级清单化**：不改"把自制页迁出 themes"（hexo 硬编码 `view_dir = theme_dir + 'layout'`，迁移需维护上游 layout 副本），改为产出 `docs/主题升级指南.md` —— 55 个定制文件清单（144.7 KB）+ 8 步升级流程 + 5 个易错点 | `docs/主题升级指南.md`(新) |
-| 2026-09-11 | **文案统一**：首页 title `Yibao` → `夜航工坊 \| Yibao`；站点描述去掉"折腾"等主观词，改为客观介绍；工程页占位符改条件渲染（原先 5 张卡片无条件输出"项目介绍陆续整理中…"）；工程页可见副标题由外引名言改为站点自我介绍 | `_config.yml`、`themes/butterfly/layout/{home,projects,project-detail}.pug`、`project-parts/top.html`、`scripts/projects-generator.js` |
+| 2026-09-11 | **文案统一**：首页 title `Jahee` → `夜航工坊 \| Jahee`；站点描述去掉"折腾"等主观词，改为客观介绍；工程页占位符改条件渲染（原先 5 张卡片无条件输出"项目介绍陆续整理中…"）；工程页可见副标题由外引名言改为站点自我介绍 | `_config.yml`、`themes/butterfly/layout/{home,projects,project-detail}.pug`、`project-parts/top.html`、`scripts/projects-generator.js` |
 | 2026-09-11 | **阶段 4 收尾**：① 4.7a 断点保守合并（`769→768` ×5、`1101→1100` ×3，零视觉变化，只影响恰好 768px 档的导航）；② 4.8 `nova-tags.js` 拆分 → `scripts/lib/feeds.js`（239→132 行，产物逐字节等价）；③ 4.7b 导航皮肤抽取**评估后不做**（`#page-header` 是特异性对抗工具，非皮肤命名空间） | `source/css/custom.css`、`source/rose-galaxy/css/{tag-page,project-detail-page}.css`、`scripts/nova-tags.js`、`scripts/lib/feeds.js`(新) |
 | 2026-09-11 | **阶段 1–3**：删 3 个空壳文件 + `galaxy-canvas.js` −495 行 + CSS −183 行（每页 −3 请求 −17.4 KB）；修 6 个 P0 缺陷（minify 非零退出、说说流请求成倍放大、播放器监听泄漏、工程日期恒为构建日、文章页 favicon 404、`renderAtom` 空数组崩溃）；建测试护栏 —— `npm test` **68 项**、`npm run verify` **10/18 项**、基线比对 | 多文件 |
 
@@ -59,12 +59,12 @@
 | | ② 新增"工程"板块(/projects/):5 个工程(单片机 3 + 建模 2);hero 背景用自定义图(转 webp q80,`/img/projects-hero.webp`);概览条(项目/分类/标签/WIP 自动统计);卡片排版参考 KurTips 课程列表(封面大图 3:2 + 标题 + 简介 + 日期/分类页脚,整卡外链 GitHub/嘉立创/下载,平铺 3 列网格),内容包一级页面板框(1300px);数据快照自 deymo-site portfolio info.json(描述原文)+ manifest(下载清单),维护只需改 `scripts/projects-data.js` 与放封面 webp;全站导航加"工程"(config menu + 8 个 *-parts 硬编码菜单 ×2 处 + pjax 排除 8 处 + nova-ux 路由类/routeMarkers);二级页(详情页)曾试做两版后按需求删除,卡片行为定为外链 | `scripts/projects-data.js`、`scripts/projects-generator.js`、`layout/projects.pug`、`layout/project-parts/top.html`、`source/rose-galaxy/css/projects-page.css`、`source/img/projects/`、`source/img/projects-hero.webp`、`_config.butterfly.yml`、`layout/{idx,tag,home}-parts/{top,bottom}.html`、`layout/page-parts/{music,shuoshuo,about,courses,404}.html`、`source/rose-galaxy/js/nova-ux.js` |
 | 2026-08-23 | ① 页面 hero 背景图更换(webp):音乐页背景换为 IMG_20260825_121749(转 webp);文章一级页 hero 换 fenlei.webp、二级页 hero 换 leetcode.webp(原 tech-mysql);文章三级页(default_top_img)背景换 fenlei.webp(与一级页统一);fliex 素材图源。统一 cover 展示、舍弃工程页试验代码 | `source/img/`、`_config.butterfly.yml`、`themes/butterfly/layout/idx-parts/top.html`、`tag-parts/top.html` |
 | | ② 首页 loading 改为"仅从网站首次进入时弹一次":此前首屏 loading 在站内 PJAX 返回首页/整页刷新时会重复弹出;引入会话级标志 `sessionStorage.__novaLoadingShown`,由 `nova-ux.js` 统一负责读/写判定,`top.html` 内联脚本只读该标志并据此决定是否显示,消除两处判定冲突。首次进入弹一次,返回首页/刷新不弹 | `themes/butterfly/layout/home-parts/top.html`、`source/rose-galaxy/js/nova-ux.js` |
-| | ③ 首页 loading 强化 + 动画优化:①首屏 loading 改为立即显示(去顶部 1200ms 延迟,避免被 DOMContentLoaded 提前取消致一闪而过);②新增最小展示时长 `INITIAL_MIN_SHOW=400`(退场须同时满足背景图 ready 且展示≥400ms);③loading 退场改整体渐隐淡出(480ms)+ Yibao 内容先 260ms 淡出;④首页空闲时用 `<link rel="prefetch" as="document">` 预取导航其他页(`/articles/`、`/music/`、`/shuoshuo/`、`/about/`,不预取子页),跳转更快 | `themes/butterfly/layout/home-parts/top.html`、`source/rose-galaxy/js/nova-ux.js`、`source/css/custom.css` |
+| | ③ 首页 loading 强化 + 动画优化:①首屏 loading 改为立即显示(去顶部 1200ms 延迟,避免被 DOMContentLoaded 提前取消致一闪而过);②新增最小展示时长 `INITIAL_MIN_SHOW=400`(退场须同时满足背景图 ready 且展示≥400ms);③loading 退场改整体渐隐淡出(480ms)+ Jahee 内容先 260ms 淡出;④首页空闲时用 `<link rel="prefetch" as="document">` 预取导航其他页(`/articles/`、`/music/`、`/shuoshuo/`、`/about/`,不预取子页),跳转更快 | `themes/butterfly/layout/home-parts/top.html`、`source/rose-galaxy/js/nova-ux.js`、`source/css/custom.css` |
 | | ④ 阅读模式配色改成 sitename-minted 陶土橙系:右侧书籍按钮开启的 `body.read-mode` 下的文章正文(`#article-container`)由玫红改陶土橙(浅色米白 #faf8f4 + #d97757 / 深色蓝黑 #171c2e + #e59b7d);`.read-mode` 补覆盖 `--post-*` 变量使正文真正生效;普通文章页/首页等非阅读模式保持玫红不变。配套 Typora 主题 `sitename-minted-light/dark.css`(编辑器用) | `themes/butterfly/_config.yml`、`source/css/index.css`、`source/css/custom.css`、`nova-ux.js` |
-| | ⑤ 首页加载顺序修复(方案 A):首屏 loading 图案(`Yibao / LOADING THE NIGHT...`)等 hero 背景图(`night.webp`/`day.webp`)真正加载完成后再淡出,消除"粒子先动、图片后到"的错位;新增 `HOME_BG` `whenHomeBgReady` 守卫 + 3s 兜底,非首页不受影响 | `source/rose-galaxy/js/nova-ux.js` |
+| | ⑤ 首页加载顺序修复(方案 A):首屏 loading 图案(`Jahee / LOADING THE NIGHT...`)等 hero 背景图(`night.webp`/`day.webp`)真正加载完成后再淡出,消除"粒子先动、图片后到"的错位;新增 `HOME_BG` `whenHomeBgReady` 守卫 + 3s 兜底,非首页不受影响 | `source/rose-galaxy/js/nova-ux.js` |
 | | ⑥ 部署目标修正:`gh-pages` → `public`(线上 GitHub Pages 实际使用 public 分支;原配置指向不存在的 gh-pages,导致 hexo deploy 推错方向) | `_config.yml`、`.deploy_git` |
 | | ⑦ 文章页精选 & 阅读体验:①关相关推荐(related_post.enable=false);②版权卡片仅保留「文章作者/文章链接」两行,删「版权声明」行(post-copyright__notice);③上一篇/下一篇内容介绍由两行改三行(line-clamp 2→3,超出第三行末尾省略号);④文章相关页(详情页 `#body-wrap.post` + 列表/分类页 `#content-inner.nova-tag-content`)右侧垂直滚动条参考 DSH 加宽(8px、圆角、浅玫瑰 `rgba(190,112,138,.45)` → 悬停深玫瑰 `rgba(164,90,120,.92)`),首页/音乐/说说/课程/关于等版块不变 | `themes/butterfly/_config.yml`、`layout/includes/post/post-copyright.pug`、`source/css/index.css`、`source/css/custom.css` |
-| 2026-08-22 | P2.7 评论系统:Waline v2 自建后端(Vercel serverless + Neon PostgreSQL,仓库 waline 分支 → yibao11-github-io.vercel.app);启用主题评论(文章/普通页,评论数);说说/音乐/关于页接入;说说页改"评论即说说"(留言评论动态渲染为说说条目,按月分组/LATEST/本地点赞,清除旧硬编码说说);移除 SECURE_DOMAINS(与相对路径评论冲突) | `_config.butterfly.yml`、`layout/page-parts/{about,shuoshuo,music}.html` |
+| 2026-08-22 | P2.7 评论系统:Waline v2 自建后端(Vercel serverless + Neon PostgreSQL,仓库 waline 分支 → jaheecn-github-io.vercel.app);启用主题评论(文章/普通页,评论数);说说/音乐/关于页接入;说说页改"评论即说说"(留言评论动态渲染为说说条目,按月分组/LATEST/本地点赞,清除旧硬编码说说);移除 SECURE_DOMAINS(与相对路径评论冲突) | `_config.butterfly.yml`、`layout/page-parts/{about,shuoshuo,music}.html` |
 | 2026-08-21 | ① 浅色模式花瓣飘落:删尘埃粒子改花瓣(渐变/3形状/3档色/自转/高光/间歇风/下落缓急,尺寸6-10/40-60片,进入即满屏、重置60%顶部下落);深色模式保持;精选记录布局(板块距大图30px、文字区顶46px底14px、摘要上边距4px、标题与图片距增大);运动自然化(风速-0.02~-0.008/自转±0.0009/摇摆±0.6/下落3.4) | `rose-galaxy/js/galaxy-canvas.js`、`rose-galaxy/css/nova-home.css`、`layout/home-parts/bottom.html`、`layout/home.pug` |
 | | ② 首页粒子迭代:深色适度增强(95-115 玫瑰系+星座连线);浅色重设计——左半屏+右上小区域尘埃,修复根因(粒子创建时按主题定参数,切浅色后不重建导致不可见;主题切换现自动重建)与崩溃(连线 dx/dy/b 未定义);浅色最终为 8105 尘埃样式(浅蓝、30% 星带十字芒、85-110 个、白色连线) | `rose-galaxy/js/galaxy-canvas.js`、`rose-galaxy/css/nova-home.css`、`layout/home-parts/bottom.html`、`layout/home.pug` |
 | | ③ P2.6 构建压缩:esbuild 压缩全部 JS(188KB→99KB);CSS 保留未压缩(避免颜色舍入差异,gzip 已兜底);build 链接入 minify | `package.json`、`scripts/minify.js`(esbuild) |
@@ -72,7 +72,7 @@
 | | ⑤ P2.2 布局化重构:head 收敛为 `_partials/head.pug`(参数化,9 份→1 份);标签/索引页迁 pug 布局;5 个静态页改布局渲染;删除 nova-templates 占位符模板;域名从 config 读取;版本号全站统一 5.7.0 | `layout/base.pug`、`_partials/`、`layout/*.pug`、`*-parts/`、`scripts/*-generator.js`、`source/`(静态页删) |
 | | ⑥ 首页 build 化(P2.1):删除手工静态首页,改由 hexo 布局渲染;LATEST/精选卡片按文章 order 自动输出;摘要统一 70 字 | `layout/home.pug`、`home-parts/`、`scripts/home-generator.js`、`source/index.html`(删)、`_posts/`(加 order) |
 | | ⑦ P1 内容清理:删红石科技空文章+首页坏 HTML 卡片;变声器删失效本地图引用;绘世卡片摘要修正;站点描述与实际内容一致;删 7MB 冗余资源 15 项 | `_posts/`、`source/index.html`、`source/img/`、`source/bili-music/`(删) |
-| | ⑧ P0 域名修复:全站 deymocn.github.io → yibao11.github.io(72 处/13 文件,含生成器/模板/og/canonical/sitemap/atom/robots) | 全站源码 |
+| | ⑧ P0 域名修复:全站 deymocn.github.io → jaheecn.github.io(72 处/13 文件,含生成器/模板/og/canonical/sitemap/atom/robots) | 全站源码 |
 | 2026-08-19 | ① 导航当前页高亮:进入各页面时对应菜单标玫瑰色(深 #ce8299 / 浅 #9a6177,与首页"首页"同款),覆盖未滚动/滚动后/hover;JS 按路径匹配(文章含索引页/标签页/详情页),桌面与移动端同步,pjax 自动更新 | `nova-ux.js`、`custom.css` |
 | | ② 首页导航文字:浅色未选中菜单改近黑 #1f1d24(含滚动后),移除 text-shadow;菜单 14/15px→17px、站名 16px→18px(深浅一致) | `nova-home.css` |
 | | ③ 首页生活碎片板块文案:进入播放空间→进入音乐、进入日常记录→进入说说 | `index.html` |
@@ -101,5 +101,5 @@
 | | ③ 时间自动主题(方案 B):删除 localStorage 记忆,纯时间制(后被 2.B 取代) | `nova-ux.js` |
 | | ④ 浅色 Hero 蓝色轻纱蒙版(状态 B)、SCROLL 滚动引导、首页模块删减 | `nova-home.css` |
 | 2026-08-15 | 板块删减(归档/分类/模板/照片)、导航改版、彩蛋移除、背景图 day/night.webp | 全站 |
-| | ⑫ 工程更名 deymo-web → Yibao-web(目录与 package.json,含主题存储键 sitename-theme-pref) | `package.json`、`nova-ux.js`、README |
+| | ⑫ 工程更名 deymo-web → Jahee-web(目录与 package.json,含主题存储键 sitename-theme-pref) | `package.json`、`nova-ux.js`、README |
 

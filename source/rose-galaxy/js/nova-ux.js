@@ -46,7 +46,7 @@
     loader.innerHTML = `
       <div class="nova-page-loading__inner">
         <span class="nova-page-loading__mark" aria-hidden="true"></span>
-        <strong>Yibao</strong>
+        <strong>Jahee</strong>
         <small>LOADING THE NIGHT...</small>
       </div>`
     document.body.appendChild(loader)

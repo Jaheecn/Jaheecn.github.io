@@ -7,9 +7,9 @@
      - 左下角心形供浏览者点赞(本地), 管理员点心形 → 收录到「最近状态」
      - 访客留言仅保留在评论区, 不进说说流 */
 
-  const SERVER = 'https://yibao11-github-io.vercel.app'
+  const SERVER = 'https://jaheecn-github-io.vercel.app'
   const OWNER_USER_ID = 1
-  const OWNER_NICK = 'Yibao'
+  const OWNER_NICK = 'Jahee'
   const MOOD_KEY = 'nova-moments-mood-v2'
   const MOOD_KEY_V1 = 'nova-moments-mood'
   const META_KEYS = ['心情', '地点', '人物', '天气']
@@ -34,7 +34,7 @@
     return `${p(d.getHours())}:${p(d.getMinutes())}`
   }
 
-  /* 站长判定(三重判据, 任一命中即站长): 后端 user_id=1 / 昵称 Yibao / 官方管理员标记 */
+  /* 站长判定(三重判据, 任一命中即站长): 后端 user_id=1 / 昵称 Jahee / 官方管理员标记 */
   const isOwner = c =>
     Number(c.user_id) === OWNER_USER_ID ||
     String(c.nick || '').trim() === OWNER_NICK ||

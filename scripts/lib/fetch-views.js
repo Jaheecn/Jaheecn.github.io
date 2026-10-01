@@ -48,7 +48,7 @@ function fetchPv(pageKey) {
       method: 'GET',
       headers: {
         Referer: SITE + encodeURI(pageKey),
-        'User-Agent': 'Mozilla/5.0 (compatible; Yibao-builder/1.0)'
+        'User-Agent': 'Mozilla/5.0 (compatible; Jahee-builder/1.0)'
       },
       timeout: 8000
     }, res => {

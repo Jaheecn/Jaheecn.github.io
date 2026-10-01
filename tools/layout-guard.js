@@ -21,7 +21,7 @@
 
    用法：
      node tools/layout-guard.js --url http://127.0.0.1:4011            检查
-     node tools/layout-guard.js --url https://yibao11.github.io       检查线上
+     node tools/layout-guard.js --url https://jaheecn.github.io       检查线上
      node tools/layout-guard.js --baseline                            把当前结果写入基线
      node tools/layout-guard.js --help                                查看用法
      不带 --url 时默认检查 http://127.0.0.1:4011 (需自行启动服务)

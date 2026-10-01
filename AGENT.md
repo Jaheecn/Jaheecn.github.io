@@ -1,4 +1,4 @@
-# Yibao-web 维护文档
+# Jahee-web 维护文档
 
 > 本文件主要面向 **AI/Agent 维护者**:架构事实、改动纪律、部署流程、工程坑。
 > 操作者必须遵守,避免误触误删;人类用户看 `README.md` 或本地预览(仓库根目录下 `hexo server -p 4015`)即可。
@@ -260,7 +260,7 @@ P0(2026-09-11) 把外链库改为同源自托管，消除 jsDelivr 依赖。这�
 | GitHub Pages | 直接以 **main 分支的 `/docs` 目录**为发布源 | 产物由构建生成；**上线只由 `docs/` 的内容决定** |
 
 - **`hexo generate` 直接输出到本仓 `docs/`** —— `_config.yml` 的 `public_dir: docs`（`docs/` 不被 `.gitignore` 忽略, 它就是产物目录兼发布源）。产物目录一律用 `tools/lib/public-dir.js` 解析，勿在脚本里硬编码目录名。
-- **评论后端不在本仓**：Waline 是**独立仓库**、独立部署在 Vercel；前端通过 `_config.nova.yml` 的 `waline.serverURL`（`https://yibao11-github-io.vercel.app`）按 URL 引用它，前端改动通常不需要动它。
+- **评论后端不在本仓**：Waline 是**独立仓库**、独立部署在 Vercel；前端通过 `_config.nova.yml` 的 `waline.serverURL`（`https://jaheecn-github-io.vercel.app`）按 URL 引用它，前端改动通常不需要动它。
 - **源码与上线在同一个提交里**：没有"只推源码""只推产物"两条线了 —— `git push origin main` 之后 Pages 自动重建；**只改源码不构建 ⇒ 线上不会变**，因为 Pages 只发布 `docs/`。
 
 ### 发布流程（改源码 → 构建 → 提交推送 → 线上验证）
@@ -273,7 +273,7 @@ P0(2026-09-11) 把外链库改为同源自托管，消除 jsDelivr 依赖。这�
    ```
 4. 线上验证：curl 关键路由(首页 / moments / articles / posts 示例 / projects / sitemap.xml) + 抽查资源版本号
 
-> ⚠️ **`hexo deploy` 不要再用**（`npm run deploy` 同样别跑）：`_config.yml` 的 deploy 段仍指向 `yibao11.github.io` 的 **`public` 分支**，它会重建 `.deploy_git` 并强推一条与发布源无关的历史 —— 既不生效，又可能让"线上停在旧版"（历史断裂时 Pages 不重建，需 `commit-tree` 修复）。产物统一由 `main` 分支的 `docs/` 推。
+> ⚠️ **`hexo deploy` 不要再用**（`npm run deploy` 同样别跑）：`_config.yml` 的 deploy 段仍指向 `jaheecn.github.io` 的 **`public` 分支**，它会重建 `.deploy_git` 并强推一条与发布源无关的历史 —— 既不生效，又可能让"线上停在旧版"（历史断裂时 Pages 不重建，需 `commit-tree` 修复）。产物统一由 `main` 分支的 `docs/` 推。
 
 ```bash
 npm run build     # hexo generate && node tools/minify.js && node tools/smoke.js

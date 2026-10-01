@@ -1,8 +1,8 @@
-# Yibao-web — 个人网站
+# Jahee-web — 个人网站
 
-一个以「深夜幕蓝 + 玫瑰星系粒子」为视觉核心的个人网站。基于 [yibao11.github.io](https://yibao11.github.io) 的静态构建产物重建，采用 Hexo 8.1.2 + 自研 nova 主题（`themes/nova/`）+ rose-galaxy 定制层，并在此基础上做了个性化与开放共享。
+一个以「深夜幕蓝 + 玫瑰星系粒子」为视觉核心的个人网站。基于 [jaheecn.github.io](https://jaheecn.github.io) 的静态构建产物重建，采用 Hexo 8.1.2 + 自研 nova 主题（`themes/nova/`）+ rose-galaxy 定制层，并在此基础上做了个性化与开放共享。
 
-线上地址：<https://yibao11.github.io>
+线上地址：<https://jaheecn.github.io>
 
 | 深色主题 | 浅色主题 |
 | --- | --- |
@@ -49,7 +49,7 @@ npm run verify -- --strict   # 结构 + 基线比对 19 项
 ## 目录结构
 
 ```
-Yibao-web/
+Jahee-web/
 ├── _config.yml                Hexo 站点配置，permalink: posts/:title/、public_dir: docs
 ├── _config.nova.yml           主题配置：导航 / 搜索 / 资源注入 / 评论（原 _config.butterfly.yml）
 ├── package.json               Hexo 8.1.2 + 插件
@@ -242,7 +242,7 @@ Markdown 是一种轻量级的标记语言……
 
 ### 发一条说说
 
-管理员在说说页评论区留言即可，`moments-feed.js` 会把站长评论渲染成说说卡片。判定条件是三重匹配：`user_id=1`、昵称 Yibao、administrator 标记。
+管理员在说说页评论区留言即可，`moments-feed.js` 会把站长评论渲染成说说卡片。判定条件是三重匹配：`user_id=1`、昵称 Jahee、administrator 标记。
 
 说说流只在页面加载和 PJAX 切页时拉取，没有轮询。新发说说后刷新页面即可看到。
 
@@ -387,7 +387,7 @@ Markdown 是一种轻量级的标记语言……
 
 ## 历史记录
 
-Yibao-web 从一份静态站导出产物，长成现在这个带生成器、双主题与自研交互层的个人站点，前后约一个月。
+Jahee-web 从一份静态站导出产物，长成现在这个带生成器、双主题与自研交互层的个人站点，前后约一个月。
 
 下表按时间倒序记录每个阶段**读者能感知到的变化**；逐条改动与实现细节见 `CHANGELOG.md`。
 
@@ -412,7 +412,7 @@ Yibao-web 从一份静态站导出产物，长成现在这个带生成器、双�
 
 ## 相关仓库
 
-线上仓库 `yibao11/yibao11.github.io`，**本地就是这一个仓库**（单仓自包含，克隆它即可完成「构建 → 提交 → 上线」）：源码与产物都在 `main` 分支上，**GitHub Pages 直接以 `main` 分支的 `/docs` 目录为发布源**。
+线上仓库 `Jaheecn/Jaheecn.github.io`，**本地就是这一个仓库**（单仓自包含，克隆它即可完成「构建 → 提交 → 上线」）：源码与产物都在 `main` 分支上，**GitHub Pages 直接以 `main` 分支的 `/docs` 目录为发布源**。
 
 | 位置 | 内容 | 说明 |
 | --- | --- | --- |

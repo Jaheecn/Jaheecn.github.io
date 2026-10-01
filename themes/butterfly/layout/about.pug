@@ -2,7 +2,7 @@ extends ./base.pug
 
 block headOpts
   - page.bodyClass = 'nova-about-route'
-  - page.headOpts = { title: '关于 | Yibao', siteTitle: '关于', description: '记录正在学习的技术、正在构建的项目，以及一些普通的生活片段。', ogUrl: siteUrl + '/about/', canonical: siteUrl + '/about/', pageType: 'page', extraHead: '<link rel="preload" as="image" href="/img/hero/archive-bg.webp" fetchpriority="high" type="image/webp"><script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"关于","url":"' + siteUrl + '/about/","inLanguage":"zh-CN","isPartOf":{"@type":"WebSite","url":"' + siteUrl + '/"}}</script>' }
+  - page.headOpts = { title: '关于 | Jahee', siteTitle: '关于', description: '记录正在学习的技术、正在构建的项目，以及一些普通的生活片段。', ogUrl: siteUrl + '/about/', canonical: siteUrl + '/about/', pageType: 'page', extraHead: '<link rel="preload" as="image" href="/img/hero/archive-bg.webp" fetchpriority="high" type="image/webp"><script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"关于","url":"' + siteUrl + '/about/","inLanguage":"zh-CN","isPartOf":{"@type":"WebSite","url":"' + siteUrl + '/"}}</script>' }
 
 block content
   != page.body

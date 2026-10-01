@@ -1,8 +1,8 @@
 {
-  "name": "yibao-web",
+  "name": "jahee-web",
   "version": "1.0.0",
   "private": true,
-  "description": "Personal site rebuilt from Yibao static source (Hexo 8.1.2 + Butterfly)",
+  "description": "Personal site rebuilt from Jahee static source (Hexo 8.1.2 + Butterfly)",
   "scripts": {
     "prebuild": "node scripts/lib/fetch-views.js",
     "build": "hexo generate && node tools/minify.js && node tools/smoke.js",

@@ -1,7 +1,7 @@
 (()=>{"use strict";if(window.__novaUxBoot)return;window.__novaUxBoot=!0;const G=50,U=2e3,K=300,T=400,A={dark:"/img/hero/night.webp",light:"/img/hero/day.webp"},W=3e3;let v=!1;const I=["nova-home-active","nova-music-route","nova-tag-route","nova-tags-route","nova-projects-route","nova-project-detail-route","nova-moments-route","nova-about-route"];let g=0,w=0,f=0,M=!1,k=0,d=null,i=null;function D(){const e=Array.from(document.querySelectorAll("[data-nova-loading]"));let t=e.shift();return e.forEach(n=>n.remove()),t||(t=document.createElement("div"),t.className="nova-page-loading",t.dataset.novaLoading="",t.setAttribute("aria-hidden","true"),t.innerHTML=`
       <div class="nova-page-loading__inner">
         <span class="nova-page-loading__mark" aria-hidden="true"></span>
-        <strong>Yibao</strong>
+        <strong>Jahee</strong>
         <small>LOADING THE NIGHT...</small>
       </div>`,document.body.appendChild(t),t)}function b(){const e=document.querySelector("#local-search .search-dialog"),t=e==null?void 0:e.querySelector(".local-search-input input"),n=e==null?void 0:e.querySelector("#local-search-results");if(!e||!t||!n||e.dataset.novaSearchReady==="true")return;e.dataset.novaSearchReady="true",i==null||i.disconnect(),i=null;const o=document.createElement("div");o.className="nova-search-state",o.innerHTML=`
       <span class="nova-search-state__eyebrow">QUICK PASSAGE</span>

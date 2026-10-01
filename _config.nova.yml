@@ -73,7 +73,7 @@ lightbox: medium_zoom
 
 # Footer (will be replaced with your identity in phase 2)
 footer:
-  owner: Yibao
+  owner: Jahee
   since: 2025
 
 
@@ -119,7 +119,7 @@ comments:
   count: true
   card_post_count: true
 waline:
-  serverURL: https://yibao11-github-io.vercel.app
+  serverURL: https://jaheecn-github-io.vercel.app
   pageview: false
   option:
 

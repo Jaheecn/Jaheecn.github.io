@@ -4,8 +4,8 @@ block headOpts
   - page.bodyClass = 'nova-project-detail-route'
   - var detailUrl = encodeURI(siteUrl + '/projects/' + page.projectId + '/')
   //- 结构化数据: 工程页用 TechArticle(与文章页 BlogPosting 区分)。siteUrl 由 base.pug 从 config.url 解析。
-  - var detailLd = '{"@context":"https://schema.org","@type":"TechArticle","headline":"' + page.title + '","description":"' + (page.description || '') + '","url":"' + detailUrl + '","inLanguage":"zh-CN","author":{"@type":"Person","name":"Yibao","url":"' + siteUrl + '/"},"publisher":{"@type":"Person","name":"Yibao"},"mainEntityOfPage":{"@type":"WebPage","@id":"' + detailUrl + '"}' + (page.date ? ',"datePublished":"' + page.date + '"' : '') + (page.updated ? ',"dateModified":"' + page.updated + '"' : '') + '}'
-  - page.headOpts = { title: '工程: ' + page.title + ' | Yibao', siteTitle: '工程: ' + page.title, description: page.description, ogUrl: detailUrl, canonical: detailUrl, ogTitle: page.title, pageType: 'page', extraHead: '<link rel="preload" as="image" href="/img/hero/projects-detail-hero.webp" fetchpriority="high" type="image/webp"><script type="application/ld+json">' + detailLd + '</script>' }
+  - var detailLd = '{"@context":"https://schema.org","@type":"TechArticle","headline":"' + page.title + '","description":"' + (page.description || '') + '","url":"' + detailUrl + '","inLanguage":"zh-CN","author":{"@type":"Person","name":"Jahee","url":"' + siteUrl + '/"},"publisher":{"@type":"Person","name":"Jahee"},"mainEntityOfPage":{"@type":"WebPage","@id":"' + detailUrl + '"}' + (page.date ? ',"datePublished":"' + page.date + '"' : '') + (page.updated ? ',"dateModified":"' + page.updated + '"' : '') + '}'
+  - page.headOpts = { title: '工程: ' + page.title + ' | Jahee', siteTitle: '工程: ' + page.title, description: page.description, ogUrl: detailUrl, canonical: detailUrl, ogTitle: page.title, pageType: 'page', extraHead: '<link rel="preload" as="image" href="/img/hero/projects-detail-hero.webp" fetchpriority="high" type="image/webp"><script type="application/ld+json">' + detailLd + '</script>' }
 
 block content
   //- 公共壳(P1): sidebar/body-wrap/header/nav 由生成器按 shellTop 拼装, post-info 页级
@@ -161,7 +161,7 @@ block content
     script.
       (() => {
         const loadWaline = () => {
-          const serverURL = 'https://yibao11-github-io.vercel.app'
+          const serverURL = 'https://jaheecn-github-io.vercel.app'
           const path = window.location.pathname
           const load = () => import('!{url_for(theme.asset.waline_js)}')
             .then(({ init }) => init({

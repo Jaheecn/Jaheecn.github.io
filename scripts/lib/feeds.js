@@ -101,9 +101,9 @@ function renderAtom(posts) {
     const url = postUrl(p)
     const cats = (p.tags && p.tags.toArray ? p.tags.toArray() : (p.tags || [])).map(t => t.name)
     const catXml = cats.map(c => '<category term="' + escXml(c) + '" scheme="' + SITE + '/articles/' + escXml(encodeURIComponent(c)) + '/"/>').join('\n    ')
-    return '  <entry>\n    <author>\n      <name>Yibao</name>\n    </author>\n    ' + catXml + '\n    <id>' + SITE + escXml(url) + '</id>\n    <link href="' + SITE + escXml(url) + '"/>\n    <published>' + fmtDate(p.date) + 'T00:00:00.000Z</published>\n    <summary>' + escXml(summaryOf(p)) + '</summary>\n    <title>' + escXml(p.title) + '</title>\n    <updated>' + fmtDate(p.date) + 'T00:00:00.000Z</updated>\n  </entry>'
+    return '  <entry>\n    <author>\n      <name>Jahee</name>\n    </author>\n    ' + catXml + '\n    <id>' + SITE + escXml(url) + '</id>\n    <link href="' + SITE + escXml(url) + '"/>\n    <published>' + fmtDate(p.date) + 'T00:00:00.000Z</published>\n    <summary>' + escXml(summaryOf(p)) + '</summary>\n    <title>' + escXml(p.title) + '</title>\n    <updated>' + fmtDate(p.date) + 'T00:00:00.000Z</updated>\n  </entry>'
   }).join('\n')
-  return '<?xml version="1.0" encoding="utf-8"?>\n<feed xmlns="http://www.w3.org/2005/Atom">\n  <author>\n    <name>Yibao</name>\n  </author>\n  <generator uri="https://hexo.io/">Hexo</generator>\n  <id>' + SITE + '/</id>\n  <link href="' + SITE + '/" rel="alternate"/>\n  <link href="' + SITE + '/atom.xml" rel="self"/>\n  <rights>All rights reserved 2026, Yibao</rights>\n  <subtitle>个人学习与生活记录。</subtitle>\n  <title>Yibao</title>\n  <updated>' + updated + '</updated>\n' + entries + '\n</feed>\n'
+  return '<?xml version="1.0" encoding="utf-8"?>\n<feed xmlns="http://www.w3.org/2005/Atom">\n  <author>\n    <name>Jahee</name>\n  </author>\n  <generator uri="https://hexo.io/">Hexo</generator>\n  <id>' + SITE + '/</id>\n  <link href="' + SITE + '/" rel="alternate"/>\n  <link href="' + SITE + '/atom.xml" rel="self"/>\n  <rights>All rights reserved 2026, Jahee</rights>\n  <subtitle>个人学习与生活记录。</subtitle>\n  <title>Jahee</title>\n  <updated>' + updated + '</updated>\n' + entries + '\n</feed>\n'
 }
 
 function postUrl(post) {

@@ -17,8 +17,8 @@ mixin headContent(opts)
   meta(http-equiv='X-UA-Compatible' content='IE=edge')
   meta(name='viewport' content='width=device-width, initial-scale=1.0,viewport-fit=cover')
   title= opts.title
-  meta(name='author' content='Yibao')
-  meta(name='copyright' content='Yibao')
+  meta(name='author' content='Jahee')
+  meta(name='copyright' content='Jahee')
   meta(name='format-detection' content='telephone=no')
   meta(name='theme-color' content=opts.themeColor || '#080B14')
   if opts.description
@@ -27,7 +27,7 @@ mixin headContent(opts)
   meta(property='og:title' content=opts.ogTitle || opts.siteTitle || opts.title)
   if opts.ogUrl
     meta(property='og:url' content=opts.ogUrl)
-  meta(property='og:site_name' content='Yibao')
+  meta(property='og:site_name' content='Jahee')
   if opts.description
     meta(property='og:description' content=opts.description)
   meta(property='og:locale' content='zh_CN')
@@ -39,7 +39,7 @@ mixin headContent(opts)
   if opts.articleDate || opts.articleUpdated
     meta(property='article:published_time' content=opts.articleDate || opts.articleUpdated)
     meta(property='article:modified_time' content=opts.articleUpdated || opts.articleDate)
-    meta(property='article:author' content='Yibao')
+    meta(property='article:author' content='Jahee')
   //- 文章标签: 原版 head 由 open_graph() 逐条输出 article:tag, 共享实现里显式生成
   if opts.articleTags
     each _tag in opts.articleTags

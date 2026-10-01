@@ -1,1 +1,1 @@
-(function(){"use strict";window.NOVA_SITE={bili:{proxy:"https://1470690781-6b1hcscil5.ap-guangzhou.tencentscf.com",uid:"3546712446601247",folder:"music"}}})();
+(function(){"use strict";window.NOVA_SITE={music:{proxy:"https://1499374265-69fpqsov31.ap-guangzhou.tencentscf.com",playlist:"5219355225"}}})();

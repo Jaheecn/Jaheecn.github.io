@@ -1,14 +1,14 @@
 'use strict'
-/* 音乐歌单(搜索索引数据源, A 方案 2026-09-02):
-   - 构建时请求 B 站云函数 /api/playlist 获取当前歌单(歌曲名/作者/时长)
+/* 音乐歌单(搜索索引数据源, A 方案 2026-09-02; 2026-10-01 由 B 站迁移到网易云):
+   - 构建时请求云函数 /api/playlist 获取当前歌单(歌曲名/作者/时长)
    - 成功 → 回写 data/music-playlist.json 缓存(入库, 离线兜底)
    - 失败(网络/代理不可用) → 读缓存兜底, 无缓存返回空数组(索引只剩文章)
-   以后加减歌曲: 只改 B 站收藏夹, build 时自动同步, 零手工。 */
+   以后加减歌曲: 只改网易云歌单, build 时自动同步, 零手工。 */
 
 const fs = require('fs')
 const path = require('path')
 const https = require('https')
-const { BILI } = require('../site-config')
+const { MUSIC } = require('../site-config')
 
 const CACHE_FILE = path.join(__dirname, '..', '..', 'data', 'music-playlist.json')
 
@@ -57,9 +57,8 @@ function writeCache(songs) {
 }
 
 async function fetchPlaylist() {
-  const url = BILI.proxy
-    + '/api/playlist?uid=' + encodeURIComponent(BILI.uid)
-    + '&folder=' + encodeURIComponent(BILI.folder || 'music')
+  const base = String(MUSIC.proxy || '').replace(/\/+$/, '')
+  const url = base + '/api/playlist?id=' + encodeURIComponent(MUSIC.playlist || '')
   const json = await requestJson(url)
   const songs = Array.isArray(json.songs) ? json.songs : []
   if (!songs.length) throw new Error('empty playlist')
@@ -67,8 +66,8 @@ async function fetchPlaylist() {
 }
 
 async function loadSearchSongs() {
-  if (!BILI.proxy || !BILI.uid) {
-    console.warn('[music-playlist] BILI 配置缺失, 使用缓存')
+  if (!MUSIC.proxy || /REPLACE_WITH/.test(MUSIC.proxy)) {
+    console.warn('[music-playlist] 云函数地址尚未配置, 使用缓存')
     return readCache()?.songs || []
   }
   try {

@@ -52,20 +52,20 @@ test('renderSearchXml: 剥离代码块(figure.highlight / pre)', () => {
   assert.ok(xml.includes('前') && xml.includes('后'))
 })
 
-test('renderSearchXml: songs 仅收录含 title 与 bvid 的条目', () => {
+test('renderSearchXml: songs 仅收录含 title 与 id 的条目', () => {
   const songs = [
-    { title: '歌名', artist: '歌手', bvid: 'BV1' },
-    { title: '', artist: 'A', bvid: 'BV2' },
-    { title: '无 bvid', artist: 'A' }
+    { title: '歌名', artist: '歌手', id: '1001' },
+    { title: '', artist: 'A', id: '1002' },
+    { title: '无 id', artist: 'A' }
   ]
   const xml = renderSearchXml([], songs)
   assert.strictEqual(countEntries(xml), 1)
-  assert.ok(xml.includes('/music/?song=BV1'))
+  assert.ok(xml.includes('/music/?song=1001'))
 })
 
-test('renderSearchXml: 歌曲 url 对 bvid 做编码', () => {
-  const xml = renderSearchXml([], [{ title: 'T', artist: 'A', bvid: 'BV1/2' }])
-  assert.ok(xml.includes('/music/?song=BV1%2F2'))
+test('renderSearchXml: 歌曲 url 对 id 做编码', () => {
+  const xml = renderSearchXml([], [{ title: 'T', artist: 'A', id: '10/2' }])
+  assert.ok(xml.includes('/music/?song=10%2F2'))
 })
 
 test('renderSearchXml: 无 songs 参数(undefined)不抛错', () => {

@@ -13,9 +13,8 @@
   if (window.__novaPlayer) return;
 
   // 站点配置单一来源(P1·R5): lib/site-config.js
-  const BILI_PROXY = window.NOVA_SITE.bili.proxy;
-  const BILI_UID = window.NOVA_SITE.bili.uid;
-  const BILI_FOLDER = window.NOVA_SITE.bili.folder;
+  // 2026-10-01: 音频来源由 B 站云函数换为网易云(歌单端点给元信息, /api/song 给直链)
+  const MUSIC_PROXY = window.NOVA_SITE.music.proxy;
   const STORAGE_KEY = "nova-player-state";
   // 音乐页悬浮窗开关(会话级, 默认关闭): 开启后迷你条在音乐页/其他页都显示
   const MINI_ENABLED_KEY = "nova-mini-enabled";
@@ -27,10 +26,10 @@
     currentIndex: -1,
     loadAbort: null,
     loading: false,
-    loadedBvid: null, // 当前 audio 已加载的歌曲 bvid(判断无需重拉流)
+    loadedSongId: null, // 当前 audio 已加载的歌曲 ID(判断无需重拉流)
   }));
 
-  // ---- sessionStorage 记忆(会话级): { songIndex, songs } (songs 仅元信息, 含 bvid/name/artist/cover) ----
+  // ---- sessionStorage 记忆(会话级): { songIndex, songs } (songs 仅元信息, 含 id/name/artist/cover) ----
   function loadMemory() {
     try {
       const raw = window.NOVA_UTILS.readStoredKey(STORAGE_KEY, "novaPlayerState", sessionStorage);
@@ -50,7 +49,7 @@
         songIndex: state.currentIndex,
         played: played === true ? true : Boolean(prev.played), // 仅显式 true 才标记真正播放过
         songs: state.songs.map(s => ({
-          bvid: s.bvid,
+          id: s.id,
           name: s?.name || s?.title || "",
           artist: s?.artist || s?.author || "",
           cover: window.NOVA_UTILS.coverOf(s),
@@ -59,47 +58,24 @@
     } catch (_) {}
   }
 
-  // ---- 云函数音频流(与音乐页同源): SCF 函数 URL 网关把二进制音频以
-  //      base64 文本传输(并注入 application/json 头), 前端需 base64 解码为
-  //      blob; 失败/未来网关若直接解码二进制则原样使用。基于响应体字节判定,
-  //      不依赖 Content-Type。
-  async function fetchAudioBlob(bvid, signal) {
-    const resp = await fetch(BILI_PROXY + "/stream2?bvid=" + encodeURIComponent(bvid), { signal });
-    if (!resp.ok) throw new Error("音频请求失败 HTTP " + resp.status);
-    const bytes = new Uint8Array(await resp.arrayBuffer());
-    // 错误响应: JSON 对象(以 { 开头)
-    try {
-      const head = new TextDecoder().decode(bytes.subarray(0, 64)).trimStart();
-      if (head.startsWith("{")) {
-        const j = JSON.parse(new TextDecoder().decode(bytes));
-        throw new Error((j && j.error) || "音频获取失败");
-      }
-    } catch (e) {
-      if (e instanceof SyntaxError) { /* 非 JSON 正常 */ } else { throw e; }
-    }
-    // 前 16 字节均为 base64 字符集 → 按 base64 解码; 否则(二进制直传)原样使用
-    const head16 = bytes.subarray(0, 16);
-    const isBase64Text = head16.every(b =>
-      (b >= 65 && b <= 90) || (b >= 97 && b <= 122) || (b >= 48 && b <= 57) ||
-      b === 43 || b === 47 || b === 61 || b === 10 || b === 13 || b === 32 || b === 9);
-    if (isBase64Text) {
-      const text = new TextDecoder().decode(bytes);
-      const bin = atob(text.trim());
-      const out = new Uint8Array(bin.length);
-      for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
-      return new Blob([out], { type: "audio/mp4" });
-    }
-    return new Blob([bytes], { type: "audio/mp4" });
+  // ---- 音频直链(2026-10-01 网易云改造) ----
+  // 旧实现走云函数 /stream2 把整首歌 base64 传回来再解码成 blob: 一首 4 MB 必须先下完
+  // 才能出声, 且顶着 SCF 网关的体积上限。改为向云函数要网易云 CDN 的 https 直链,
+  // 直接赋给 audio.src —— 浏览器原生渐进播放 + 原生 Range 拖动, 云函数不再转发字节。
+  // (实测网易云 CDN 不校验 Referer, 任意来源均可 206 播放)
+  async function fetchAudioUrl(songId, signal) {
+    const resp = await fetch(MUSIC_PROXY + "/api/song?id=" + encodeURIComponent(songId), { signal });
+    if (!resp.ok) throw new Error("音频地址请求失败 HTTP " + resp.status);
+    const j = await resp.json();
+    if (!j || !j.url) throw new Error((j && j.reason) || "该歌曲暂无可播放的直链");
+    return j.url;
   }
 
-  function setAudioSource(blob) {
+  function setAudioSource(url) {
     const audio = ensureAudio();
-    const url = URL.createObjectURL(blob);
     const old = audio.src;
     audio.src = url;
-    /* P1 修复(2026-09-11): 原先延迟 60s 才 revoke 上一个 blob URL, 连续切歌会堆积数十 MB
-       (每个音频 blob 数 MB)。改为切换时立即释放上一个 —— 它已不再是 audio.src,
-       浏览器不再需要它; 当前 url 留待下一次切换(或页面销毁)时释放。 */
+    /* 兼容旧路径: 若上一次是 blob: URL 则释放; http(s) 直链无需释放 */
     if (old && old.startsWith("blob:")) URL.revokeObjectURL(old);
   }
 
@@ -148,7 +124,7 @@
       currentTime: state.audio ? state.audio.currentTime : 0,
       duration: state.audio ? state.audio.duration : 0,
       song: state.songs[state.currentIndex] || null,
-      loadedBvid: state.loadedBvid,
+      loadedSongId: state.loadedSongId,
       hasMemory: Boolean(loadMemory()),
     };
   }
@@ -176,10 +152,10 @@
     emit("loadstart");
     const song = state.songs[state.currentIndex];
     try {
-      const blob = await fetchAudioBlob(song.bvid, ac.signal);
+      const url = await fetchAudioUrl(song.id, ac.signal);
       if (ac.signal.aborted) return;
-      setAudioSource(blob);
-      state.loadedBvid = String(song.bvid || "");
+      setAudioSource(url);
+      state.loadedSongId = String(song.id || "");
       saveMemory();
       if (autoplay !== false) {
         const result = state.audio.play();

@@ -64,16 +64,16 @@ function renderSearchXml(posts, songs) {
       return '<entry>\n    <title>' + escXml(p.title) + '</title>\n    <url>' + escXml(url) + '</url>\n    <content><![CDATA[' + content + ']]></content>\n  </entry>'
     })
     .join('\n')
-  // 歌曲条目(构建期抓取/缓存, 点击直达 /music/?song=<bvid> 定位并播放);
+  // 歌曲条目(构建期抓取/缓存, 点击直达 /music/?song=<id> 定位并播放);
   // content = 歌曲标题(含歌名/简介文案) + 作者, 音乐页框架说明文字不入索引
   const musicEntries = (songs || [])
     .map(s => {
       const title = String(s.title || '').trim()
       const artist = String(s.artist || '').trim()
-      const bvid = String(s.bvid || '')
-      if (!title || !bvid) return ''
+      const songId = String(s.id || '')
+      if (!title || !songId) return ''
       const content = (title + '\n' + artist).replace(/\]\]>/g, '] ]>')
-      return '<entry>\n    <title>' + escXml(title) + '</title>\n    <url>/music/?song=' + encodeURIComponent(bvid) + '</url>\n    <content><![CDATA[' + content + ']]></content>\n  </entry>'
+      return '<entry>\n    <title>' + escXml(title) + '</title>\n    <url>/music/?song=' + encodeURIComponent(songId) + '</url>\n    <content><![CDATA[' + content + ']]></content>\n  </entry>'
     })
     .filter(Boolean)
     .join('\n')

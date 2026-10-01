@@ -8,9 +8,9 @@
   "use strict";
 
   // 站点配置单一来源(P1·R5): lib/site-config.js
-  const BILI_PROXY = window.NOVA_SITE.bili.proxy;
-  const BILI_UID = window.NOVA_SITE.bili.uid;
-  const BILI_FOLDER = window.NOVA_SITE.bili.folder;
+  // 2026-10-01: 音乐来源由 B 站收藏夹改为网易云歌单(云函数代理 + 歌单 ID)
+  const MUSIC_PROXY = window.NOVA_SITE.music.proxy;
+  const MUSIC_PLAYLIST = window.NOVA_SITE.music.playlist;
 
   // B5 单源(2026-09-02): 视觉图列表改为运行时从音乐页卡片 DOM 收集(data-src),
   // 与 music.html 卡片 img 单一来源, 换图只改模板
@@ -137,7 +137,7 @@
 
     function showLoadingState() {
       els.title.textContent = "歌单载入中";
-      els.artist.textContent = `B站收藏夹 · ${BILI_FOLDER}`;
+      els.artist.textContent = "网易云音乐";
       if (els.retry) els.retry.hidden = true;
     }
 
@@ -253,31 +253,31 @@
       playlistAbort = ac;
       clearTimeout(playlistTimer);
       playlistTimer = setTimeout(() => ac.abort(), 15000);
-      fetch(BILI_PROXY + "/api/playlist?uid=" + BILI_UID + "&folder=" + encodeURIComponent(BILI_FOLDER), { signal: ac.signal })
+      fetch(MUSIC_PROXY + "/api/playlist?id=" + encodeURIComponent(MUSIC_PLAYLIST), { signal: ac.signal })
         .then(resp => resp.json())
         .then(j => {
           if (j.error) throw new Error(j.error);
-          if (!Array.isArray(j.songs) || !j.songs.length) throw new Error("收藏夹为空");
+          if (!Array.isArray(j.songs) || !j.songs.length) throw new Error("歌单为空");
           player.setPlaylist(j.songs);
           if (els.retry) els.retry.hidden = true;
           bindMusicControls();
           renderCurrentSong();
           renderVisibleCards();
           updateProgress();
-          // 搜索直达: ?song=<bvid> → 定位并播放对应歌曲;
+          // 搜索直达: ?song=<网易云歌曲ID> → 定位并播放对应歌曲;
           // 无参数时: 若 audio 已加载同一首歌(无缝返回音乐页)则保持, 不重拉流;
           // 否则预载当前歌曲(不自动播): 点击播放时音频已就绪, 立即出声
-          const targetBvid = new URLSearchParams(location.search).get("song");
-          const targetIndex = targetBvid
-            ? j.songs.findIndex(s => String(s.bvid || "") === targetBvid)
+          const targetSongId = new URLSearchParams(location.search).get("song");
+          const targetIndex = targetSongId
+            ? j.songs.findIndex(s => String(s.id || "") === targetSongId)
             : -1;
           if (targetIndex >= 0) {
             player.playSongAt(targetIndex, true);
           } else {
             const snapNow = player.state;
             const sameSong = Boolean(
-              snapNow.loadedBvid &&
-              snapNow.loadedBvid === String(j.songs[snapNow.currentIndex]?.bvid)
+              snapNow.loadedSongId &&
+              snapNow.loadedSongId === String(j.songs[snapNow.currentIndex]?.id)
             );
             if (!sameSong) player.playSongAt(player.state.currentIndex, false);
           }
@@ -285,7 +285,7 @@
         })
         .catch(e => {
           if (e?.name === "AbortError") return; // 主动取消或超时: 已离开音乐页 / 已发起新请求
-          showLoadFailure("收藏夹加载失败", errText(e));
+          showLoadFailure("歌单加载失败", errText(e));
           console.error("Nova music: playlist failed.", e);
         })
         .finally(() => {

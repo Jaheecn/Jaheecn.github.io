@@ -41,7 +41,7 @@ function runScriptTimes(file, times) {
     sessionStorage: { getItem: () => null, setItem: noop, removeItem: noop },
     location: { search: '', pathname: '/', href: 'http://localhost/' },
     navigator: { userAgent: 'node' },
-    NOVA_SITE: { bili: { proxy: 'https://example.invalid', uid: '1', folder: 'f' } },
+    NOVA_SITE: { music: { proxy: 'https://example.invalid', playlist: '1' } },
     NOVA_UTILS: { formatTime: () => '', songName: () => '', songArtist: () => '', clamp: v => v },
     setTimeout, clearTimeout, setInterval, clearInterval,
     requestAnimationFrame: () => 0, cancelAnimationFrame: noop,

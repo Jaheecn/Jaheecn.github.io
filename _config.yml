@@ -60,6 +60,16 @@ prismjs:
   line_number: true
   tab_replace: ''
 
+# Markdown 渲染器(hexo-renderer-marked 7.0.1)
+# mangle: 上游默认 true —— 会把正文里的邮箱自动链接写成 HTML 实体，
+#   且每个字符**随机**选用十进制(`&#102;`)或十六进制(`&#x66;`)，
+#   于是同一篇文章每次构建的产物字节都不同(实测: 仅此一行差异,
+#   却让 docs/ 永远无法保持干净工作树, 也无法用 diff 审阅真实改动)。
+#   本站文章里的邮箱都不是需要防爬的公开联系方式, 且确定性更重要, 故关闭。
+#   关闭后 mailto: 链接原样输出为 `mailto:fake@example.com`。
+marked:
+  mangle: false
+
 # Category & Tag
 default_category: uncategorized
 category_map:

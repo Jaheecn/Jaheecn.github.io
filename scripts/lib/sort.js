@@ -34,4 +34,34 @@ function byKeys(specs) {
   }
 }
 
-module.exports = { toMs, byTitle, byKeys }
+/* 文章的稳定身份键: post.path 在站内唯一且不随构建变化。
+   (与 lib/feeds.js 的 postUrl 同源; 这里不 require feeds, 避免循环依赖。) */
+const postPath = p => String((p && (p.path || p.source)) || '')
+
+/* 日期降序 + 路径升序兜底。
+   为什么必须补兜底键: 本站有并列日期的文章(如 洛神赋 与 西江月·春色三分过二 同为
+   2026-08-29 19:00:00 且都没有 order), 并列时比较器返回 0 时, 元素的先后取决于
+   locals.posts 这个 Query 的底层插入顺序 —— 而插入顺序取决于异步文件处理的完成顺序,
+   因此每次 clean 构建的 prev/next 兄弟链接与 tag 页列表都可能不同。
+   实测: 连续三次 `hexo clean && npm run build` 产出三套不同的 docs/posts 指纹。
+   路径升序兜底后, 同一份数据产生逐字节相同的产物。
+   (lib/feeds.js 的 byDateDescThenPath 修的是 search/sitemap/atom 那一半, 这里是另一半。) */
+function byDateDescThenPath(a, b) {
+  const d = (b && b.date ? b.date : 0) - (a && a.date ? a.date : 0)
+  if (d) return d
+  const pa = postPath(a)
+  const pb = postPath(b)
+  return pa < pb ? -1 : pa > pb ? 1 : 0
+}
+
+/* 手动序升序(缺省 999) + 日期降序 + 路径升序兜底。
+   给 tag 页列表用: 有 order 的按作者手写的顺序(如 Markdown 系列 1..5),
+   没有 order 的按时间倒序, 再并列时按路径 —— 三级全部可比, 不存在返回 0 的情况。 */
+function byOrderThenDateDescThenPath(a, b) {
+  const oa = (a && a.order) || 999
+  const ob = (b && b.order) || 999
+  if (oa !== ob) return oa - ob
+  return byDateDescThenPath(a, b)
+}
+
+module.exports = { toMs, byTitle, byKeys, postPath, byDateDescThenPath, byOrderThenDateDescThenPath }

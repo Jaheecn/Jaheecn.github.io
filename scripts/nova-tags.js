@@ -20,6 +20,8 @@ const { SITE } = require('./site-config')
 const { loadSearchSongs } = require('./lib/music-playlist')
 // 阶段4 · 4.8: search.xml / sitemap.xml / atom.xml 三件套及其依赖已拆到 lib/feeds.js
 const { renderSearchXml, renderSitemap, renderAtom } = require('./lib/feeds')
+// 并列日期时的确定性兜底比较器(详见 lib/sort.js 顶部注释)
+const { byDateDescThenPath, byOrderThenDateDescThenPath } = require('./lib/sort')
 
 function tagLdjson(tagName) {
   const tagUrl = encodeURI(SITE + '/articles/' + tagName + '/')
@@ -45,7 +47,7 @@ hexo.extend.generator.register('nova-tags', async function (locals) {
   const sortedTags = allTags.slice().sort((a, b) => (b.count - a.count) || (a.name < b.name ? -1 : a.name > b.name ? 1 : 0))
   const sortedAllTags = allTags.slice().sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0))
   const top = sortedTags[0] || { name: '', count: 0 }
-  const latest = posts.slice().sort((a, b) => (b.date - a.date) || ((a.order || 999) - (b.order || 999)))[0] || { title: '', date: new Date() }
+  const latest = posts.slice().sort((a, b) => (b.date - a.date) || ((a.order || 999) - (b.order || 999)) || byDateDescThenPath(a, b))[0] || { title: '', date: new Date() }
 
   // 公共壳(P1 重建): sidebar 统计卡数字动态计算
   const articles = { href: '/articles/', label: '文章', count: String(posts.length) }
@@ -93,7 +95,7 @@ hexo.extend.generator.register('nova-tags', async function (locals) {
   ]
 
   allTags.forEach(t => {
-    const sorted = t.posts.slice().sort((a, b) => (a.order || 999) - (b.order || 999))
+    const sorted = t.posts.slice().sort(byOrderThenDateDescThenPath)
     const count = sorted.length
     const firstYear = fmtDate(sorted[0].date).slice(0, 4)
     const last = fmtDate(sorted[sorted.length - 1].date)

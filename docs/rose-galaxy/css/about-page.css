@@ -1,0 +1,598 @@
+body.nova-about-route {
+  overflow-x: clip;
+  background:
+    radial-gradient(circle at 76% 18%, rgba(111, 83, 112, .09), transparent 31rem),
+    linear-gradient(180deg, var(--about-page-soft), var(--about-page) 34rem);
+  color: var(--about-text);
+}
+
+body.nova-about-route #page-header.nova-about-nav-header {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 60px;
+  background: transparent;
+}
+
+body.nova-about-route #page-header.nova-about-nav-header::before {
+  display: none;
+}
+
+body.nova-about-route #page-header #nav {
+  background: linear-gradient(180deg, rgba(7, 9, 17, .54), transparent);
+}
+
+body.nova-about-route main.nova-about-shell {
+  display: block;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nova-about-page,
+.nova-about-page * {
+  box-sizing: border-box;
+}
+
+.nova-about-hero {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  min-height: clamp(430px, 52vh, 610px);
+  overflow: hidden;
+  background: url("/img/hero/archive-bg.webp") center 48% / cover no-repeat;
+}
+
+.nova-about-hero-shade {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(7, 9, 18, .84), rgba(9, 11, 21, .35) 62%, rgba(9, 11, 21, .5)),
+    linear-gradient(180deg, rgba(8, 10, 18, .24), rgba(11, 13, 22, .18) 54%, var(--about-page));
+}
+
+html[data-theme="light"] body.nova-about-route .nova-about-hero-shade {
+  /* 照搬音乐页浅色 overlay:顶部深色遮罩(透出夜景,导航白字可读),
+     底部 78% 后才过渡到页面浅色 */
+  background:
+    linear-gradient(90deg, rgba(9, 12, 24, .68) 0%, rgba(9, 12, 24, .44) 34%, rgba(9, 12, 24, .1) 72%),
+    linear-gradient(180deg, transparent 0%, transparent 78%, rgba(30, 29, 48, .1) 87%, rgba(205, 202, 215, .3) 95%, var(--about-page) 100%);
+}
+
+.nova-about-hero-copy {
+  position: relative;
+  z-index: 1;
+  width: min(1240px, calc(100% - 64px));
+  margin: 0 auto;
+  padding: 0 0 112px;
+  animation: nova-about-reveal .42s ease-out both;
+}
+
+.nova-about-kicker,
+.nova-about-hero-copy > p {
+  margin: 0;
+  color: var(--about-accent-soft);
+  font-size: .7rem;
+  font-weight: 600;
+  letter-spacing: .2em;
+}
+
+.nova-about-hero-copy h1 {
+  margin: 14px 0 12px;
+  color: #f3edef;
+  font-size: clamp(2.4rem, 4.8vw, 4.2rem);
+  font-weight: 500;
+  letter-spacing: .06em;
+  line-height: 1;
+}
+
+html[data-theme="light"] body.nova-about-route .nova-about-hero-copy h1 {
+  color: #f3edef;
+  opacity: 1;
+}
+
+.nova-about-hero-copy > span {
+  display: block;
+  max-width: 740px;
+  color: rgba(237, 230, 234, .82);
+  font-size: clamp(.98rem, 1.35vw, 1.14rem);
+  line-height: 1.8;
+}
+
+.nova-about-hero-copy > small {
+  display: block;
+  margin-top: 18px;
+  color: rgba(196, 187, 199, .68);
+  font-size: .72rem;
+  letter-spacing: .08em;
+  line-height: 1.7;
+}
+
+html[data-theme="light"] body.nova-about-route .nova-about-hero-copy > span {
+  color: rgba(237, 230, 234, .82);
+  opacity: 1;
+}
+
+html[data-theme="light"] body.nova-about-route .nova-about-hero-copy > small {
+  color: rgba(196, 187, 199, .68);
+  opacity: .9;
+}
+
+html[data-theme="light"] body.nova-about-route #page-header #nav {
+  /* 浅色下导航栏背景透明,与其他页面(音乐页)一致;滚动后毛玻璃由全局规则处理 */
+  background: transparent;
+  border-bottom: 0;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+html[data-theme="light"] body.nova-about-route #nav .site-name {
+  color: #302c35;
+  font-weight: 500;
+  opacity: 1;
+}
+
+html[data-theme="light"] body.nova-about-route #nav .site-page,
+html[data-theme="light"] body.nova-about-route #nav #search-button,
+html[data-theme="light"] body.nova-about-route #nav #search-button i {
+  color: #3f3944;
+  font-weight: 500;
+  opacity: 1;
+}
+
+html[data-theme="light"] body.nova-about-route #nav .site-page:hover,
+html[data-theme="light"] body.nova-about-route #nav #search-button:hover,
+html[data-theme="light"] body.nova-about-route #nav #search-button:hover i {
+  color: #a45f77;
+  background: rgba(164, 95, 119, .045);
+}
+
+html[data-theme="light"] body.nova-about-route .nova-about-kicker,
+html[data-theme="light"] body.nova-about-route .nova-about-hero-copy > p {
+  color: #a45f77;
+  font-weight: 600;
+  opacity: 1;
+}
+
+html[data-theme="light"] body.nova-about-route .nova-about-profile {
+  border-color: rgba(86, 75, 91, .14);
+  background: var(--about-card);
+  box-shadow: 0 24px 58px rgba(76, 61, 73, .1);
+}
+
+html[data-theme="light"] body.nova-about-route .nova-about-profile-intro img {
+  border-color: rgba(169, 99, 121, .34);
+  background: #f2eef1;
+}
+
+html[data-theme="light"] body.nova-about-route .nova-about-profile-intro h2 {
+  color: #302d36;
+}
+
+html[data-theme="light"] body.nova-about-route .nova-about-profile-intro strong {
+  color: #8f5368;
+  font-weight: 500;
+}
+
+html[data-theme="light"] body.nova-about-route .nova-about-profile-intro div > p:last-child {
+  color: #55505a;
+  font-weight: 400;
+  line-height: 1.75;
+  opacity: .96;
+}
+
+html[data-theme="light"] body.nova-about-route .nova-about-status.nova-about-contact a:hover {
+  border-color: rgba(169, 99, 121, .28);
+  background: #eae5ea;
+}
+
+.nova-about-body {
+  position: relative;
+  z-index: 2;
+  width: min(1240px, calc(100% - 64px));
+  margin: -60px auto 0;
+  padding-bottom: 90px;
+}
+
+.nova-about-profile,
+.nova-about-learning-grid article,
+.nova-about-contact {
+  border: 1px solid var(--about-line);
+  background: var(--about-card);
+  box-shadow: var(--about-shadow);
+}
+
+.nova-about-profile {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(330px, .75fr);
+  gap: 44px;
+  padding: clamp(22px, 3vw, 40px);
+  border-radius: 24px;
+  animation: nova-about-reveal .48s .06s ease-out both;
+}
+
+.nova-about-profile-intro {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: 20px 28px;
+  align-items: start;
+}
+
+.nova-about-profile-intro .nova-about-desc {
+  grid-column: 1 / -1;
+}
+
+.nova-about-profile-intro img {
+  display: block;
+  width: 112px;
+  height: 112px;
+  padding: 4px;
+  border: 1px solid var(--about-line-strong);
+  border-radius: 22px;
+  object-fit: cover;
+  background: var(--about-card-soft);
+}
+
+.nova-about-profile-intro h2,
+.nova-about-section-head h2,
+.nova-about-contact h2,
+.nova-about-comments h2 {
+  margin: 4px 0 0;
+  color: var(--about-text);
+  font-weight: 500;
+  letter-spacing: .04em;
+}
+
+.nova-about-profile-intro h2 {
+  font-size: clamp(2rem, 3.2vw, 2.8rem);
+}
+
+.nova-about-profile-intro strong {
+  display: block;
+  margin: 7px 0 16px;
+  color: var(--about-accent-soft);
+  font-size: .92rem;
+  font-weight: 500;
+}
+
+.nova-about-profile-intro div > p:last-child {
+  margin: 0;
+  color: var(--about-muted);
+  font-size: .92rem;
+  line-height: 1.9;
+}
+
+.nova-about-status {
+  display: grid;
+  gap: 28px;
+}
+
+/* 联系方式移到 profile 右侧:容器不渲染卡片背景,链接本身成卡片 */
+.nova-about-status.nova-about-contact {
+  border: 0;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.nova-about-status.nova-about-contact a {
+  background: var(--about-card-soft);
+}
+
+html[data-theme="light"] body.nova-about-route .nova-about-status.nova-about-contact a {
+  border-color: rgba(95, 79, 96, .14);
+  background: #eeeaee;
+}
+
+html[data-theme="light"] body.nova-about-route .nova-about-status.nova-about-contact a:hover {
+  border-color: rgba(169, 99, 121, .28);
+  background: #eae5ea;
+}
+
+.nova-about-section {
+  margin-top: 82px;
+}
+
+.nova-about-section-head {
+  margin-bottom: 25px;
+}
+
+.nova-about-section-head h2,
+.nova-about-contact h2,
+.nova-about-comments h2 {
+  font-size: clamp(1.55rem, 2.2vw, 2rem);
+}
+
+.nova-about-section-head > span {
+  display: block;
+  margin-top: 5px;
+  color: var(--about-muted);
+  font-size: .84rem;
+}
+
+.nova-about-learning-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.nova-about-learning-grid article {
+  min-height: 190px;
+  padding: 26px;
+  border-radius: 18px;
+  transition: transform .2s ease, border-color .2s ease, background-color .2s ease;
+}
+
+.nova-about-learning-grid article:hover {
+  transform: translateY(-2px);
+  border-color: var(--about-line-strong);
+  background: var(--about-card-soft);
+}
+
+.nova-about-learning-grid i {
+  color: var(--about-accent);
+  font-size: .65rem;
+  font-style: normal;
+  letter-spacing: .15em;
+}
+
+.nova-about-learning-grid h3 {
+  margin: 25px 0 10px;
+  color: var(--about-text);
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.nova-about-learning-grid p {
+  margin: 0;
+  color: var(--about-muted);
+  font-size: .78rem;
+  line-height: 1.75;
+}
+
+.nova-about-contact a:focus-visible {
+  outline: 2px solid var(--about-accent);
+  outline-offset: 3px;
+}
+
+.nova-about-contact {
+  padding: clamp(28px, 3vw, 40px);
+  border-radius: 20px;
+}
+
+.nova-about-contact a {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  padding: 15px 17px;
+  border: 1px solid var(--about-line);
+  border-radius: 13px;
+  color: inherit;
+  text-decoration: none;
+  transition: transform .2s ease, border-color .2s ease, background-color .2s ease;
+}
+
+.nova-about-contact a:hover {
+  transform: translateY(-2px);
+  border-color: var(--about-line-strong);
+  background: var(--about-card-soft);
+}
+
+.nova-about-contact a b {
+  color: var(--about-accent);
+  font-size: .68rem;
+  font-weight: 600;
+  letter-spacing: .18em;
+}
+
+.nova-about-contact a small {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--about-text);
+  font-size: .95rem;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nova-about-contact a i {
+  position: absolute;
+  top: 13px;
+  right: 14px;
+  color: var(--about-accent);
+  font-size: .8rem;
+  font-style: normal;
+}
+
+.nova-about-comments {
+  margin-top: 90px;
+  padding-top: 44px;
+  border-top: 1px solid var(--about-line);
+}
+
+.nova-about-comments > header {
+  margin-bottom: 24px;
+}
+
+.nova-about-comments > header > span {
+  color: var(--about-accent-soft);
+  font-size: .67rem;
+  font-weight: 600;
+  letter-spacing: .18em;
+}
+
+.nova-about-comments > header > p {
+  margin: 8px 0 0;
+  color: var(--about-muted);
+  font-size: .8rem;
+}
+
+.nova-about-comments .comment-head {
+  display: none;
+}
+
+.nova-about-comments #post-comment,
+.nova-about-comments .waline-container {
+  margin: 0;
+}
+
+.nova-about-comments .wl-panel {
+  border: 1px solid var(--about-line);
+  border-radius: 16px;
+  background: var(--about-card-soft);
+  box-shadow: none;
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.nova-about-comments .wl-panel:focus-within {
+  border-color: var(--about-line-strong);
+  box-shadow: 0 0 0 3px rgba(194, 130, 154, .08);
+}
+
+.nova-about-comments .wl-editor,
+.nova-about-comments .wl-header input {
+  color: var(--about-text);
+}
+
+.nova-about-comments .wl-header,
+.nova-about-comments .wl-footer {
+  border-color: var(--about-line);
+}
+
+.nova-about-comments .wl-btn.primary {
+  border-color: var(--about-accent);
+  background: var(--about-accent);
+  color: #fff;
+}
+
+.nova-about-comments :where(button, input, textarea, a):focus-visible {
+  outline: 2px solid var(--about-accent);
+  outline-offset: 2px;
+}
+
+body.nova-about-route #footer {
+  margin: 0;
+}
+
+
+
+@keyframes nova-about-reveal {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 1100px) {
+  .nova-about-profile {
+    grid-template-columns: minmax(0, 1fr) minmax(300px, .8fr);
+    gap: 28px;
+  }
+
+  .nova-about-learning-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+}
+
+@media (max-width: 820px) {
+  html[data-theme="light"] body.nova-about-route .nova-about-hero-shade {
+    background:
+      linear-gradient(0deg, var(--about-page) 0, rgba(236, 233, 238, .7) 18px, rgba(236, 233, 238, .16) 42px, transparent 60px),
+      linear-gradient(90deg, rgba(244, 241, 244, .78) 0, rgba(244, 241, 244, .56) 24%, rgba(244, 241, 244, .24) 40%, transparent 58%);
+  }
+
+  .nova-about-hero-copy,
+  .nova-about-body {
+    width: min(100% - 40px, 1240px);
+  }
+
+  .nova-about-profile {
+    grid-template-columns: 1fr;
+  }
+
+  .nova-about-status {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  html[data-theme="light"] body.nova-about-route .nova-about-hero-shade {
+    background:
+      linear-gradient(0deg, var(--about-page) 0, rgba(236, 233, 238, .68) 16px, rgba(236, 233, 238, .14) 38px, transparent 56px),
+      linear-gradient(90deg, rgba(244, 241, 244, .78) 0, rgba(244, 241, 244, .58) 30%, rgba(244, 241, 244, .24) 52%, transparent 72%);
+  }
+
+  .nova-about-hero {
+    min-height: 46vh;
+  }
+
+  .nova-about-hero-copy,
+  .nova-about-body {
+    width: calc(100% - 28px);
+  }
+
+  .nova-about-hero-copy {
+    padding-bottom: 88px;
+  }
+
+  .nova-about-body {
+    margin-top: -44px;
+    padding-bottom: 64px;
+  }
+
+  .nova-about-profile {
+    gap: 26px;
+    padding: 25px 20px;
+    border-radius: 20px;
+  }
+
+  .nova-about-profile-intro {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .nova-about-profile-intro img {
+    width: 92px;
+    height: 92px;
+  }
+
+  .nova-about-status,
+  .nova-about-learning-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .nova-about-section {
+    margin-top: 62px;
+  }
+
+  .nova-about-learning-grid article {
+    min-height: auto;
+  }
+
+  .nova-about-contact a small {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .nova-about-contact a i {
+    display: none;
+  }
+
+  .nova-about-comments {
+    margin-top: 68px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nova-about-hero-copy,
+  .nova-about-profile {
+    animation: none;
+  }
+
+  .nova-about-learning-grid article,
+  .nova-about-contact a {
+    transition: none;
+  }
+}

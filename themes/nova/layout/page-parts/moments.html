@@ -1,0 +1,35 @@
+
+    <div class="nova-moments-page">
+      <section class="nova-moments-hero" aria-labelledby="nova-moments-title">
+        <div class="nova-moments-hero-shade"></div>
+        <div class="nova-moments-hero-copy">
+          <p class="nova-tag-eyebrow">NOVA · DAILY FRAGMENTS</p><h1 id="nova-moments-title">说说</h1>
+          <span>记录一些没有主题的日常、情绪与瞬间。</span>
+          <a href="#nova-moments-stream">EXPLORE THE TOPICS</a>
+        </div>
+      </section>
+      <div class="nova-moments-body">
+        <section class="nova-moments-overview is-compact" aria-label="说说概览">
+          <div><b>—</b><span>TOTAL MOMENTS</span><small>说说总数</small></div>
+          
+          <div><b>—</b><span>LATEST UPDATE</span><small>最近更新</small></div>
+          
+        </section>
+        <div class="nova-moments-layout" id="nova-moments-stream">
+          <div class="nova-moments-stream nova-moments-month-flow">
+            <!-- 说说条目由下方 JS 从 Waline 留言动态渲染(评论即说说) -->
+            <div class="nova-moments-continuation">
+              <span>TO BE CONTINUED</span><p>生活仍在继续。</p></div>
+          </div>
+          <aside class="nova-moments-sidebar">
+            <section class="nova-moments-side-card nova-moments-mood">
+              <p class="nova-moments-side-kicker">CURRENT MOOD</p><h2>最近状态</h2>
+              <div class="nova-moments-mood-list"></div>
+            </section>
+            
+          </aside>
+        </div>
+        <section class="nova-moments-comments">
+          <header><span>NIGHT MESSAGES</span><h2>留言</h2></header><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="waline-wrap"></div></div></div></div></section>
+      </div>
+    </div>

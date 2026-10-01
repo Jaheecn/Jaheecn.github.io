@@ -1,0 +1,8 @@
+extends ./base.pug
+
+block headOpts
+  - page.bodyClass = 'nova-music-route'
+  - page.headOpts = { title: '夜里的旋律 | Yibao', siteTitle: '夜里的旋律', description: '收藏适合夜晚聆听的旋律、歌单札记与个人音乐记忆。', ogUrl: siteUrl + '/music/', canonical: siteUrl + '/music/', pageType: 'page', extraHead: '<link rel="preload" as="image" href="/img/music/music-hero-bg.webp" fetchpriority="high" type="image/webp"><script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"夜里的旋律","url":"' + siteUrl + '/music/","inLanguage":"zh-CN","isPartOf":{"@type":"WebSite","url":"' + siteUrl + '/"}}</script>' }
+
+block content
+  != page.body

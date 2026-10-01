@@ -1,0 +1,46 @@
+<!-- hexo injector body_begin start -->
+<style>
+  /* 首屏遮罩关键样式内联(2026-09-04): 不依赖 custom.css, 首帧即渲染遮罩盖住未就绪的 hero;
+     custom.css 中同名规则保留(同值), 修改样式时两处需同步 */
+  .nova-page-loading { position: fixed; z-index: 2147483000; inset: 0; display: flex; width: 100%; height: 100%; align-items: center; justify-content: center; visibility: hidden; opacity: 0; background: radial-gradient(circle at 50% 40%, rgba(120,58,84,.22) 0%, rgba(14,20,34,.94) 40%, #0a0f1e 82%); transition: opacity 180ms ease, visibility 0s linear 180ms; pointer-events: none; isolation: isolate; }
+  .nova-page-loading.is-visible { visibility: visible; opacity: 1; transition: opacity 220ms ease; pointer-events: auto; }
+  .nova-page-loading.is-leaving { visibility: hidden; opacity: 0; transition: opacity 300ms ease, visibility 0s linear 300ms; pointer-events: none; }
+  .nova-page-loading__inner { position: relative; z-index: 1; display: flex; max-width: calc(100vw - 40px); align-items: center; flex-direction: column; text-align: center; opacity: 1; transition: opacity 220ms ease; }
+  .nova-page-loading.is-leaving .nova-page-loading__inner { opacity: 0; transition: opacity 260ms ease; }
+  @keyframes nova-loading-breathe { 0%, 100% { transform: scale(1); opacity: .9; } 50% { transform: scale(1.06); opacity: 1; } }
+  @keyframes nova-loading-turn { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+</style>
+<div class="nova-page-loading" data-nova-loading="" aria-hidden="true" aria-live="polite">
+  <div class="nova-page-loading__inner">
+    <span class="nova-page-loading__mark" aria-hidden="true"></span>
+    <strong>Yibao</strong>
+    <small>LOADING THE NIGHT...</small>
+  </div>
+</div>
+<script>
+  ;(() => {
+    const loaders = Array.from(document.querySelectorAll('[data-nova-loading]'))
+    const loader = loaders.shift()
+    loaders.forEach(item => item.remove())
+    if (!loader || window.__novaLoaderBootstrapped) {
+      loader?.remove()
+      return
+    }
+    window.__novaLoaderBootstrapped = true
+    // 以 __novaLoadingShown 为唯一基准:仅"从网站首次进入"(本次会话第一次)显示;
+    // 之后整页刷新/返回首页都读到此标志 → 跳过显示并移除,避免再次弹 loading。
+    // 标志的写入统一由 nova-ux.js 的 initInitialLoading 负责,这里只读不写,避免双重判定冲突。
+    let alreadyShown = false
+    try { alreadyShown = sessionStorage.getItem('__novaLoadingShown') === '1' } catch (_) {}
+    if (alreadyShown) {
+      loader?.remove()
+      return
+    }
+    if (!loader.isConnected || loader.dataset.novaLoadingState === 'leaving') return
+    window.__novaLoaderVisibleAt = Date.now()
+    loader.dataset.novaLoadingState = 'visible'
+    loader.setAttribute('aria-hidden', 'false')
+    loader.classList.add('is-visible')
+    document.body.classList.add('nova-loading-active')
+  })()
+</script><!-- hexo injector body_begin end -->

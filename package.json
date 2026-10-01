@@ -1,0 +1,35 @@
+{
+  "name": "yibao-web",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Personal site rebuilt from Yibao static source (Hexo 8.1.2 + Butterfly)",
+  "scripts": {
+    "prebuild": "node scripts/lib/fetch-views.js",
+    "build": "hexo generate && node tools/minify.js && node tools/smoke.js",
+    "clean": "hexo clean",
+    "server": "hexo server",
+    "deploy": "hexo deploy",
+    "test": "node --test",
+    "verify": "node tools/smoke.js"
+  },
+  "hexo": {
+    "version": "8.1.2"
+  },
+  "dependencies": {
+    "hexo": "8.1.2",
+    "hexo-cli": "^4.3.2",
+    "hexo-deployer-git": "^4.0.0",
+    "hexo-renderer-marked": "7.0.1",
+    "hexo-renderer-pug": "3.0.0",
+    "hexo-renderer-stylus": "3.0.1",
+    "hexo-server": "3.0.0",
+    "hexo-theme-butterfly": "5.7.0"
+  },
+  "devDependencies": {
+    "@egjs/infinitegrid": "4.13.0",
+    "@fortawesome/fontawesome-free": "7.3.1",
+    "esbuild": "^0.28.2",
+    "medium-zoom": "1.1.0",
+    "pjax": "0.2.8"
+  }
+}

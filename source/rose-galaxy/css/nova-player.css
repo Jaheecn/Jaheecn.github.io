@@ -1,0 +1,233 @@
+/* Nova Global Player mini bar (2026-08-27) */
+
+.nova-mini-player {
+  position: fixed;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 240px;
+  max-width: 300px;
+  padding: 8px 34px 8px 8px;
+  border: 1px solid rgba(224, 194, 210, .18);
+  border-radius: 16px;
+  background: linear-gradient(145deg, rgba(16, 23, 43, .94), rgba(11, 18, 35, .92));
+  box-shadow: 0 18px 48px rgba(0, 0, 0, .38);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  user-select: none;
+  touch-action: none;
+}
+
+.nova-mini-drag-handle {
+  position: absolute;
+  right: 9px;
+  bottom: 7px;
+  width: 12px;
+  height: 12px;
+  color: #8f96a5;
+  cursor: grab;
+  opacity: .6;
+  transition: opacity 180ms ease;
+}
+
+.nova-mini-drag-handle:hover {
+  opacity: 1;
+}
+
+.nova-mini-drag-handle::before {
+  content: "";
+  display: block;
+  width: 12px;
+  height: 12px;
+  background: radial-gradient(circle, currentColor 1px, transparent 1.4px) 0 0 / 6px 6px;
+}
+
+.nova-mini-player.is-dragging {
+  cursor: grabbing;
+}
+
+.nova-mini-player[hidden] {
+  display: none !important;
+}
+
+.nova-mini-cover-wrap {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #0c1323;
+}
+
+.nova-mini-cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.nova-mini-main {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.nova-mini-meta {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nova-mini-title {
+  overflow: hidden;
+  color: var(--nova-tag-text, #f1edf2);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nova-mini-artist {
+  overflow: hidden;
+  color: var(--nova-tag-muted, rgba(195, 189, 202, .64));
+  font-size: 11.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nova-mini-progress {
+  position: relative;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(221, 190, 207, .16);
+  cursor: pointer;
+}
+
+.nova-mini-progress-bar {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--nova-rose), #8196aa);
+  transition: width .25s linear;
+}
+
+.nova-mini-times {
+  display: flex;
+  justify-content: space-between;
+  color: var(--nova-tag-muted, rgba(195, 189, 202, .64));
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.nova-mini-controls {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 10px;
+}
+
+.nova-mini-btn {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  place-items: center;
+  border: 1px solid rgba(205, 105, 143, .28);
+  border-radius: 50%;
+  color: var(--nova-tag-secondary, rgba(224, 219, 227, .76));
+  background: rgba(205, 105, 143, .1);
+  font-size: 11px;
+  cursor: pointer;
+  transition: background .2s ease, border-color .2s ease, color .2s ease;
+}
+
+.nova-mini-btn:hover,
+.nova-mini-btn:focus-visible {
+  border-color: rgba(205, 105, 143, .5);
+  color: var(--nova-tag-text, #f1edf2);
+  background: rgba(205, 105, 143, .2);
+  outline: none;
+}
+
+.nova-mini-btn.nova-mini-toggle {
+  width: 30px;
+  height: 30px;
+  border-color: rgba(205, 105, 143, .5);
+  background: var(--nova-tag-accent, var(--nova-rose));
+  color: #fff;
+}
+
+.nova-mini-btn.nova-mini-toggle:hover {
+  background: var(--nova-rose-hover);
+  border-color: var(--nova-rose-hover);
+}
+
+.nova-mini-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: grid;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  color: var(--nova-tag-muted, rgba(195, 189, 202, .64));
+  background: transparent;
+  font-size: 11px;
+  cursor: pointer;
+  transition: color .2s ease, background .2s ease;
+}
+
+.nova-mini-close:hover {
+  color: var(--nova-tag-text, #f1edf2);
+  background: rgba(205, 105, 143, .16);
+}
+
+html[data-theme="light"] .nova-mini-player {
+  border-color: rgba(75, 62, 83, .16);
+  background: linear-gradient(145deg, rgba(255, 255, 255, .96), rgba(244, 241, 247, .94));
+  box-shadow: 0 18px 48px rgba(53, 43, 62, .18);
+}
+
+html[data-theme="light"] .nova-mini-btn {
+  border-color: rgba(179, 83, 119, .26);
+  background: rgba(179, 83, 119, .08);
+}
+
+html[data-theme="light"] .nova-mini-btn:hover,
+html[data-theme="light"] .nova-mini-btn:focus-visible {
+  border-color: rgba(179, 83, 119, .46);
+  background: rgba(179, 83, 119, .16);
+}
+
+html[data-theme="light"] .nova-mini-btn.nova-mini-toggle {
+  background: #bd607d;
+  color: #fff;
+}
+
+html[data-theme="light"] .nova-mini-progress {
+  background: rgba(75, 62, 83, .12);
+}
+
+/* 浅色: 文字/时间与音乐页浅色 meta(「共 N 首 · 当前第 N 首」)一致 */
+html[data-theme="light"] .nova-mini-title {
+  color: #443f4c;
+}
+
+html[data-theme="light"] .nova-mini-artist,
+html[data-theme="light"] .nova-mini-time,
+html[data-theme="light"] .nova-mini-duration {
+  color: rgba(70, 62, 84, .62);
+}
+
+html[data-theme="light"] .nova-mini-drag-handle {
+  color: rgba(70, 62, 84, .5);
+}

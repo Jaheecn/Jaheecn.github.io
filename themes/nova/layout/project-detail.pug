@@ -1,0 +1,188 @@
+extends ./base.pug
+
+block headOpts
+  - page.bodyClass = 'nova-project-detail-route'
+  - var detailUrl = encodeURI(siteUrl + '/projects/' + page.projectId + '/')
+  //- 结构化数据: 工程页用 TechArticle(与文章页 BlogPosting 区分)。siteUrl 由 base.pug 从 config.url 解析。
+  - var detailLd = '{"@context":"https://schema.org","@type":"TechArticle","headline":"' + page.title + '","description":"' + (page.description || '') + '","url":"' + detailUrl + '","inLanguage":"zh-CN","author":{"@type":"Person","name":"Yibao","url":"' + siteUrl + '/"},"publisher":{"@type":"Person","name":"Yibao"},"mainEntityOfPage":{"@type":"WebPage","@id":"' + detailUrl + '"}' + (page.date ? ',"datePublished":"' + page.date + '"' : '') + (page.updated ? ',"dateModified":"' + page.updated + '"' : '') + '}'
+  - page.headOpts = { title: '工程: ' + page.title + ' | Yibao', siteTitle: '工程: ' + page.title, description: page.description, ogUrl: detailUrl, canonical: detailUrl, ogTitle: page.title, pageType: 'page', extraHead: '<link rel="preload" as="image" href="/img/hero/projects-detail-hero.webp" fetchpriority="high" type="image/webp"><script type="application/ld+json">' + detailLd + '</script>' }
+
+block content
+  //- 公共壳(P1): sidebar/body-wrap/header/nav 由生成器按 shellTop 拼装, post-info 页级
+  != page.shellTop
+  div#post-info
+    h1.post-title= page.title
+    div#post-meta
+      div.meta-firstline
+        //- 发表于/更新于: 与文章页一致(工程无更新时间则不显示"更新于")
+        if page.date
+          span.post-meta-date
+            i.far.fa-calendar-alt.fa-fw.post-meta-icon
+            span.post-meta-label= '发表于'
+            time(datetime=page.date)= page.date
+            if page.updated
+              span.post-meta-separator |
+              i.fas.fa-history.fa-fw.post-meta-icon
+              span.post-meta-label= '更新于'
+              time(datetime=page.updated)= page.updated
+      div.meta-secondline
+        //- 浏览量 + 评论数: 与文章页一致(busuanzi + waline-comment-count)
+        span.post-meta-separator
+        span.post-meta-pv-cv(data-flag-title=page.title)
+          i.far.fa-eye.fa-fw.post-meta-icon
+          span.post-meta-label 浏览量:
+          span#busuanzi_value_page_pv
+            i.fa-solid.fa-spinner.fa-spin
+        span.post-meta-separator
+        span.post-meta-commentcount
+          i.far.fa-comments.fa-fw.post-meta-icon
+          span.post-meta-label 评论数:
+          a(href='#post-comment')
+            span.waline-comment-count(data-path='/' + 'projects/' + page.projectId + '/')
+              i.fa-solid.fa-spinner.fa-spin
+  | </header>
+  main#content-inner
+      //- 内联 grid 布局: 两栏(左主区 + 340px 右栏)不依赖外部 CSS 时序, 首帧不堆叠
+      div.nova-project-detail(style='display:grid;grid-template-columns:var(--cols,minmax(0,1fr) 340px);gap:var(--gap,48px);align-items:start;width:var(--w,min(1400px,calc(100% - 64px)));margin:var(--m,46px auto 60px);max-width:1400px;')
+        section.nova-project-detail-main
+          //- 白色卡片: 演示图 + 介绍文本包裹在一起(参照文章三级页正文卡片)
+          div.nova-project-detail-panel
+            //- 演示图保持原显示宽度(约 740px, 与旧版一致): 面板加宽但不放大图片, 图片居中; 底部 32px 与文字分隔
+            div.nova-project-detail-demo(style='position:relative;overflow:hidden;width:100%;max-width:740px;margin:0 auto 32px;')
+              span(style='display:block;padding-top:56.2823%;' aria-hidden='true')
+              img(src=page.demoCover alt=page.title decoding='async' style='position:absolute;inset:0;width:100%;height:100%;object-fit:cover;' onerror="this.onerror=null;this.src='/img/misc/404.jpg'")
+            if page.introBlocks && page.introBlocks.length
+              div.nova-project-detail-intro
+                each block, i in page.introBlocks
+                  - if (block.tag === 'h2')
+                    h2= block.text
+                  - else if (block.tag === 'list')
+                    ul
+                      each item in block.items
+                        li= item
+                  - else
+                    p= block.text
+            //- 工程链接 / 资料下载: 有对应数据时才渲染整块(条目无链接、无下载时不输出空标题与占位按钮)
+            if page.link || page.link2
+              h2.nova-project-detail-actions-title
+                i.fas.fa-link.fa-fw(aria-hidden='true')
+                span 工程链接
+              div.nova-project-detail-actions
+                if page.link
+                  a.nova-project-detail-btn(href=page.link target='_blank' rel='noopener')
+                    i.fab.fa-github.fa-fw
+                    span= page.linkLabel || 'GitHub'
+                if page.link2
+                  a.nova-project-detail-btn(href=page.link2 target='_blank' rel='noopener')
+                    i.fas.fa-puzzle-piece.fa-fw
+                    span= page.link2Label || '更多信息'
+            if page.downloads && page.downloads.length
+              h2.nova-project-detail-dl-title
+                i.fas.fa-download.fa-fw(aria-hidden='true')
+                span 资料下载
+              div.nova-project-detail-dl-list
+                each d in page.downloads
+                  div.nova-project-detail-dl-item
+                    div.nova-project-detail-dl-head
+                      div.nova-project-detail-dl-info
+                        strong= d.name
+                        if d.desc
+                          small= d.desc
+                      a.nova-project-detail-dl-btn(href=d.href download)
+                        i.fas.fa-download.fa-fw(aria-hidden='true')
+                        span 下载
+                        if d.sizeLabel
+                          span.nova-project-detail-dl-size= d.sizeLabel
+                    if d.files && d.files.length
+                      details.nova-project-detail-dl-files
+                        summary
+                          i.fas.fa-folder-open.fa-fw(aria-hidden='true')
+                          - var isZip = /\.zip$/i.test(d.name)
+                          span= (isZip ? '压缩包内文件（' : '文件内容（') + d.files.length + '）'
+                          i.fas.fa-chevron-down.fa-fw.nova-project-detail-dl-caret(aria-hidden='true')
+                        ul
+                          each f in d.files
+                            li
+                              span.nova-project-detail-dl-fname= f.name
+                              if f.desc
+                                span.nova-project-detail-dl-fdesc= f.desc
+                              if f.sizeLabel
+                                span.nova-project-detail-dl-fsize= f.sizeLabel
+        aside.nova-project-detail-aside
+          section.nova-project-detail-side-card.nova-project-detail-profile
+            header
+              span PROJECT PROFILE
+              h2 工程简介
+            h3= page.title
+            p= page.description
+            div.nova-project-detail-profile-stats
+              span= page.category
+              span= page.projectCount + ' PROJECTS · ' + page.tagCount + ' TAGS'
+          section.nova-project-detail-side-card.nova-project-detail-data
+            header
+              span PROJECT DATA
+              h2 工程档案
+            ul.nova-project-detail-data-rows
+              li
+                span 发表于
+                strong= page.date
+              li
+                span 更新于
+                strong= page.updated
+          section.nova-project-detail-side-card.nova-project-detail-path
+            header
+              span PROJECT PATH
+              h2 工程路径
+            nav
+              each p, i in page.allProjects
+                - var pdClass = p.id === page.projectId ? 'is-current' : ''
+                a.nova-project-detail-path-link(class=pdClass href=p.detailHref)
+                  span= String(i + 1).padStart(2, '0')
+                  strong= p.title
+                  small= p.category
+                  i(aria-hidden='true')
+          section.nova-project-detail-side-card.nova-project-detail-tags
+            header
+              span TECH TAGS
+              h2 技术标签
+            div.nova-project-detail-tags-wrap
+              each t in page.tags
+                a.nova-project-detail-tag(href='/projects/')
+                  span= t
+  //- 评论区块(参照文章页): 每个工程页 path 独立, 评论互不串页
+  section.nova-project-detail-comments#post-comment
+    div.comment-head
+      div.comment-headline
+        i.fas.fa-comments.fa-fw
+        span 评论
+    div.comment-wrap
+      div
+        div#waline-wrap
+    script.
+      (() => {
+        const loadWaline = () => {
+          const serverURL = 'https://yibao11-github-io.vercel.app'
+          const path = window.location.pathname
+          const load = () => import('!{url_for(theme.asset.waline_js)}')
+            .then(({ init }) => init({
+              el: document.querySelector('#waline-wrap'),
+              serverURL,
+              path,
+              dark: 'html[data-theme="dark"]',
+              pageview: false,
+              comment: true
+            }))
+          if (window.walineInit) { window.walineInit.destroy && window.walineInit.destroy() }
+          load().then(w => { window.walineInit = w }).catch(e => console.warn('[waline] init failed:', e))
+        }
+        const css = document.createElement('link')
+        css.rel = 'stylesheet'
+        css.href = '!{url_for(theme.asset.waline_css)}'
+        document.head.appendChild(css)
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', loadWaline)
+        } else {
+          loadWaline()
+        }
+      })()
+  != page.shellBottom

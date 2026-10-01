@@ -1,0 +1,18 @@
+//- 统一 head partial(P2.2):收敛全部页面的 head 样板(首帧脚本/btf/GLOBAL_CONFIG/CSS/注入)
+//- 参数(opts):
+//-   title        页面 <title>(含 "| Yibao" 后缀)
+//-   siteTitle    GLOBAL_CONFIG_SITE.title(不含后缀)
+//-   description  meta description / og:description
+//-   ogUrl        og:url 与 canonical
+//-   ogTitle      og:title(默认取 siteTitle)
+//-   themeColor   默认 #080B14
+//-   pageType     GLOBAL_CONFIG_SITE.pageType('home'/'page'/'tag'/'404')
+//-   ogType       og:type(默认 website)
+//-   articleDate  文章日期(可选,输出 article:published/modified)
+//-   extraCss     页面特有 CSS link(原样 HTML)
+//-   extraHead    页面追加 head 内容(原样 HTML,如 LDJSON/preload)
+include ./head-content.pug
+
+mixin head(opts)
+  head
+    +headContent(opts)

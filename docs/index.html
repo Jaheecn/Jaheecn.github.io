@@ -1,0 +1,737 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark"><head><!-- hexo injector head_begin start --><script>
+;(function () {
+  try {
+    var hour = new Date().getHours()
+    var dark = hour >= 18 || hour < 7
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light')
+    /* 阶段5 · P0-B: 首页 hero 大图按当前主题预加载。
+       day/night 是两张按主题二选一的背景图(CSS 引用), 原先要等 CSS 下载+解析后浏览器才发现,
+       实测 startTime 被推到 8443ms。这里在 head 阶段就确定主题并 preload 对应那张, 让它与
+       CSS/HTML 并行下载。
+       注意: 本脚本注入在 <head>, 此时 document.body 尚不存在, 故用 URL 路径判定首页。 */
+    var p = location.pathname
+    if (p === '/' || p === '/index.html') {
+      var l = document.createElement('link')
+      l.rel = 'preload'
+      l.as = 'image'
+      l.type = 'image/webp'
+      l.fetchPriority = 'high'
+      l.href = dark ? '/img/hero/night.webp' : '/img/hero/day.webp'
+      document.head.appendChild(l)
+    }
+  } catch (e) {}
+})()
+</script><!-- hexo injector head_begin end --><meta charset="UTF-8"><meta name="referrer" content="no-referrer"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Yibao</title><meta name="author" content="Yibao"><meta name="copyright" content="Yibao"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#080B14"><meta name="description" content="技术笔记、软件环境搭建与安全练习的个人记录。"><meta property="og:type" content="website"><meta property="og:title" content="Yibao"><meta property="og:url" content="https://yibao11.github.io/"><meta property="og:site_name" content="Yibao"><meta property="og:description" content="技术笔记、软件环境搭建与安全练习的个人记录。"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="https://yibao11.github.io/img/hero/post-hero-banner.webp"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://yibao11.github.io/img/hero/post-hero-banner.webp"><link rel="shortcut icon" href="/img/brand/favicon-small.png"><link rel="canonical" href="https://yibao11.github.io/"><link rel="preconnect" href="//busuanzi.ibruce.info"><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="/rose-galaxy/vendor/fontawesome/css/all.min.css?v=7.3.1"><script>(() => {
+
+const saveToLocal = {
+  set: (key, value, ttl) => {
+    const data = { value }
+
+    if (ttl != null) {
+      data.expiry = Date.now() + ttl * 86400000
+    }
+
+    localStorage.setItem(key, JSON.stringify(data))
+  },
+  get: key => {
+    const itemStr = localStorage.getItem(key)
+    if (!itemStr) return
+
+    try {
+      const data = JSON.parse(itemStr)
+
+      if (data.expiry && Date.now() > data.expiry) {
+        localStorage.removeItem(key)
+        return
+      }
+
+      return data.value
+    } catch {
+      localStorage.removeItem(key)
+    }
+  }
+}
+
+const scriptCache = new Map()
+const cssCache = new Map()
+window.btf = {
+  saveToLocal,
+  getScript: (url, attr = {}) => {
+    if (scriptCache.has(url)) {
+      return scriptCache.get(url)
+    }
+
+    const promise = new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+
+      script.src = url
+      script.async = true
+
+      for (const key in attr) {
+        script.setAttribute(key, attr[key])
+      }
+
+      script.onload = resolve
+      script.onerror = reject
+
+      document.head.appendChild(script)
+    })
+
+    scriptCache.set(url, promise)
+
+    return promise
+  },
+  getCSS: (url, id) => {
+    if (cssCache.has(url)) {
+      return cssCache.get(url)
+    }
+
+    const promise = new Promise((resolve, reject) => {
+      const link = document.createElement('link')
+
+      link.rel = 'stylesheet'
+      link.href = url
+
+      if (id) {
+        link.id = id
+      }
+
+      link.onload = resolve
+      link.onerror = reject
+
+      document.head.appendChild(link)
+    })
+
+    cssCache.set(url, promise)
+
+    return promise
+  },
+  addGlobalFn: (key, fn, name = false, parent = window) => {
+    if (!true && key.startsWith('pjax')) return
+    const globalFn = parent.globalFn || {}
+    globalFn[key] = globalFn[key] || {}
+    globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+    parent.globalFn = globalFn
+  }
+}
+
+
+  const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+  const activateDarkMode = () => {
+    document.documentElement.dataset.theme = 'dark'
+    if (metaThemeColor !== null) {
+      metaThemeColor.setAttribute('content', '#080B14')
+    }
+  }
+  const activateLightMode = () => {
+    document.documentElement.dataset.theme = 'light'
+    if (metaThemeColor !== null) {
+      metaThemeColor.setAttribute('content', '#F7F4F1')
+    }
+  }
+
+  btf.activateDarkMode = activateDarkMode
+  btf.activateLightMode = activateLightMode
+const asideStatus = saveToLocal.get('aside-status')
+  if (asideStatus !== undefined) {
+    document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+  }
+
+
+  const detectApple = () => {
+    if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+      document.documentElement.classList.add('apple')
+    }
+  }
+  detectApple()
+
+})()</script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"top_n_per_article":1,"unescape":true,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共有 ${hits} 个结果"}},
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'medium_zoom',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: '/rose-galaxy/vendor/infinitegrid/infinitegrid.min.js?v=4.13.0',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: "Yibao",
+  isHighlightShrink: undefined,
+  isToc: false,
+  pageType: "home"
+}</script><link rel="stylesheet" href="/css/custom.css?v=20260831-p48"><link rel="stylesheet" href="/rose-galaxy/css/project-detail-page.css?v=20260831-p48"><link rel="stylesheet" href="/rose-galaxy/css/nova-player.css?v=20260831-p48"><link rel="stylesheet" href="/rose-galaxy/css/nova-home.css?v=20260831-p48"><link rel="stylesheet" href="/rose-galaxy/css/tag-page.css?v=20260831-p48"><link rel="stylesheet" href="/rose-galaxy/css/projects-page.css?v=20260831-p48"><link rel="stylesheet" href="/rose-galaxy/css/music-page.css?v=20260831-p48"><link rel="stylesheet" href="/rose-galaxy/css/about-page.css?v=20260831-p48"><link rel="stylesheet" href="/rose-galaxy/css/moments-page.css?v=20260831-p48"><script defer src="/rose-galaxy/js/lib/site-config.js?v=20260831-p48"></script><script defer src="/rose-galaxy/js/lib/utils.js?v=20260831-p48"></script><script defer src="/rose-galaxy/js/nova-player.js?v=20260831-p48"></script><link rel="alternate" href="https://yibao11.github.io/atom.xml" title="Yibao" type="application/atom+xml"><link rel="preload" as="font" href="/rose-galaxy/fonts/cormorant-garamond-latin.woff2" type="font/woff2" crossorigin=""><link rel="preload" as="font" href="/rose-galaxy/fonts/inter-latin.woff2" type="font/woff2" crossorigin=""><link rel="stylesheet" href="/rose-galaxy/css/nova-fonts.css?v=20260831-p48"><link rel="preload" as="image" href="/img/hero/background02.webp" fetchpriority="high" type="image/webp"><script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","@id":"https://yibao11.github.io/#website","name":"Yibao","url":"https://yibao11.github.io/","description":"技术笔记、软件环境搭建与安全练习的个人记录。","inLanguage":"zh-CN","creator":{"@type":"Person","name":"Yibao","url":"https://yibao11.github.io/"}}</script><meta name="generator" content="Hexo 8.1.2"></head><body class="nova-home-active"><!-- hexo injector body_begin start -->
+<style>
+  /* 首屏遮罩关键样式内联(2026-09-04): 不依赖 custom.css, 首帧即渲染遮罩盖住未就绪的 hero;
+     custom.css 中同名规则保留(同值), 修改样式时两处需同步 */
+  .nova-page-loading { position: fixed; z-index: 2147483000; inset: 0; display: flex; width: 100%; height: 100%; align-items: center; justify-content: center; visibility: hidden; opacity: 0; background: radial-gradient(circle at 50% 40%, rgba(120,58,84,.22) 0%, rgba(14,20,34,.94) 40%, #0a0f1e 82%); transition: opacity 180ms ease, visibility 0s linear 180ms; pointer-events: none; isolation: isolate; }
+  .nova-page-loading.is-visible { visibility: visible; opacity: 1; transition: opacity 220ms ease; pointer-events: auto; }
+  .nova-page-loading.is-leaving { visibility: hidden; opacity: 0; transition: opacity 300ms ease, visibility 0s linear 300ms; pointer-events: none; }
+  .nova-page-loading__inner { position: relative; z-index: 1; display: flex; max-width: calc(100vw - 40px); align-items: center; flex-direction: column; text-align: center; opacity: 1; transition: opacity 220ms ease; }
+  .nova-page-loading.is-leaving .nova-page-loading__inner { opacity: 0; transition: opacity 260ms ease; }
+  @keyframes nova-loading-breathe { 0%, 100% { transform: scale(1); opacity: .9; } 50% { transform: scale(1.06); opacity: 1; } }
+  @keyframes nova-loading-turn { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+</style>
+<div class="nova-page-loading" data-nova-loading="" aria-hidden="true" aria-live="polite">
+  <div class="nova-page-loading__inner">
+    <span class="nova-page-loading__mark" aria-hidden="true"></span>
+    <strong>Yibao</strong>
+    <small>LOADING THE NIGHT...</small>
+  </div>
+</div>
+<script>
+  ;(() => {
+    const loaders = Array.from(document.querySelectorAll('[data-nova-loading]'))
+    const loader = loaders.shift()
+    loaders.forEach(item => item.remove())
+    if (!loader || window.__novaLoaderBootstrapped) {
+      loader?.remove()
+      return
+    }
+    window.__novaLoaderBootstrapped = true
+    // 以 __novaLoadingShown 为唯一基准:仅"从网站首次进入"(本次会话第一次)显示;
+    // 之后整页刷新/返回首页都读到此标志 → 跳过显示并移除,避免再次弹 loading。
+    // 标志的写入统一由 nova-ux.js 的 initInitialLoading 负责,这里只读不写,避免双重判定冲突。
+    let alreadyShown = false
+    try { alreadyShown = sessionStorage.getItem('__novaLoadingShown') === '1' } catch (_) {}
+    if (alreadyShown) {
+      loader?.remove()
+      return
+    }
+    if (!loader.isConnected || loader.dataset.novaLoadingState === 'leaving') return
+    window.__novaLoaderVisibleAt = Date.now()
+    loader.dataset.novaLoadingState = 'visible'
+    loader.setAttribute('aria-hidden', 'false')
+    loader.classList.add('is-visible')
+    document.body.classList.add('nova-loading-active')
+  })()
+</script><!-- hexo injector body_begin end -->
+
+<div class="bg-animation" id="web_bg"></div>
+<div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/brand/headpicture.jpg" onerror="this.onerror=null;this.src='/img/misc/friend_404.gif'" alt="avatar" width="1080" height="1080" decoding="async"></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/articles/"><span> 文章</span></a></div><div class="menus_item"><a class="site-page" href="/projects/"><span> 工程</span></a></div><div class="menus_item"><a class="site-page" href="/music/"><span> 音乐</span></a></div><div class="menus_item"><a class="site-page" href="/moments/"><span> 说说</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><span> 关于</span></a></div></div></div></div>
+
+<div class="page" id="body-wrap"><header class="full_page" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="/img/brand/magic-cube-logo.png" alt="Logo" width="36" height="36" loading="eager" decoding="async"><span class="site-name">Yibao</span></a></span><div id="menus"><div id="search-button"><button class="site-page social-icon search search-nav-link" type="button" aria-label="打开搜索"><svg class="search-nav-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg><span> 搜索</span></button></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/articles/"><span> 文章</span></a></div><div class="menus_item"><a class="site-page" href="/projects/"><span> 工程</span></a></div><div class="menus_item"><a class="site-page" href="/music/"><span> 音乐</span></a></div><div class="menus_item"><a class="site-page" href="/moments/"><span> 说说</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav>
+</header>
+<div class="nova-homepage" data-nova-home="">
+    <section class="nova-hero hero-section" id="hero">
+      <div class="nova-hero-bg" id="hero-bg"></div>
+      <div class="nova-hero-mist"></div>
+      <div class="nova-particle-layer" aria-hidden="true">
+        <canvas id="nova-particle-canvas" class="hero-galaxy-canvas"></canvas>
+      </div>
+      <div class="nova-particle-softener" aria-hidden="true"></div>
+      <div class="hero-inner">
+        <div class="nova-hero-main">
+          <div class="hero-copy nova-hero-copy nova-hero-primary">
+            <p class="nova-kicker">NOVA · ROSE OBSERVATORY</p>
+            <h1 class="hero-title"><span class="hero-title-nova">NOVA</span><span class="hero-title-sitename">Yibao</span></h1>
+            <p class="nova-cn-subtitle">还没有睡的人，也许都在构建些什么。</p>
+            <p class="nova-en-subtitle" data-typewriter-text="Building quietly, growing steadily.">Building quietly, growing steadily.</p>
+            <div class="nova-actions">
+              <a href="#nova-notes">查看工程</a>
+              <a href="#nova-recent">进入文章</a>
+            </div>
+            <a class="nova-latest-signal" href="/posts/%E5%8F%98%E5%A3%B0%E5%99%A8%E6%93%8D%E4%BD%9C%E8%AE%B0%E5%BD%95/" aria-label="最近提交：变声器操作记录，2026-10-01"><span>LATEST SIGNAL</span><strong><em class="nova-signal-kind">[文章]</em>变声器操作记录</strong><time datetime="2026-10-01">2026-10-01</time></a>
+          </div>
+        </div>
+      </div>
+      <a class="nova-scroll-hint" href="#nova-notes" aria-label="滚动到精选工程"><span></span><em class="sh-text">SCROLL</em></a>
+    </section>
+<main class="nova-observatory">
+      <section class="nova-notes nova-reveal" id="nova-notes">
+        <header class="nova-section-heading">
+          <div><span class="nova-section-eyebrow">SELECTED PROJECTS</span><h2 class="nova-section-title">精选工程</h2></div>
+        </header>
+        <div class="nova-featured-grid"><div class="nova-note-card nova-note-card--lead" data-href="/projects/pikachu/" role="link" tabindex="0" aria-label="查看工程：Pikachu"><div class="post_cover"><a href="/projects/pikachu/" title="Pikachu"><img class="post-bg" src="/img/projects/pikachu.webp" alt="Pikachu" loading="lazy" decoding="async" width="1280" height="720"></a></div><div class="recent-post-info"><a class="article-title" href="/projects/pikachu/" title="Pikachu">Pikachu</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发布于</span><time datetime="2026-10-01" title="2026-10-01">2026-10-01</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><span class="article-meta__categories">安全工具</span></span></div><div class="content">开源 Web 安全漏洞练习平台，覆盖 SQL 注入、XSS、文件包含、文件上传等常见漏洞类型，按模块逐项练习。</div></div></div>
+<div class="nova-note-card nova-note-card--side" data-href="/projects/bluelotus/" role="link" tabindex="0" aria-label="查看工程：BlueLotus"><div class="post_cover"><a href="/projects/bluelotus/" title="BlueLotus"><img class="post-bg" src="/img/projects/bluelotus.webp" alt="BlueLotus" loading="lazy" decoding="async" width="1280" height="720"></a></div><div class="recent-post-info"><a class="article-title" href="/projects/bluelotus/" title="BlueLotus">BlueLotus</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发布于</span><time datetime="2026-09-28" title="2026-09-28">2026-09-28</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><span class="article-meta__categories">安全工具</span></span></div><div class="content">安全练习与靶场平台，配合本地 Web 环境使用，用来把课堂上学到的 Web 安全知识在受控环境里动手验证。</div></div></div>
+<div class="nova-note-card nova-note-card--side" data-href="/projects/phpstudy/" role="link" tabindex="0" aria-label="查看工程：phpstudy"><div class="post_cover"><a href="/projects/phpstudy/" title="phpstudy"><img class="post-bg" src="/img/projects/phpstudy.webp" alt="phpstudy" loading="lazy" decoding="async" width="1280" height="720"></a></div><div class="recent-post-info"><a class="article-title" href="/projects/phpstudy/" title="phpstudy">phpstudy</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发布于</span><time datetime="2026-09-24" title="2026-09-24">2026-09-24</time></span><span class="article-meta"><span class="article-meta-separator">|</span><i class="fas fa-inbox"></i><span class="article-meta__categories">Web 环境</span></span></div><div class="content">Windows 下的一键式 Web 运行环境集成面板。集成 Apache/Nginx、PHP、MySQL，用来在本地快速搭起网站与靶场环境。</div></div></div></div>
+      </section>
+
+      <section class="nova-recent nova-reveal" id="nova-recent">
+        <header class="nova-section-heading">
+          <div><span class="nova-section-eyebrow">LATEST NOTES</span><h2 class="nova-section-title">最新文章</h2></div>
+        </header>
+        <div class="nova-recent-grid"><a class="nova-recent-card" href="/posts/%E5%8F%98%E5%A3%B0%E5%99%A8%E6%93%8D%E4%BD%9C%E8%AE%B0%E5%BD%95/" role="link" aria-label="阅读文章：变声器操作记录"><span class="nova-recent-cover"><img class="post-bg" src="/img/covers/tech-notes.webp" alt="变声器操作记录" loading="lazy" decoding="async" width="1200" height="900"></span><span class="nova-recent-info"><span class="nova-recent-title">变声器操作记录</span><span class="nova-recent-meta"><time datetime="2026-08-17" title="发表于 2026-08-17"><i class="far fa-calendar-alt" aria-hidden="true"></i>发表于 2026-08-17</time><span class="nova-recent-tag"><i class="fas fa-inbox" aria-hidden="true"></i>工具</span></span></span></a>
+<a class="nova-recent-card" href="/posts/Markdown%20%E5%AE%9E%E7%94%A8%E8%AF%AD%E6%B3%95/" role="link" aria-label="阅读文章：Markdown 实用语法"><span class="nova-recent-cover"><img class="post-bg" src="/img/covers/tech-notes.webp" alt="Markdown 实用语法" loading="lazy" decoding="async" width="1200" height="900"></span><span class="nova-recent-info"><span class="nova-recent-title">Markdown 实用语法</span><span class="nova-recent-meta"><time datetime="2026-08-17" title="发表于 2026-08-17"><i class="far fa-calendar-alt" aria-hidden="true"></i>发表于 2026-08-17</time><span class="nova-recent-tag"><i class="fas fa-inbox" aria-hidden="true"></i>Markdown语法</span></span></span></a>
+<a class="nova-recent-card" href="/posts/%E5%93%80%E6%B1%9F%E5%8D%97%E8%B5%8B/" role="link" aria-label="阅读文章：哀江南赋"><span class="nova-recent-cover"><img class="post-bg" src="/img/covers/tech-notes.webp" alt="哀江南赋" loading="lazy" decoding="async" width="1200" height="900"></span><span class="nova-recent-info"><span class="nova-recent-title">哀江南赋</span><span class="nova-recent-meta"><time datetime="2026-08-29" title="发表于 2026-08-29"><i class="far fa-calendar-alt" aria-hidden="true"></i>发表于 2026-08-29</time><span class="nova-recent-tag"><i class="fas fa-inbox" aria-hidden="true"></i>赋文</span></span></span></a>
+<a class="nova-recent-card" href="/posts/%E5%88%AB%E8%B5%8B/" role="link" aria-label="阅读文章：别赋"><span class="nova-recent-cover"><img class="post-bg" src="/img/covers/tech-notes.webp" alt="别赋" loading="lazy" decoding="async" width="1200" height="900"></span><span class="nova-recent-info"><span class="nova-recent-title">别赋</span><span class="nova-recent-meta"><time datetime="2026-08-29" title="发表于 2026-08-29"><i class="far fa-calendar-alt" aria-hidden="true"></i>发表于 2026-08-29</time><span class="nova-recent-tag"><i class="fas fa-inbox" aria-hidden="true"></i>赋文</span></span></span></a>
+<a class="nova-recent-card" href="/posts/%E7%A6%BB%E9%AA%9A/" role="link" aria-label="阅读文章：离骚"><span class="nova-recent-cover"><img class="post-bg" src="/img/covers/tech-notes.webp" alt="离骚" loading="lazy" decoding="async" width="1200" height="900"></span><span class="nova-recent-info"><span class="nova-recent-title">离骚</span><span class="nova-recent-meta"><time datetime="2026-08-29" title="发表于 2026-08-29"><i class="far fa-calendar-alt" aria-hidden="true"></i>发表于 2026-08-29</time><span class="nova-recent-tag"><i class="fas fa-inbox" aria-hidden="true"></i>赋文</span></span></span></a>
+<a class="nova-recent-card" href="/posts/%E6%B4%9B%E7%A5%9E%E8%B5%8B/" role="link" aria-label="阅读文章：洛神赋"><span class="nova-recent-cover"><img class="post-bg" src="/img/covers/tech-notes.webp" alt="洛神赋" loading="lazy" decoding="async" width="1200" height="900"></span><span class="nova-recent-info"><span class="nova-recent-title">洛神赋</span><span class="nova-recent-meta"><time datetime="2026-08-29" title="发表于 2026-08-29"><i class="far fa-calendar-alt" aria-hidden="true"></i>发表于 2026-08-29</time><span class="nova-recent-tag"><i class="fas fa-inbox" aria-hidden="true"></i>赋文</span></span></span></a></div>
+      </section>
+      <section class="nova-fragments nova-reveal">
+        <div class="nova-section-heading">
+          <div><span class="nova-section-eyebrow">FRAGMENTS</span><h2 class="nova-section-title">生活碎片</h2><p class="nova-section-desc">瞬息的刹那，却有永恒的美。</p></div>
+        </div>
+        <div class="nova-fragment-grid">
+          <a href="/music/" class="nova-fragment nova-fragment--music">
+            <div><small>MUSIC</small><h3>夜里的旋律</h3><span>进入音乐 →</span></div>
+            <img src="/img/music/music-hero-bg.webp" alt="夜色玫瑰歌单封面" loading="lazy" decoding="async" width="1672" height="941">
+          </a>
+          <a href="/moments/" class="nova-fragment nova-fragment--moments">
+            <div><small>DAILY FRAGMENTS</small><h3>漫游的思想</h3><span>进入说说 →</span></div>
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="nova-footer">
+      <div><b>✣</b><strong>NOVA Yibao</strong><small>Built in 2026.</small></div>
+    </footer>
+  </div></div>
+
+<div id="rightside"><div id="rightside-config-hide"><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button>
+</div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><script defer="" src="/rose-galaxy/vendor/medium-zoom/medium-zoom.min.js?v=1.1.0"></script><div class="js-pjax"><script>(() => {
+  const parseViewBox = viewBox => {
+    if (!viewBox) return null
+    const parts = viewBox.trim().split(/[\s,]+/).map(n => Number(n))
+    if (parts.length !== 4 || parts.some(n => Number.isNaN(n))) return null
+    return parts
+  }
+
+  const getSvgViewBox = svg => {
+    const attr = parseViewBox(svg.getAttribute('viewBox'))
+    if (attr) return attr
+
+    // Fallback: use bbox to build a viewBox
+    try {
+      const bbox = svg.getBBox()
+      if (bbox && bbox.width && bbox.height) return [bbox.x, bbox.y, bbox.width, bbox.height]
+    } catch (e) {
+      // getBBox may fail on some edge cases; ignore
+    }
+
+    const w = Number(svg.getAttribute('width')) || 0
+    const h = Number(svg.getAttribute('height')) || 0
+    if (w > 0 && h > 0) return [0, 0, w, h]
+    return [0, 0, 100, 100]
+  }
+
+  const setSvgViewBox = (svg, vb) => {
+    svg.setAttribute('viewBox', `${vb[0]} ${vb[1]} ${vb[2]} ${vb[3]}`)
+  }
+
+  const clamp = (v, min, max) => Math.max(min, Math.min(max, v))
+
+  const openSvgInNewTab = ({ source, initViewBox }) => {
+    const getClonedSvg = () => {
+      if (typeof source === 'string') {
+        const template = document.createElement('template')
+        template.innerHTML = source.trim()
+        const svg = template.content.querySelector('svg')
+        return svg ? svg.cloneNode(true) : null
+      }
+      if (source && typeof source.cloneNode === 'function') {
+        return source.cloneNode(true)
+      }
+      return null
+    }
+
+    const clone = getClonedSvg()
+    if (!clone) return
+    if (initViewBox && initViewBox.length === 4) {
+      clone.setAttribute('viewBox', initViewBox.join(' '))
+    }
+    if (!clone.getAttribute('xmlns')) clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+    if (!clone.getAttribute('xmlns:xlink') && clone.innerHTML.includes('xlink:')) {
+      clone.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink')
+    }
+    // inject background to match current theme
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark'
+    const bg = getComputedStyle(document.body).backgroundColor || (isDark ? '#1e1e1e' : '#ffffff')
+    if (!clone.style.background) clone.style.background = bg
+
+    const serializer = new XMLSerializer()
+    const svgSource = serializer.serializeToString(clone)
+    const htmlSource = `<!doctype html><html><head><meta charset="utf-8" />
+      <style>
+        html, body { width: 100%; height: 100%; margin: 0; display: flex; align-items: center; justify-content: center; background: ${bg}; }
+        svg { max-width: 100%; max-height: 100%; height: auto; width: auto; }
+      </style>
+      </head><body>${svgSource}</body></html>`
+    const blob = new Blob([htmlSource], { type: 'text/html;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    window.open(url, '_blank', 'noopener')
+
+    setTimeout(() => URL.revokeObjectURL(url), 5000)
+  }
+
+  const attachMermaidViewerButton = wrap => {
+    let btn = wrap.querySelector('.mermaid-open-btn')
+    if (!btn) {
+      btn = document.createElement('button')
+      btn.type = 'button'
+      btn.className = 'mermaid-open-btn'
+      wrap.appendChild(btn)
+    }
+
+    btn.innerHTML = '<i class="fa fa-search fa-fw" aria-hidden="true"></i>'
+
+    if (!btn.__mermaidViewerBound) {
+      btn.addEventListener('click', e => {
+        e.preventDefault()
+        e.stopPropagation()
+        const svg = wrap.__mermaidOriginalSvg || wrap.querySelector('svg')
+        if (!svg) return
+        const initViewBox = wrap.__mermaidInitViewBox
+        openSvgInNewTab({ source: svg, initViewBox })
+      })
+      btn.__mermaidViewerBound = true
+    }
+  }
+
+  // Zoom around a point (px, py) in the SVG viewport (in viewBox coordinates)
+  const zoomAtPoint = (vb, factor, px, py) => {
+    const w = vb[2] * factor
+    const h = vb[3] * factor
+    const nx = px - (px - vb[0]) * factor
+    const ny = py - (py - vb[1]) * factor
+    return [nx, ny, w, h]
+  }
+
+  const initMermaidGestures = wrap => {
+    // Clean up previous event listeners and pending frames
+    if (wrap.__mermaidAbortController) {
+      wrap.__mermaidAbortController.abort()
+      if (wrap.__mermaidRafId) cancelAnimationFrame(wrap.__mermaidRafId)
+    }
+    const ac = new AbortController()
+    wrap.__mermaidAbortController = ac
+    const svg = wrap.querySelector('svg')
+    if (!svg) return
+
+    // Ensure viewBox exists so gestures always work
+    const initVb = getSvgViewBox(svg)
+    wrap.__mermaidInitViewBox = initVb
+    wrap.__mermaidCurViewBox = initVb.slice()
+    setSvgViewBox(svg, initVb)
+    // Disable default gestures to prevent scroll chaining and pinch-zoom penetration in Chrome
+    svg.style.touchAction = 'none'
+
+    // Cache BoundingClientRect, throttled on scroll to reduce reflow
+    let cachedRect = svg.getBoundingClientRect()
+    let rectDirty = false
+    const markRectDirty = () => { rectDirty = true }
+    window.addEventListener('resize', markRectDirty, { signal: ac.signal })
+    window.addEventListener('scroll', markRectDirty, { signal: ac.signal, capture: true })
+    const getRect = () => {
+      if (rectDirty) {
+        cachedRect = svg.getBoundingClientRect()
+        rectDirty = false
+      }
+      return cachedRect
+    }
+
+    // Precompute clamp bounds from initial viewBox
+    const minW = initVb[2] * 0.1
+    const maxW = initVb[2] * 10
+    const minH = initVb[3] * 0.1
+    const maxH = initVb[3] * 10
+    const clampVb = vb => {
+      const out = vb.slice()
+      out[2] = clamp(out[2], minW, maxW)
+      out[3] = clamp(out[3], minH, maxH)
+      return out
+    }
+
+    // Throttle DOM updates using requestAnimationFrame
+    let pendingVb = null
+    let rafId = null
+    const applyVb = () => {
+      if (pendingVb) {
+        wrap.__mermaidCurViewBox = pendingVb
+        setSvgViewBox(svg, pendingVb)
+        pendingVb = null
+      }
+      rafId = null
+      wrap.__mermaidRafId = null
+    }
+    const setCurVb = vb => {
+      pendingVb = clampVb(vb)
+      if (!rafId) {
+        rafId = requestAnimationFrame(applyVb)
+        wrap.__mermaidRafId = rafId
+      }
+    }
+
+    const state = {
+      pointers: new Map(),
+      startVb: null,
+      startDist: 0,
+      lastPointerX: 0,
+      lastPointerY: 0
+    }
+
+    const onPointerDown = e => {
+      if (e.pointerType === 'mouse' && e.button !== 0) return
+      svg.setPointerCapture(e.pointerId)
+      const curVb = wrap.__mermaidCurViewBox
+      state.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+      if (state.pointers.size === 1) {
+        state.startVb = curVb.slice()
+        state.lastPointerX = e.clientX
+        state.lastPointerY = e.clientY
+      } else if (state.pointers.size === 2) {
+        const pts = [...state.pointers.values()]
+        const dx = pts[0].x - pts[1].x
+        const dy = pts[0].y - pts[1].y
+        state.startDist = Math.hypot(dx, dy)
+        state.startVb = curVb.slice()
+      }
+    }
+
+    const onPointerMove = e => {
+      if (!state.pointers.has(e.pointerId)) return
+      state.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+      const curVb = wrap.__mermaidCurViewBox
+      const rect = getRect()
+      if (state.pointers.size === 1 && state.startVb) {
+        const p = state.pointers.values().next().value
+        const dxClient = p.x - state.lastPointerX
+        const dyClient = p.y - state.lastPointerY
+        state.lastPointerX = p.x
+        state.lastPointerY = p.y
+        const dx = dxClient * (curVb[2] / rect.width)
+        const dy = dyClient * (curVb[3] / rect.height)
+        setCurVb([curVb[0] - dx, curVb[1] - dy, curVb[2], curVb[3]])
+        return
+      }
+      if (state.pointers.size === 2 && state.startVb && state.startDist > 0) {
+        const pts = [...state.pointers.values()]
+        const dx = pts[0].x - pts[1].x
+        const dy = pts[0].y - pts[1].y
+        const dist = Math.hypot(dx, dy)
+        if (!dist) return
+        const factor = state.startDist / dist
+        const cx = (pts[0].x + pts[1].x) / 2
+        const cy = (pts[0].y + pts[1].y) / 2
+        const px = curVb[0] + (cx - rect.left) * (curVb[2] / rect.width)
+        const py = curVb[1] + (cy - rect.top) * (curVb[3] / rect.height)
+        setCurVb(zoomAtPoint(state.startVb, factor, px, py))
+      }
+    }
+
+    const onPointerUpOrCancel = e => {
+      // Release PointerCapture to avoid event capture anomalies
+      if (svg.hasPointerCapture && svg.hasPointerCapture(e.pointerId)) {
+        svg.releasePointerCapture(e.pointerId)
+      }
+      state.pointers.delete(e.pointerId)
+      if (state.pointers.size === 0) {
+        state.startVb = null
+        state.startDist = 0
+      } else if (state.pointers.size === 1) {
+        const p = state.pointers.values().next().value
+        state.lastPointerX = p.x
+        state.lastPointerY = p.y
+      }
+    }
+
+    const onWheel = e => {
+      // Prevent event bubbling from triggering external scroll
+      e.preventDefault()
+      e.stopPropagation()
+      // Normalize deltaY across deltaMode (Chrome uses pixels, Safari uses lines)
+      let delta = e.deltaY
+      if (e.deltaMode === 1) delta *= 16
+      else if (e.deltaMode === 2) delta *= 400
+
+      // Continuous zoom factor: smoother than fixed 1.1/0.9 steps
+      const zoomFactor = Math.pow(1.001, delta)
+
+      const curVb = wrap.__mermaidCurViewBox
+      const rect = getRect()
+      const px = curVb[0] + (e.clientX - rect.left) * (curVb[2] / rect.width)
+      const py = curVb[1] + (e.clientY - rect.top) * (curVb[3] / rect.height)
+      setCurVb(zoomAtPoint(curVb, zoomFactor, px, py))
+    }
+
+    const onDblClick = () => {
+      const init = wrap.__mermaidInitViewBox
+      if (init) setCurVb(init)
+    }
+
+    svg.addEventListener('pointerdown', onPointerDown, { signal: ac.signal })
+    svg.addEventListener('pointermove', onPointerMove, { signal: ac.signal })
+    svg.addEventListener('pointerup', onPointerUpOrCancel, { signal: ac.signal })
+    svg.addEventListener('pointercancel', onPointerUpOrCancel, { signal: ac.signal })
+    svg.addEventListener('wheel', onWheel, { passive: false, signal: ac.signal })
+    svg.addEventListener('dblclick', onDblClick, { signal: ac.signal })
+  }
+
+  const runMermaid = ele => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+    ele.forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+      // Clean up event listeners before removing old SVG
+      if (item.__mermaidAbortController) {
+        item.__mermaidAbortController.abort()
+      }
+      const oldSvg = item.querySelector('svg')
+      if (oldSvg) oldSvg.remove()
+      let config = {}
+      try {
+        config = mermaidSrc.dataset.config ? JSON.parse(mermaidSrc.dataset.config) : {}
+      } catch (e) {
+        console.warn('[mermaid] failed to parse dataset.config:', e)
+      }
+      if (!config.theme) {
+        config.theme = theme
+      }
+      const mermaidThemeConfig = `%%{init: ${JSON.stringify(config)}}%%\n`
+      const mermaidID = `mermaid-${index}`
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderMermaid = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+        if (true) initMermaidGestures(item)
+        item.__mermaidOriginalSvg = svg
+        if (true) attachMermaidViewerButton(item)
+      }
+
+      const handleError = err => {
+        console.error(`[mermaid] render failed for block #${index}:`, err)
+        const errorEl = document.createElement('div')
+        errorEl.className = 'mermaid-error'
+        errorEl.textContent = `Mermaid render error: ${err.message || err}`
+        mermaidSrc.insertAdjacentElement('afterend', errorEl)
+      }
+
+      try {
+        const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+        // mermaid v9 and v10 compatibility
+        if (typeof renderFn === 'string') {
+          renderMermaid(renderFn)
+        } else {
+          renderFn.then(({ svg }) => renderMermaid(svg)).catch(handleError)
+        }
+      } catch (err) {
+        handleError(err)
+      }
+    })
+  }
+
+  const codeToMermaid = $article => {
+    const codeMermaidEle = $article.querySelectorAll('pre > code.mermaid')
+    if (codeMermaidEle.length === 0) return
+
+    codeMermaidEle.forEach(ele => {
+      const preEle = document.createElement('pre')
+      preEle.className = 'mermaid-src'
+      preEle.hidden = true
+      preEle.textContent = ele.textContent
+      const newEle = document.createElement('div')
+      newEle.className = 'mermaid-wrap'
+      newEle.appendChild(preEle)
+      ele.parentNode.replaceWith(newEle)
+    })
+  }
+
+  const loadMermaid = () => {
+    const $article = document.getElementById('article-container')
+    if (!$article) return
+
+    if (true) codeToMermaid($article)
+    const $mermaid = $article.querySelectorAll('.mermaid-wrap')
+    if ($mermaid.length === 0) return
+
+    const runMermaidFn = () => runMermaid($mermaid)
+    btf.addGlobalFn('themeChange', runMermaidFn, 'mermaid')
+    window.loadMermaid ? runMermaidFn() : btf.getScript('https://cdn.jsdelivr.net/npm/mermaid@11.16.0/dist/mermaid.min.js').then(runMermaidFn)
+  }
+
+  btf.addGlobalFn('encrypt', loadMermaid, 'mermaid')
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script>
+  <script defer="" data-pjax="" src="/rose-galaxy/animation/galaxy-canvas.js?v=20260831-p48"></script>
+<script defer="" data-pjax="" src="/rose-galaxy/js/nova-home.js?v=20260831-p48"></script>
+
+
+</div><script defer="" src="/rose-galaxy/js/nova-ux.js?v=20260831-p48"></script><script src="/rose-galaxy/vendor/pjax/pjax.min.js?v=0.2.8" defer="defer"></script><script>document.addEventListener('DOMContentLoaded', () => {
+  const pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+  window.pjax = new Pjax({
+    elements: 'a:not([target="_blank"]):not([data-fancybox]):not([href^="#"]):not([href^="mailto:"]):not([href^="http"]):not([href^="//"])',
+    selectors: pjaxSelectors,
+    cacheBust: false,
+    analytics: false,
+    scrollRestoration: false
+  })
+
+  const triggerPjaxFn = (val) => {
+    if (!val) return
+    Object.values(val).forEach(fn => {
+      try {
+        fn()
+      } catch (err) {
+        console.debug('Pjax callback failed:', err)
+      }
+    })
+  }
+
+  document.addEventListener('pjax:send', () => {
+    // removeEventListener
+    btf.removeGlobalFnEvent('pjaxSendOnce')
+    btf.removeGlobalFnEvent('themeChange')
+
+    // reset readmode
+    const $bodyClassList = document.body.classList
+    if ($bodyClassList.contains('read-mode')) $bodyClassList.remove('read-mode')
+
+    triggerPjaxFn(window.globalFn.pjaxSend)
+  })
+
+  document.addEventListener('pjax:complete', () => {
+    btf.removeGlobalFnEvent('pjaxCompleteOnce')
+    document.querySelectorAll('script[data-pjax]').forEach(item => {
+      if (!item.parentNode) return
+      const newScript = document.createElement('script')
+      const content = item.text || item.textContent || ''
+      Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+      newScript.appendChild(document.createTextNode(content))
+      item.parentNode.replaceChild(newScript, item)
+    })
+
+    triggerPjaxFn(window.globalFn.pjaxComplete)
+  })
+
+  document.addEventListener('pjax:error', e => {
+    const responseURL = e.request && e.request.responseURL
+    if (e.request && e.request.status === 404) {
+      true
+        ? pjax.loadUrl('/404')
+        : responseURL && (window.location.href = responseURL)
+    } else if (responseURL) {
+      window.location.href = responseURL
+    }
+  })
+})</script><script async="" data-pjax="" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button" type="button" aria-label="关闭搜索"><i class="fas fa-times" aria-hidden="true"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="Search..." type="text" id="global-search-input"></div><hr><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script defer="" src="/js/search/local-search.js?v=5.7.0"></script></div></div>
+</body></html>

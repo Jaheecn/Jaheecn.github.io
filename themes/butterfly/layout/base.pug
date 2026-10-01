@@ -1,0 +1,11 @@
+//- 基础布局(P2.2):统一 html/head(body class 参数化)
+//- doctype 由 _partials/head-content.pug 输出(它需要 doctype 来决定标签不自闭合),
+//- 此处不再重复声明, 否则会输出两个 <!DOCTYPE html>。
+include ./_partials/head.pug
+include ./_partials/helpers.pug
+- var siteUrl = (config.url || '').replace(/\/+$/, '')
+html(lang='zh-CN' data-theme='dark')
+  block headOpts
+  +head(page.headOpts || {})
+  body(class=page.bodyClass)
+    block content

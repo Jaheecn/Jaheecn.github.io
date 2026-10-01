@@ -1,0 +1,7 @@
+//- 共享模板函数(P2.2):供各页面布局使用
+- var postUrl = function(p) { return encodeURI('/' + p.path.replace(/\/?index\.html$/, '')) }
+- var coverFor = function(p) { var n = p.tags.toArray().map(function(t){ return t.name }).join(' '); if (/MySQL|sql|PostgreSQL|数据库/i.test(n)) return 'tech-mysql.webp'; if (/数组|链表|栈|字符串|算法|LeetCode|KMP|队列/i.test(n)) return 'tech-algorithm.webp'; if (/Go/i.test(n)) return 'tech-go.webp'; return 'tech-notes.webp' }
+- var stripHtml = function(s) { var ent = function(m){ return ({ '&#x2F;':'/', '&#x2f;':'/', '&#47;':'/', '&nbsp;':' ', '&amp;':'&', '&lt;':'<', '&gt;':'>', '&quot;':'"' })[m] || m }; return String(s || '').replace(/<figure class="highlight[^>]*>[\s\S]*?<\/figure>/g, ' ').replace(/<pre[^>]*>[\s\S]*?<\/pre>/g, ' ').replace(/<code[^>]*>[\s\S]*?<\/code>/g, ' ').replace(/<[^>]+>/g, ' ').replace(/&(#x2F|#47|#X2F|nbsp|amp|lt|gt|quot);/gi, ent).replace(/[#>*_~|]/g, ' ').replace(/\s+/g, ' ').trim() }
+- var summaryOf = function(p, len) { var src = (p.excerpt && p.excerpt.trim()) ? p.excerpt : p.content; return (p.title + ' ' + stripHtml(src)).slice(0, len || 70) }
+- var summaryBodyOf = function(p, len) { var src = (p.excerpt && p.excerpt.trim()) ? p.excerpt : p.content; return stripHtml(src).slice(0, len || 90) }
+- var tagNameOf = function(p) { var t = p.tags.toArray(); return (t[0] || {}).name || '' }

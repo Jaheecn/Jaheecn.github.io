@@ -1,0 +1,690 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark"><head><!-- hexo injector head_begin start --><script>
+;(function () {
+  try {
+    var hour = new Date().getHours()
+    var dark = hour >= 18 || hour < 7
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light')
+    /* 阶段5 · P0-B: 首页 hero 大图按当前主题预加载。
+       day/night 是两张按主题二选一的背景图(CSS 引用), 原先要等 CSS 下载+解析后浏览器才发现,
+       实测 startTime 被推到 8443ms。这里在 head 阶段就确定主题并 preload 对应那张, 让它与
+       CSS/HTML 并行下载。
+       注意: 本脚本注入在 <head>, 此时 document.body 尚不存在, 故用 URL 路径判定首页。 */
+    var p = location.pathname
+    if (p === '/' || p === '/index.html') {
+      var l = document.createElement('link')
+      l.rel = 'preload'
+      l.as = 'image'
+      l.type = 'image/webp'
+      l.fetchPriority = 'high'
+      l.href = dark ? '/img/hero/night.webp' : '/img/hero/day.webp'
+      document.head.appendChild(l)
+    }
+  } catch (e) {}
+})()
+</script><!-- hexo injector head_begin end --><meta charset="UTF-8"><meta name="referrer" content="no-referrer"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>工程: SQL Server Management Studio | Yibao</title><meta name="author" content="Yibao"><meta name="copyright" content="Yibao"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#080B14"><meta name="description" content="SQL Server 的官方图形化管理工具。连接数据库实例、编写并执行 T-SQL、查看执行计划与结果集，是数据库课程的主要操作界面。"><meta property="og:type" content="website"><meta property="og:title" content="SQL Server Management Studio"><meta property="og:url" content="https://yibao11.github.io/projects/ssms/"><meta property="og:site_name" content="Yibao"><meta property="og:description" content="SQL Server 的官方图形化管理工具。连接数据库实例、编写并执行 T-SQL、查看执行计划与结果集，是数据库课程的主要操作界面。"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="https://yibao11.github.io/img/hero/post-hero-banner.webp"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://yibao11.github.io/img/hero/post-hero-banner.webp"><link rel="shortcut icon" href="/img/brand/favicon-small.png"><link rel="canonical" href="https://yibao11.github.io/projects/ssms/"><link rel="preconnect" href="//busuanzi.ibruce.info"><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="/rose-galaxy/vendor/fontawesome/css/all.min.css?v=7.3.1"><script>(() => {
+
+const saveToLocal = {
+  set: (key, value, ttl) => {
+    const data = { value }
+
+    if (ttl != null) {
+      data.expiry = Date.now() + ttl * 86400000
+    }
+
+    localStorage.setItem(key, JSON.stringify(data))
+  },
+  get: key => {
+    const itemStr = localStorage.getItem(key)
+    if (!itemStr) return
+
+    try {
+      const data = JSON.parse(itemStr)
+
+      if (data.expiry && Date.now() > data.expiry) {
+        localStorage.removeItem(key)
+        return
+      }
+
+      return data.value
+    } catch {
+      localStorage.removeItem(key)
+    }
+  }
+}
+
+const scriptCache = new Map()
+const cssCache = new Map()
+window.btf = {
+  saveToLocal,
+  getScript: (url, attr = {}) => {
+    if (scriptCache.has(url)) {
+      return scriptCache.get(url)
+    }
+
+    const promise = new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+
+      script.src = url
+      script.async = true
+
+      for (const key in attr) {
+        script.setAttribute(key, attr[key])
+      }
+
+      script.onload = resolve
+      script.onerror = reject
+
+      document.head.appendChild(script)
+    })
+
+    scriptCache.set(url, promise)
+
+    return promise
+  },
+  getCSS: (url, id) => {
+    if (cssCache.has(url)) {
+      return cssCache.get(url)
+    }
+
+    const promise = new Promise((resolve, reject) => {
+      const link = document.createElement('link')
+
+      link.rel = 'stylesheet'
+      link.href = url
+
+      if (id) {
+        link.id = id
+      }
+
+      link.onload = resolve
+      link.onerror = reject
+
+      document.head.appendChild(link)
+    })
+
+    cssCache.set(url, promise)
+
+    return promise
+  },
+  addGlobalFn: (key, fn, name = false, parent = window) => {
+    if (!true && key.startsWith('pjax')) return
+    const globalFn = parent.globalFn || {}
+    globalFn[key] = globalFn[key] || {}
+    globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+    parent.globalFn = globalFn
+  }
+}
+
+
+  const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+  const activateDarkMode = () => {
+    document.documentElement.dataset.theme = 'dark'
+    if (metaThemeColor !== null) {
+      metaThemeColor.setAttribute('content', '#080B14')
+    }
+  }
+  const activateLightMode = () => {
+    document.documentElement.dataset.theme = 'light'
+    if (metaThemeColor !== null) {
+      metaThemeColor.setAttribute('content', '#F7F4F1')
+    }
+  }
+
+  btf.activateDarkMode = activateDarkMode
+  btf.activateLightMode = activateLightMode
+const asideStatus = saveToLocal.get('aside-status')
+  if (asideStatus !== undefined) {
+    document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+  }
+
+
+  const detectApple = () => {
+    if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+      document.documentElement.classList.add('apple')
+    }
+  }
+  detectApple()
+
+})()</script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"top_n_per_article":1,"unescape":true,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共有 ${hits} 个结果"}},
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'medium_zoom',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: '/rose-galaxy/vendor/infinitegrid/infinitegrid.min.js?v=4.13.0',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: "工程: SQL Server Management Studio",
+  isHighlightShrink: undefined,
+  isToc: false,
+  pageType: "page"
+}</script><link rel="stylesheet" href="/css/custom.css?v=20260831-p48"><link rel="stylesheet" href="/rose-galaxy/css/project-detail-page.css?v=20260831-p48"><link rel="stylesheet" href="/rose-galaxy/css/nova-player.css?v=20260831-p48"><link rel="stylesheet" href="/rose-galaxy/css/nova-home.css?v=20260831-p48"><link rel="stylesheet" href="/rose-galaxy/css/tag-page.css?v=20260831-p48"><link rel="stylesheet" href="/rose-galaxy/css/projects-page.css?v=20260831-p48"><link rel="stylesheet" href="/rose-galaxy/css/music-page.css?v=20260831-p48"><link rel="stylesheet" href="/rose-galaxy/css/about-page.css?v=20260831-p48"><link rel="stylesheet" href="/rose-galaxy/css/moments-page.css?v=20260831-p48"><script defer src="/rose-galaxy/js/lib/site-config.js?v=20260831-p48"></script><script defer src="/rose-galaxy/js/lib/utils.js?v=20260831-p48"></script><script defer src="/rose-galaxy/js/nova-player.js?v=20260831-p48"></script><link rel="preload" as="image" href="/img/hero/projects-detail-hero.webp" fetchpriority="high" type="image/webp"><script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"SQL Server Management Studio","description":"SQL Server 的官方图形化管理工具。连接数据库实例、编写并执行 T-SQL、查看执行计划与结果集，是数据库课程的主要操作界面。","url":"https://yibao11.github.io/projects/ssms/","inLanguage":"zh-CN","author":{"@type":"Person","name":"Yibao","url":"https://yibao11.github.io/"},"publisher":{"@type":"Person","name":"Yibao"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://yibao11.github.io/projects/ssms/"},"datePublished":"2026-09-20","dateModified":"2026-09-20"}</script><meta name="generator" content="Hexo 8.1.2"></head><body class="nova-project-detail-route"><!-- hexo injector body_begin start -->
+<style>
+  /* 首屏遮罩关键样式内联(2026-09-04): 不依赖 custom.css, 首帧即渲染遮罩盖住未就绪的 hero;
+     custom.css 中同名规则保留(同值), 修改样式时两处需同步 */
+  .nova-page-loading { position: fixed; z-index: 2147483000; inset: 0; display: flex; width: 100%; height: 100%; align-items: center; justify-content: center; visibility: hidden; opacity: 0; background: radial-gradient(circle at 50% 40%, rgba(120,58,84,.22) 0%, rgba(14,20,34,.94) 40%, #0a0f1e 82%); transition: opacity 180ms ease, visibility 0s linear 180ms; pointer-events: none; isolation: isolate; }
+  .nova-page-loading.is-visible { visibility: visible; opacity: 1; transition: opacity 220ms ease; pointer-events: auto; }
+  .nova-page-loading.is-leaving { visibility: hidden; opacity: 0; transition: opacity 300ms ease, visibility 0s linear 300ms; pointer-events: none; }
+  .nova-page-loading__inner { position: relative; z-index: 1; display: flex; max-width: calc(100vw - 40px); align-items: center; flex-direction: column; text-align: center; opacity: 1; transition: opacity 220ms ease; }
+  .nova-page-loading.is-leaving .nova-page-loading__inner { opacity: 0; transition: opacity 260ms ease; }
+  @keyframes nova-loading-breathe { 0%, 100% { transform: scale(1); opacity: .9; } 50% { transform: scale(1.06); opacity: 1; } }
+  @keyframes nova-loading-turn { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+</style>
+<div class="nova-page-loading" data-nova-loading="" aria-hidden="true" aria-live="polite">
+  <div class="nova-page-loading__inner">
+    <span class="nova-page-loading__mark" aria-hidden="true"></span>
+    <strong>Yibao</strong>
+    <small>LOADING THE NIGHT...</small>
+  </div>
+</div>
+<script>
+  ;(() => {
+    const loaders = Array.from(document.querySelectorAll('[data-nova-loading]'))
+    const loader = loaders.shift()
+    loaders.forEach(item => item.remove())
+    if (!loader || window.__novaLoaderBootstrapped) {
+      loader?.remove()
+      return
+    }
+    window.__novaLoaderBootstrapped = true
+    // 以 __novaLoadingShown 为唯一基准:仅"从网站首次进入"(本次会话第一次)显示;
+    // 之后整页刷新/返回首页都读到此标志 → 跳过显示并移除,避免再次弹 loading。
+    // 标志的写入统一由 nova-ux.js 的 initInitialLoading 负责,这里只读不写,避免双重判定冲突。
+    let alreadyShown = false
+    try { alreadyShown = sessionStorage.getItem('__novaLoadingShown') === '1' } catch (_) {}
+    if (alreadyShown) {
+      loader?.remove()
+      return
+    }
+    if (!loader.isConnected || loader.dataset.novaLoadingState === 'leaving') return
+    window.__novaLoaderVisibleAt = Date.now()
+    loader.dataset.novaLoadingState = 'visible'
+    loader.setAttribute('aria-hidden', 'false')
+    loader.classList.add('is-visible')
+    document.body.classList.add('nova-loading-active')
+  })()
+</script><!-- hexo injector body_begin end -->
+
+<div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/brand/headpicture.jpg" onerror="this.onerror=null;this.src='/img/misc/friend_404.gif'" alt="avatar" width="1080" height="1080" decoding="async"></div><div class="site-data text-center"><a href="/projects/"><div class="headline">工程</div><div class="length-num">5</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/articles/"><span> 文章</span></a></div><div class="menus_item"><a class="site-page" href="/projects/"><span> 工程</span></a></div><div class="menus_item"><a class="site-page" href="/music/"><span> 音乐</span></a></div><div class="menus_item"><a class="site-page" href="/moments/"><span> 说说</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><span> 关于</span></a></div></div></div></div>
+
+<div class="page post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image:url(/img/hero/projects-detail-hero.webp)"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="/img/brand/magic-cube-logo.png" alt="Logo" width="36" height="36" loading="eager" decoding="async"><span class="site-name">Yibao</span></a></span><div id="menus"><div id="search-button"><button class="site-page social-icon search search-nav-link" type="button" aria-label="打开搜索"><svg class="search-nav-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg><span> 搜索</span></button></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/articles/"><span> 文章</span></a></div><div class="menus_item"><a class="site-page" href="/projects/"><span> 工程</span></a></div><div class="menus_item"><a class="site-page" href="/music/"><span> 音乐</span></a></div><div class="menus_item"><a class="site-page" href="/moments/"><span> 说说</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav>
+<div id="post-info"><h1 class="post-title">SQL Server Management Studio</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time datetime="2026-09-20">2026-09-20</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time datetime="2026-09-20">2026-09-20</time></span></div><div class="meta-secondline"><span class="post-meta-separator"></span><span class="post-meta-pv-cv" data-flag-title="SQL Server Management Studio"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span><span class="post-meta-separator"></span><span class="post-meta-commentcount"><i class="far fa-comments fa-fw post-meta-icon"></i><span class="post-meta-label">评论数:</span><a href="#post-comment"><span class="waline-comment-count" data-path="/projects/ssms/"><i class="fa-solid fa-spinner fa-spin"></i></span></a></span></div></div></div></header><main id="content-inner"><div class="nova-project-detail" style="display:grid;grid-template-columns:var(--cols,minmax(0,1fr) 340px);gap:var(--gap,48px);align-items:start;width:var(--w,min(1400px,calc(100% - 64px)));margin:var(--m,46px auto 60px);max-width:1400px;"><section class="nova-project-detail-main"><div class="nova-project-detail-panel"><div class="nova-project-detail-demo" style="position:relative;overflow:hidden;width:100%;max-width:740px;margin:0 auto 32px;"><span style="display:block;padding-top:56.2823%;" aria-hidden="true"></span><img src="/img/projects/demo-ssms.webp" alt="SQL Server Management Studio" decoding="async" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null;this.src='/img/misc/404.jpg'"></div><div class="nova-project-detail-intro"><p>SQL Server 的官方图形化管理工具。相比命令行工具，它把数据库的结构、内容与执行过程都可视化出来，是学习关系型数据库时最常用的操作界面。</p><h2>连接与界面</h2><p>通过实例名与身份验证方式连接数据库服务，左侧「对象资源管理器」以树状结构展示库、表、视图、存储过程与安全性配置；右侧查询窗口用来编写 T-SQL。执行结果分别在「结果」网格与「消息」面板展示，出错时消息面板会给出具体行号与原因。</p><h2>基础操作</h2><ul><li>库与表：新建数据库、设计表结构、设置数据类型与是否允许为空</li><li>约束：主键、唯一、默认值、检查约束，以及表之间的主外键关系</li><li>数据操作：INSERT / UPDATE / DELETE 与 SELECT 的组合使用</li><li>导入导出：把 Excel 或 CSV 数据导入表中，或把查询结果导出</li></ul><h2>查询与优化</h2><p>多表查询从内连接、左连接入手，逐步加上分组聚合与子查询。发现语句变慢时，打开「显示预估执行计划」观察扫描与查找的差别、是否走了索引——这一步让抽象的「索引」变成了能看见的东西。</p><h2>心得</h2><ul><li>先想清楚表之间的关系，再动手建表，能省掉大量返工</li><li>外键约束在练习时可以暂时关闭以免插入顺序受限，但设计阶段要理解它约束的是什么</li><li>把常用查询保存成脚本文件，比每次重新输入可靠得多</li></ul></div></div></section><aside class="nova-project-detail-aside"><section class="nova-project-detail-side-card nova-project-detail-profile"><header><span>PROJECT PROFILE</span><h2>工程简介</h2></header><h3>SQL Server Management Studio</h3><p>SQL Server 的官方图形化管理工具。连接数据库实例、编写并执行 T-SQL、查看执行计划与结果集，是数据库课程的主要操作界面。</p><div class="nova-project-detail-profile-stats"><span>数据库</span><span>5 PROJECTS · 20 TAGS</span></div></section><section class="nova-project-detail-side-card nova-project-detail-data"><header><span>PROJECT DATA</span><h2>工程档案</h2></header><ul class="nova-project-detail-data-rows"><li><span>发表于</span><strong>2026-09-20</strong></li><li><span>更新于</span><strong>2026-09-20</strong></li></ul></section><section class="nova-project-detail-side-card nova-project-detail-path"><header><span>PROJECT PATH</span><h2>工程路径</h2></header><nav><a class="nova-project-detail-path-link" href="/projects/vmware/"><span>01</span><strong>VMware Workstation</strong><small>虚拟机</small><i aria-hidden="true"></i></a><a class="nova-project-detail-path-link is-current" href="/projects/ssms/"><span>02</span><strong>SQL Server Management Studio</strong><small>数据库</small><i aria-hidden="true"></i></a><a class="nova-project-detail-path-link" href="/projects/phpstudy/"><span>03</span><strong>phpstudy</strong><small>Web 环境</small><i aria-hidden="true"></i></a><a class="nova-project-detail-path-link" href="/projects/bluelotus/"><span>04</span><strong>BlueLotus</strong><small>安全工具</small><i aria-hidden="true"></i></a><a class="nova-project-detail-path-link" href="/projects/pikachu/"><span>05</span><strong>Pikachu</strong><small>安全工具</small><i aria-hidden="true"></i></a></nav></section><section class="nova-project-detail-side-card nova-project-detail-tags"><header><span>TECH TAGS</span><h2>技术标签</h2></header><div class="nova-project-detail-tags-wrap"><a class="nova-project-detail-tag" href="/projects/"><span>SQL Server</span></a><a class="nova-project-detail-tag" href="/projects/"><span>T-SQL</span></a><a class="nova-project-detail-tag" href="/projects/"><span>建库建表</span></a><a class="nova-project-detail-tag" href="/projects/"><span>执行计划</span></a></div></section></aside></div></main><section class="nova-project-detail-comments" id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span>评论</span></div></div><div class="comment-wrap"><div><div id="waline-wrap"></div></div></div><script>(() => {
+  const loadWaline = () => {
+    const serverURL = 'https://yibao11-github-io.vercel.app'
+    const path = window.location.pathname
+    const load = () => import('/rose-galaxy/vendor/waline/waline.min.js')
+      .then(({ init }) => init({
+        el: document.querySelector('#waline-wrap'),
+        serverURL,
+        path,
+        dark: 'html[data-theme="dark"]',
+        pageview: false,
+        comment: true
+      }))
+    if (window.walineInit) { window.walineInit.destroy && window.walineInit.destroy() }
+    load().then(w => { window.walineInit = w }).catch(e => console.warn('[waline] init failed:', e))
+  }
+  const css = document.createElement('link')
+  css.rel = 'stylesheet'
+  css.href = '/rose-galaxy/vendor/waline/waline.min.css'
+  document.head.appendChild(css)
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadWaline)
+  } else {
+    loadWaline()
+  }
+})()</script></section><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">©&nbsp;2025 - 2026 By Yibao</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><script defer="" src="/rose-galaxy/vendor/medium-zoom/medium-zoom.min.js?v=1.1.0"></script><div class="js-pjax"><script>(() => {
+  const parseViewBox = viewBox => {
+    if (!viewBox) return null
+    const parts = viewBox.trim().split(/[\s,]+/).map(n => Number(n))
+    if (parts.length !== 4 || parts.some(n => Number.isNaN(n))) return null
+    return parts
+  }
+
+  const getSvgViewBox = svg => {
+    const attr = parseViewBox(svg.getAttribute('viewBox'))
+    if (attr) return attr
+
+    // Fallback: use bbox to build a viewBox
+    try {
+      const bbox = svg.getBBox()
+      if (bbox && bbox.width && bbox.height) return [bbox.x, bbox.y, bbox.width, bbox.height]
+    } catch (e) {
+      // getBBox may fail on some edge cases; ignore
+    }
+
+    const w = Number(svg.getAttribute('width')) || 0
+    const h = Number(svg.getAttribute('height')) || 0
+    if (w > 0 && h > 0) return [0, 0, w, h]
+    return [0, 0, 100, 100]
+  }
+
+  const setSvgViewBox = (svg, vb) => {
+    svg.setAttribute('viewBox', `${vb[0]} ${vb[1]} ${vb[2]} ${vb[3]}`)
+  }
+
+  const clamp = (v, min, max) => Math.max(min, Math.min(max, v))
+
+  const openSvgInNewTab = ({ source, initViewBox }) => {
+    const getClonedSvg = () => {
+      if (typeof source === 'string') {
+        const template = document.createElement('template')
+        template.innerHTML = source.trim()
+        const svg = template.content.querySelector('svg')
+        return svg ? svg.cloneNode(true) : null
+      }
+      if (source && typeof source.cloneNode === 'function') {
+        return source.cloneNode(true)
+      }
+      return null
+    }
+
+    const clone = getClonedSvg()
+    if (!clone) return
+    if (initViewBox && initViewBox.length === 4) {
+      clone.setAttribute('viewBox', initViewBox.join(' '))
+    }
+    if (!clone.getAttribute('xmlns')) clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+    if (!clone.getAttribute('xmlns:xlink') && clone.innerHTML.includes('xlink:')) {
+      clone.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink')
+    }
+    // inject background to match current theme
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark'
+    const bg = getComputedStyle(document.body).backgroundColor || (isDark ? '#1e1e1e' : '#ffffff')
+    if (!clone.style.background) clone.style.background = bg
+
+    const serializer = new XMLSerializer()
+    const svgSource = serializer.serializeToString(clone)
+    const htmlSource = `<!doctype html><html><head><meta charset="utf-8" />
+      <style>
+        html, body { width: 100%; height: 100%; margin: 0; display: flex; align-items: center; justify-content: center; background: ${bg}; }
+        svg { max-width: 100%; max-height: 100%; height: auto; width: auto; }
+      </style>
+      </head><body>${svgSource}</body></html>`
+    const blob = new Blob([htmlSource], { type: 'text/html;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    window.open(url, '_blank', 'noopener')
+
+    setTimeout(() => URL.revokeObjectURL(url), 5000)
+  }
+
+  const attachMermaidViewerButton = wrap => {
+    let btn = wrap.querySelector('.mermaid-open-btn')
+    if (!btn) {
+      btn = document.createElement('button')
+      btn.type = 'button'
+      btn.className = 'mermaid-open-btn'
+      wrap.appendChild(btn)
+    }
+
+    btn.innerHTML = '<i class="fa fa-search fa-fw" aria-hidden="true"></i>'
+
+    if (!btn.__mermaidViewerBound) {
+      btn.addEventListener('click', e => {
+        e.preventDefault()
+        e.stopPropagation()
+        const svg = wrap.__mermaidOriginalSvg || wrap.querySelector('svg')
+        if (!svg) return
+        const initViewBox = wrap.__mermaidInitViewBox
+        openSvgInNewTab({ source: svg, initViewBox })
+      })
+      btn.__mermaidViewerBound = true
+    }
+  }
+
+  // Zoom around a point (px, py) in the SVG viewport (in viewBox coordinates)
+  const zoomAtPoint = (vb, factor, px, py) => {
+    const w = vb[2] * factor
+    const h = vb[3] * factor
+    const nx = px - (px - vb[0]) * factor
+    const ny = py - (py - vb[1]) * factor
+    return [nx, ny, w, h]
+  }
+
+  const initMermaidGestures = wrap => {
+    // Clean up previous event listeners and pending frames
+    if (wrap.__mermaidAbortController) {
+      wrap.__mermaidAbortController.abort()
+      if (wrap.__mermaidRafId) cancelAnimationFrame(wrap.__mermaidRafId)
+    }
+    const ac = new AbortController()
+    wrap.__mermaidAbortController = ac
+    const svg = wrap.querySelector('svg')
+    if (!svg) return
+
+    // Ensure viewBox exists so gestures always work
+    const initVb = getSvgViewBox(svg)
+    wrap.__mermaidInitViewBox = initVb
+    wrap.__mermaidCurViewBox = initVb.slice()
+    setSvgViewBox(svg, initVb)
+    // Disable default gestures to prevent scroll chaining and pinch-zoom penetration in Chrome
+    svg.style.touchAction = 'none'
+
+    // Cache BoundingClientRect, throttled on scroll to reduce reflow
+    let cachedRect = svg.getBoundingClientRect()
+    let rectDirty = false
+    const markRectDirty = () => { rectDirty = true }
+    window.addEventListener('resize', markRectDirty, { signal: ac.signal })
+    window.addEventListener('scroll', markRectDirty, { signal: ac.signal, capture: true })
+    const getRect = () => {
+      if (rectDirty) {
+        cachedRect = svg.getBoundingClientRect()
+        rectDirty = false
+      }
+      return cachedRect
+    }
+
+    // Precompute clamp bounds from initial viewBox
+    const minW = initVb[2] * 0.1
+    const maxW = initVb[2] * 10
+    const minH = initVb[3] * 0.1
+    const maxH = initVb[3] * 10
+    const clampVb = vb => {
+      const out = vb.slice()
+      out[2] = clamp(out[2], minW, maxW)
+      out[3] = clamp(out[3], minH, maxH)
+      return out
+    }
+
+    // Throttle DOM updates using requestAnimationFrame
+    let pendingVb = null
+    let rafId = null
+    const applyVb = () => {
+      if (pendingVb) {
+        wrap.__mermaidCurViewBox = pendingVb
+        setSvgViewBox(svg, pendingVb)
+        pendingVb = null
+      }
+      rafId = null
+      wrap.__mermaidRafId = null
+    }
+    const setCurVb = vb => {
+      pendingVb = clampVb(vb)
+      if (!rafId) {
+        rafId = requestAnimationFrame(applyVb)
+        wrap.__mermaidRafId = rafId
+      }
+    }
+
+    const state = {
+      pointers: new Map(),
+      startVb: null,
+      startDist: 0,
+      lastPointerX: 0,
+      lastPointerY: 0
+    }
+
+    const onPointerDown = e => {
+      if (e.pointerType === 'mouse' && e.button !== 0) return
+      svg.setPointerCapture(e.pointerId)
+      const curVb = wrap.__mermaidCurViewBox
+      state.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+      if (state.pointers.size === 1) {
+        state.startVb = curVb.slice()
+        state.lastPointerX = e.clientX
+        state.lastPointerY = e.clientY
+      } else if (state.pointers.size === 2) {
+        const pts = [...state.pointers.values()]
+        const dx = pts[0].x - pts[1].x
+        const dy = pts[0].y - pts[1].y
+        state.startDist = Math.hypot(dx, dy)
+        state.startVb = curVb.slice()
+      }
+    }
+
+    const onPointerMove = e => {
+      if (!state.pointers.has(e.pointerId)) return
+      state.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+      const curVb = wrap.__mermaidCurViewBox
+      const rect = getRect()
+      if (state.pointers.size === 1 && state.startVb) {
+        const p = state.pointers.values().next().value
+        const dxClient = p.x - state.lastPointerX
+        const dyClient = p.y - state.lastPointerY
+        state.lastPointerX = p.x
+        state.lastPointerY = p.y
+        const dx = dxClient * (curVb[2] / rect.width)
+        const dy = dyClient * (curVb[3] / rect.height)
+        setCurVb([curVb[0] - dx, curVb[1] - dy, curVb[2], curVb[3]])
+        return
+      }
+      if (state.pointers.size === 2 && state.startVb && state.startDist > 0) {
+        const pts = [...state.pointers.values()]
+        const dx = pts[0].x - pts[1].x
+        const dy = pts[0].y - pts[1].y
+        const dist = Math.hypot(dx, dy)
+        if (!dist) return
+        const factor = state.startDist / dist
+        const cx = (pts[0].x + pts[1].x) / 2
+        const cy = (pts[0].y + pts[1].y) / 2
+        const px = curVb[0] + (cx - rect.left) * (curVb[2] / rect.width)
+        const py = curVb[1] + (cy - rect.top) * (curVb[3] / rect.height)
+        setCurVb(zoomAtPoint(state.startVb, factor, px, py))
+      }
+    }
+
+    const onPointerUpOrCancel = e => {
+      // Release PointerCapture to avoid event capture anomalies
+      if (svg.hasPointerCapture && svg.hasPointerCapture(e.pointerId)) {
+        svg.releasePointerCapture(e.pointerId)
+      }
+      state.pointers.delete(e.pointerId)
+      if (state.pointers.size === 0) {
+        state.startVb = null
+        state.startDist = 0
+      } else if (state.pointers.size === 1) {
+        const p = state.pointers.values().next().value
+        state.lastPointerX = p.x
+        state.lastPointerY = p.y
+      }
+    }
+
+    const onWheel = e => {
+      // Prevent event bubbling from triggering external scroll
+      e.preventDefault()
+      e.stopPropagation()
+      // Normalize deltaY across deltaMode (Chrome uses pixels, Safari uses lines)
+      let delta = e.deltaY
+      if (e.deltaMode === 1) delta *= 16
+      else if (e.deltaMode === 2) delta *= 400
+
+      // Continuous zoom factor: smoother than fixed 1.1/0.9 steps
+      const zoomFactor = Math.pow(1.001, delta)
+
+      const curVb = wrap.__mermaidCurViewBox
+      const rect = getRect()
+      const px = curVb[0] + (e.clientX - rect.left) * (curVb[2] / rect.width)
+      const py = curVb[1] + (e.clientY - rect.top) * (curVb[3] / rect.height)
+      setCurVb(zoomAtPoint(curVb, zoomFactor, px, py))
+    }
+
+    const onDblClick = () => {
+      const init = wrap.__mermaidInitViewBox
+      if (init) setCurVb(init)
+    }
+
+    svg.addEventListener('pointerdown', onPointerDown, { signal: ac.signal })
+    svg.addEventListener('pointermove', onPointerMove, { signal: ac.signal })
+    svg.addEventListener('pointerup', onPointerUpOrCancel, { signal: ac.signal })
+    svg.addEventListener('pointercancel', onPointerUpOrCancel, { signal: ac.signal })
+    svg.addEventListener('wheel', onWheel, { passive: false, signal: ac.signal })
+    svg.addEventListener('dblclick', onDblClick, { signal: ac.signal })
+  }
+
+  const runMermaid = ele => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+    ele.forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+      // Clean up event listeners before removing old SVG
+      if (item.__mermaidAbortController) {
+        item.__mermaidAbortController.abort()
+      }
+      const oldSvg = item.querySelector('svg')
+      if (oldSvg) oldSvg.remove()
+      let config = {}
+      try {
+        config = mermaidSrc.dataset.config ? JSON.parse(mermaidSrc.dataset.config) : {}
+      } catch (e) {
+        console.warn('[mermaid] failed to parse dataset.config:', e)
+      }
+      if (!config.theme) {
+        config.theme = theme
+      }
+      const mermaidThemeConfig = `%%{init: ${JSON.stringify(config)}}%%\n`
+      const mermaidID = `mermaid-${index}`
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderMermaid = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+        if (true) initMermaidGestures(item)
+        item.__mermaidOriginalSvg = svg
+        if (true) attachMermaidViewerButton(item)
+      }
+
+      const handleError = err => {
+        console.error(`[mermaid] render failed for block #${index}:`, err)
+        const errorEl = document.createElement('div')
+        errorEl.className = 'mermaid-error'
+        errorEl.textContent = `Mermaid render error: ${err.message || err}`
+        mermaidSrc.insertAdjacentElement('afterend', errorEl)
+      }
+
+      try {
+        const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+        // mermaid v9 and v10 compatibility
+        if (typeof renderFn === 'string') {
+          renderMermaid(renderFn)
+        } else {
+          renderFn.then(({ svg }) => renderMermaid(svg)).catch(handleError)
+        }
+      } catch (err) {
+        handleError(err)
+      }
+    })
+  }
+
+  const codeToMermaid = $article => {
+    const codeMermaidEle = $article.querySelectorAll('pre > code.mermaid')
+    if (codeMermaidEle.length === 0) return
+
+    codeMermaidEle.forEach(ele => {
+      const preEle = document.createElement('pre')
+      preEle.className = 'mermaid-src'
+      preEle.hidden = true
+      preEle.textContent = ele.textContent
+      const newEle = document.createElement('div')
+      newEle.className = 'mermaid-wrap'
+      newEle.appendChild(preEle)
+      ele.parentNode.replaceWith(newEle)
+    })
+  }
+
+  const loadMermaid = () => {
+    const $article = document.getElementById('article-container')
+    if (!$article) return
+
+    if (true) codeToMermaid($article)
+    const $mermaid = $article.querySelectorAll('.mermaid-wrap')
+    if ($mermaid.length === 0) return
+
+    const runMermaidFn = () => runMermaid($mermaid)
+    btf.addGlobalFn('themeChange', runMermaidFn, 'mermaid')
+    window.loadMermaid ? runMermaidFn() : btf.getScript('https://cdn.jsdelivr.net/npm/mermaid@11.16.0/dist/mermaid.min.js').then(runMermaidFn)
+  }
+
+  btf.addGlobalFn('encrypt', loadMermaid, 'mermaid')
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script>
+  
+
+</div><script defer="" src="/rose-galaxy/js/nova-ux.js?v=20260831-p48"></script><script src="/rose-galaxy/vendor/pjax/pjax.min.js?v=0.2.8" defer="defer"></script><script>document.addEventListener('DOMContentLoaded', () => {
+  const pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+  window.pjax = new Pjax({
+    elements: 'a:not([target="_blank"]):not([data-fancybox]):not([href^="#"]):not([href^="mailto:"]):not([href^="http"]):not([href^="//"])',
+    selectors: pjaxSelectors,
+    cacheBust: false,
+    analytics: false,
+    scrollRestoration: false
+  })
+
+  const triggerPjaxFn = (val) => {
+    if (!val) return
+    Object.values(val).forEach(fn => {
+      try {
+        fn()
+      } catch (err) {
+        console.debug('Pjax callback failed:', err)
+      }
+    })
+  }
+
+  document.addEventListener('pjax:send', () => {
+    // removeEventListener
+    btf.removeGlobalFnEvent('pjaxSendOnce')
+    btf.removeGlobalFnEvent('themeChange')
+
+    // reset readmode
+    const $bodyClassList = document.body.classList
+    if ($bodyClassList.contains('read-mode')) $bodyClassList.remove('read-mode')
+
+    triggerPjaxFn(window.globalFn.pjaxSend)
+  })
+
+  document.addEventListener('pjax:complete', () => {
+    btf.removeGlobalFnEvent('pjaxCompleteOnce')
+    document.querySelectorAll('script[data-pjax]').forEach(item => {
+      if (!item.parentNode) return
+      const newScript = document.createElement('script')
+      const content = item.text || item.textContent || ''
+      Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+      newScript.appendChild(document.createTextNode(content))
+      item.parentNode.replaceChild(newScript, item)
+    })
+
+    triggerPjaxFn(window.globalFn.pjaxComplete)
+  })
+
+  document.addEventListener('pjax:error', e => {
+    const responseURL = e.request && e.request.responseURL
+    if (e.request && e.request.status === 404) {
+      true
+        ? pjax.loadUrl('/404')
+        : responseURL && (window.location.href = responseURL)
+    } else if (responseURL) {
+      window.location.href = responseURL
+    }
+  })
+})</script><script async="" data-pjax="" src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button" type="button" aria-label="关闭搜索"><i class="fas fa-times" aria-hidden="true"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="Search..." type="text" id="global-search-input"></div><hr><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script defer="" src="/js/search/local-search.js?v=5.7.0"></script></div></div>
+</body></html>

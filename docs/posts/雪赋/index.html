@@ -1,0 +1,338 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark"><head><!-- hexo injector head_begin start --><link rel="preload" as="image" href="/img/hero/post-hero-banner.webp" fetchpriority="high" type="image/webp"><script>
+;(function () {
+  try {
+    var hour = new Date().getHours()
+    var dark = hour >= 18 || hour < 7
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light')
+    /* 阶段5 · P0-B: 首页 hero 大图按当前主题预加载。
+       day/night 是两张按主题二选一的背景图(CSS 引用), 原先要等 CSS 下载+解析后浏览器才发现,
+       实测 startTime 被推到 8443ms。这里在 head 阶段就确定主题并 preload 对应那张, 让它与
+       CSS/HTML 并行下载。
+       注意: 本脚本注入在 <head>, 此时 document.body 尚不存在, 故用 URL 路径判定首页。 */
+    var p = location.pathname
+    if (p === '/' || p === '/index.html') {
+      var l = document.createElement('link')
+      l.rel = 'preload'
+      l.as = 'image'
+      l.type = 'image/webp'
+      l.fetchPriority = 'high'
+      l.href = dark ? '/img/hero/night.webp' : '/img/hero/day.webp'
+      document.head.appendChild(l)
+    }
+  } catch (e) {}
+})()
+</script><!-- hexo injector head_begin end --><meta charset="UTF-8"><meta name="referrer" content="no-referrer"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>雪赋 | Yibao</title><meta name="author" content="Yibao"><meta name="copyright" content="Yibao"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#0d0d0d"><meta name="description" content="岁将暮，时既昏。寒风积，愁云繁。梁王不悦，游于兔园。乃置旨酒，命宾友。召邹生，延枚叟。相如末至，居客之右。俄而微霰零，密雪下。王乃歌北风于卫诗，咏南山于周雅。授简于司马大夫，曰：“抽子秘思，骋子妍辞，侔色揣称，为寡人赋之。” 相如于是避席而起，逡巡而揖。曰：臣闻雪宫建于东国，雪山峙于西域。岐昌发咏于来思，姬满申歌于《黄竹》。《曹风》以麻衣比色，楚谣以幽兰俪曲。盈尺则呈瑞于丰年，袤丈则表沴于阴德。雪"><meta property="og:type" content="article"><meta property="og:title" content="雪赋"><meta property="og:url" content="https://yibao11.github.io/posts/%E9%9B%AA%E8%B5%8B/"><meta property="og:site_name" content="Yibao"><meta property="og:description" content="岁将暮，时既昏。寒风积，愁云繁。梁王不悦，游于兔园。乃置旨酒，命宾友。召邹生，延枚叟。相如末至，居客之右。俄而微霰零，密雪下。王乃歌北风于卫诗，咏南山于周雅。授简于司马大夫，曰：“抽子秘思，骋子妍辞，侔色揣称，为寡人赋之。” 相如于是避席而起，逡巡而揖。曰：臣闻雪宫建于东国，雪山峙于西域。岐昌发咏于来思，姬满申歌于《黄竹》。《曹风》以麻衣比色，楚谣以幽兰俪曲。盈尺则呈瑞于丰年，袤丈则表沴于阴德。雪"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="https://yibao11.github.io/img/hero/post-hero-banner.webp"><meta property="article:published_time" content="2026-08-29T12:00:00.000Z"><meta property="article:modified_time" content="2026-09-13T07:02:45.897Z"><meta property="article:author" content="Yibao"><meta property="article:tag" content="赋文"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://yibao11.github.io/img/hero/post-hero-banner.webp"><link rel="shortcut icon" href="/img/brand/favicon-small.png"><link rel="canonical" href="https://yibao11.github.io/posts/%E9%9B%AA%E8%B5%8B/"><link rel="preconnect" href="//busuanzi.ibruce.info"><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="/rose-galaxy/vendor/fontawesome/css/all.min.css?v=7.3.1"><script>(() => {
+
+const saveToLocal = {
+  set: (key, value, ttl) => {
+    const data = { value }
+
+    if (ttl != null) {
+      data.expiry = Date.now() + ttl * 86400000
+    }
+
+    localStorage.setItem(key, JSON.stringify(data))
+  },
+  get: key => {
+    const itemStr = localStorage.getItem(key)
+    if (!itemStr) return
+
+    try {
+      const data = JSON.parse(itemStr)
+
+      if (data.expiry && Date.now() > data.expiry) {
+        localStorage.removeItem(key)
+        return
+      }
+
+      return data.value
+    } catch {
+      localStorage.removeItem(key)
+    }
+  }
+}
+
+const scriptCache = new Map()
+const cssCache = new Map()
+window.btf = {
+  saveToLocal,
+  getScript: (url, attr = {}) => {
+    if (scriptCache.has(url)) {
+      return scriptCache.get(url)
+    }
+
+    const promise = new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+
+      script.src = url
+      script.async = true
+
+      for (const key in attr) {
+        script.setAttribute(key, attr[key])
+      }
+
+      script.onload = resolve
+      script.onerror = reject
+
+      document.head.appendChild(script)
+    })
+
+    scriptCache.set(url, promise)
+
+    return promise
+  },
+  getCSS: (url, id) => {
+    if (cssCache.has(url)) {
+      return cssCache.get(url)
+    }
+
+    const promise = new Promise((resolve, reject) => {
+      const link = document.createElement('link')
+
+      link.rel = 'stylesheet'
+      link.href = url
+
+      if (id) {
+        link.id = id
+      }
+
+      link.onload = resolve
+      link.onerror = reject
+
+      document.head.appendChild(link)
+    })
+
+    cssCache.set(url, promise)
+
+    return promise
+  },
+  addGlobalFn: (key, fn, name = false, parent = window) => {
+    if (!true && key.startsWith('pjax')) return
+    const globalFn = parent.globalFn || {}
+    globalFn[key] = globalFn[key] || {}
+    globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+    parent.globalFn = globalFn
+  }
+}
+
+
+  const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+  const activateDarkMode = () => {
+    document.documentElement.dataset.theme = 'dark'
+    if (metaThemeColor !== null) {
+      metaThemeColor.setAttribute('content', '#080B14')
+    }
+  }
+  const activateLightMode = () => {
+    document.documentElement.dataset.theme = 'light'
+    if (metaThemeColor !== null) {
+      metaThemeColor.setAttribute('content', '#F7F4F1')
+    }
+  }
+
+  btf.activateDarkMode = activateDarkMode
+  btf.activateLightMode = activateLightMode
+const asideStatus = saveToLocal.get('aside-status')
+  if (asideStatus !== undefined) {
+    document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+  }
+
+
+  const detectApple = () => {
+    if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+      document.documentElement.classList.add('apple')
+    }
+  }
+  detectApple()
+
+})()</script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"top_n_per_article":1,"unescape":true,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共有 ${hits} 个结果"}},
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'medium_zoom',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: '/rose-galaxy/vendor/infinitegrid/infinitegrid.min.js?v=4.13.0',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: "雪赋",
+  isHighlightShrink: false,
+  isToc: false,
+  pageType: "post"
+}</script><link rel="stylesheet" href="/css/custom.css?v=20260831-p48"><link rel="stylesheet" href="/rose-galaxy/css/project-detail-page.css?v=20260831-p48"><link rel="stylesheet" href="/rose-galaxy/css/nova-player.css?v=20260831-p48"><link rel="stylesheet" href="/rose-galaxy/css/nova-home.css?v=20260831-p48"><link rel="stylesheet" href="/rose-galaxy/css/tag-page.css?v=20260831-p48"><link rel="stylesheet" href="/rose-galaxy/css/projects-page.css?v=20260831-p48"><link rel="stylesheet" href="/rose-galaxy/css/music-page.css?v=20260831-p48"><link rel="stylesheet" href="/rose-galaxy/css/about-page.css?v=20260831-p48"><link rel="stylesheet" href="/rose-galaxy/css/moments-page.css?v=20260831-p48"><script defer src="/rose-galaxy/js/lib/site-config.js?v=20260831-p48"></script><script defer src="/rose-galaxy/js/lib/utils.js?v=20260831-p48"></script><script defer src="/rose-galaxy/js/nova-player.js?v=20260831-p48"></script><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "雪赋",
+  "url": "https://yibao11.github.io/posts/%E9%9B%AA%E8%B5%8B/",
+  "image": "https://yibao11.github.io/img/brand/headpicture.jpg",
+  "datePublished": "2026-08-29T12:00:00.000Z",
+  "dateModified": "2026-09-13T07:02:45.897Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "[南朝宋]谢惠连",
+      "url": "https://www.gushiwen.cn/shiwenv_e1fd07d1f139.aspx"
+    }
+  ]
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/brand/headpicture.jpg" onerror="this.onerror=null;this.src='/img/misc/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/articles/"><div class="headline">文章</div><div class="length-num">13</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/articles/"><span> 文章</span></a></div><div class="menus_item"><a class="site-page" href="/projects/"><span> 工程</span></a></div><div class="menus_item"><a class="site-page" href="/music/"><span> 音乐</span></a></div><div class="menus_item"><a class="site-page" href="/moments/"><span> 说说</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/hero/post-hero-banner.webp);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="/img/brand/magic-cube-logo.png" alt="Logo"><span class="site-name">Yibao</span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/articles/"><span> 文章</span></a></div><div class="menus_item"><a class="site-page" href="/projects/"><span> 工程</span></a></div><div class="menus_item"><a class="site-page" href="/music/"><span> 音乐</span></a></div><div class="menus_item"><a class="site-page" href="/moments/"><span> 说说</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">雪赋</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-08-29T12:00:00.000Z" title="发表于 2026-08-29 20:00:00">2026-08-29</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-09-13T07:02:45.897Z" title="更新于 2026-09-13 15:02:45">2026-09-13</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span><span class="post-meta-separator">|</span><span class="post-meta-commentcount"><i class="far fa-comments fa-fw post-meta-icon"></i><span class="post-meta-label">评论数:</span><a href="/posts/%E9%9B%AA%E8%B5%8B/#post-comment"><span class="waline-comment-count" data-path="/posts/%E9%9B%AA%E8%B5%8B/"><i class="fa-solid fa-spinner fa-spin"></i></span></a></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><div class="fu-yuanwen" style="font-family:'楷体','KaiTi',serif;font-size:20px;text-indent:2em;">
+<p>岁将暮，时既昏。寒风积，愁云繁。梁王不悦，游于兔园。乃置旨酒，命宾友。召邹生，延枚叟。相如末至，居客之右。俄而微霰零，密雪下。王乃歌北风于卫诗，咏南山于周雅。授简于司马大夫，曰：“抽子秘思，骋子妍辞，侔色揣称，为寡人赋之。”</p>
+<p>相如于是避席而起，逡巡而揖。曰：臣闻雪宫建于东国，雪山峙于西域。岐昌发咏于来思，姬满申歌于《黄竹》。《曹风》以麻衣比色，楚谣以幽兰俪曲。盈尺则呈瑞于丰年，袤丈则表沴于阴德。雪之时义远矣哉！请言其始。</p>
+<p>若乃玄律穷，严气升。焦溪涸，汤谷凝。火井灭，温泉冰。沸潭无涌，炎风不兴。北户墐扉，裸壤垂缯。于是河海生云，朔漠飞沙。连氛累霭，揜日韬霞。霰淅沥而先集，雪纷糅而遂多。</p>
+<p>其为状也，散漫交错，氛氲萧索。蔼蔼浮浮，瀌瀌弈弈。联翩飞洒，徘徊委积。始缘甍而冒栋，终开帘而入隙。初便娟于墀庑，末萦盈于帷席。既因方而为圭，亦遇圆而成璧。眄隰则万顷同缟，瞻山则千岩俱白。于是台如重璧，逵似连璐。庭列瑶阶，林挺琼树，皓鹤夺鲜，白鹇失素，纨袖惭冶，玉颜掩姱。</p>
+<p>若乃积素未亏，白日朝鲜，烂兮若烛龙，衔耀照昆山。尔其流滴垂冰，缘溜承隅，粲兮若冯夷，剖蚌列明珠。至夫缤纷繁骛之貌，皓皔曒洁之仪。回散萦积之势，飞聚凝曜之奇，固展转而无穷，嗟难得而备知。</p>
+<p>若乃申娱玩之无已，夜幽静而多怀。风触楹而转响，月承幌而通晖。酌湘吴之醇酎，御狐貉之兼衣。对庭鹍之双舞，瞻云雁之孤飞。践霜雪之交积，怜枝叶之相违。驰遥思于千里，愿接手而同归。</p>
+<p>邹阳闻之，懑然心服。有怀妍唱，敬接末曲。于是乃作而赋积雪之歌，歌曰：携佳人兮披重幄，援绮衾兮坐芳褥。燎熏炉兮炳明烛，酌桂酒兮扬清曲。又续写而为白雪之歌，歌曰：曲既扬兮酒既陈，朱颜酡兮思自亲。愿低帷以昵枕，念解佩而褫绅。怨年岁之易暮，伤后会之无因。君宁见阶上之白雪，岂鲜耀于阳春。歌卒。王乃寻绎吟玩，抚览扼腕。顾谓枚叔，起而为乱，乱曰：</p>
+<p>白羽虽白，质以轻兮，白玉虽白，空守贞兮。未若兹雪，因时兴灭。玄阴凝不昧其洁，太阳耀不固其节。节岂我名，洁岂我贞。凭云升降，从风飘零。值物赋象，任地班形。素因遇立，污随染成。纵心皓然，何虑何营？</p>
+</div>
+
+<details>
+<summary>译文</summary>
+<p>时值年末，天色已晚，寒风聚积，愁云密布。梁王心中不乐，到兔园游玩。于是摆上了酒席，邀请宾朋好友，请来邹阳，召来枚乘；司马相如最后到来，坐在宾客的首位。不久小雪粒飘落而下，继而大雪满天飞扬，梁王唱起《卫风·邶风》，又吟诵《小雅·信南山》，并把竹简送给相如，说：“抒发您精密的文思，运用您华丽的词藻，描摹眼前的景色，为寡人作一篇赋。”</p>
+<p>相如于是离席而起，向前鞠躬施礼，说：“听说雪宫建筑在东方，雪山峙立在西域。周文王曾吟咏‘今我来思’，周穆王也反复唱《黄竹》之歌，《曹风》曾以麻衣比雪色，楚辞也有《幽兰》《白雪》之曲。雪厚盈尺是丰年征兆，雪深一丈则成灾害，由此来看，下雪的时间和意义可谓深远啊。请允许我从头讲：</p>
+<p>如果四时将尽，寒气上升，焦溪干涸，汤谷凝固，火井熄灭，温泉结冰，沸潭不再翻涌，热风也不吹送。家家堵塞住北面的门窗，裸体国的人也穿上了衣服，于是河海笼罩起乌云，大漠扬起了飞沙；连延的云气，重重的雾霭，遮蔽了太阳和霞光；先是小雪淅淅沥沥的飘洒，继而大雪纷纷扬扬，漫天飞舞。</p>
+<p>雪花的形状，散乱交错，纷纷氲氲，散散落落，扬扬洒洒，翩翩飞舞于天空，回旋堆积于地面。开始时沿着屋脊而覆盖了楼宇，到最后透过门帘而进入室内；起初轻盈回旋于台阶下，后来飘舞萦绕于帷席旁。既可以随方物成为玉圭，又能够随圆物成为玉璧。眺望原野，如万顷缟素铺展；仰望山岭，则千岩银装素裹。这时，楼台就像重叠的玉璧，大路犹如连缀的美玉；庭院陈列着玉阶，林中挺立着玉树。白鹤被夺去了光彩，鹇鸟也失去了鲜艳；纨袖佳人自惭形秽，玉颜美女掩面失色。</p>
+<p>至于积雪尚未亏损，在朝阳的照耀下，鲜艳如烛龙衔着烛火照耀昆仑；待到雪融结成冰柱，沿着房檐屋角悬挂，灿烂似河伯剖开河蚌排列珍珠。至于那缤纷繁复的气象，明亮皎洁的仪态，回旋聚积的气势，飞舞闪耀的奇观，真是变化无穷，实在难已尽述。</p>
+<p>如果反复赏玩，意味无穷。夜深幽静，使人感慨，风吹楹柱，呼啸作响，月透纱窗，内外通明。斟出湘吴美酒，披上狐貂皮衣，看庭中鹍鸟双双起舞，望云中大雁孤独飞翔。踏着厚厚的积雪，怜惜飘零的落叶。思想千里外的知己，盼望与其携手而归。”</p>
+<p>邹阳听后，（对自己构思的赋）感到惭愧，佩服（相如的赋），驱遣心中艳丽的词藻，恭敬续接相如的赋。于是他站起来，吟作积雪之歌，歌词是：</p>
+<p>“携手佳人啊进入重帷，拥抱锦被啊安坐芳褥。</p>
+<p>烧上熏炉啊点燃明烛，斟满桂酒啊奏起清曲。”</p>
+<p>又续写白雪之歌，歌词是：</p>
+<p>“乐曲已奏啊美酒已陈，脸儿发红啊希望相亲。</p>
+<p>放下帷帐啊接近衾枕，解下环佩啊脱衣就寝。</p>
+<p>怨恨年岁啊飞快流逝，感伤此后啊相会无因。</p>
+<p>谁曾见到阶上的白雪，阳春三月啊还能长存？”</p>
+<p>歌罢，梁王吟咏玩味，以手握腕，回头看枚乘。枚乘会意，继作尾声。尾声说：</p>
+<p>“白羽虽白却很轻，白玉虽白空守贞；都不如这白雪，随时生灭。月亮辉映，不能掩盖它的皎洁；太阳照耀，也不固守它的气节。气节并非它的美名，纯洁也不是它的坚贞，随云升降，从风飘零。遇物体成形状，随地势而变形。洁白是因遇物干净，污浊也是外物污染。只要心胸虚静，有什么忧虑？有什么经营？”</p>
+</details>
+
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a target="_blank" rel="noopener" href="https://www.gushiwen.cn/shiwenv_e1fd07d1f139.aspx">[南朝宋]谢惠连</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a target="_blank" rel="noopener" href="https://www.gushiwen.cn/shiwenv_e1fd07d1f139.aspx">https://www.gushiwen.cn/shiwenv_e1fd07d1f139.aspx</a></span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/articles/%E8%B5%8B%E6%96%87/">赋文</a></div><div class="post-share"><div class="social-share" data-image="/img/brand/headpicture.jpg" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="/rose-galaxy/css/share-fa.css?v=20260831-p48"><script>(() => {
+  const PAGE_TITLE = "雪赋"
+  // sites -> FontAwesome 图标类 + 链接模板。仅用站内已自托管的 FontAwesome 7 图标,
+  // 未列出的站点直接不渲染, 不引入新字体。
+  // 微信特例: 微信没有公开的网页分享接口, 无法像 QQ/微博那样跳到对方分享页,
+  // 只能给二维码让用户用微信扫。这里改为在新标签页打开站内二维码页 /share-qr/
+  // (与 QQ 一致的"新页面打开"体验), 而非原方案的内嵌浮层。
+  const SITES = {
+    facebook: { icon: 'fa-facebook', label: 'Facebook', href: (u, t) => 'https://www.facebook.com/sharer/sharer.php?u=' + u },
+    x: { icon: 'fa-x-twitter', label: 'X', href: (u, t) => 'https://x.com/intent/tweet?text=' + t + '&url=' + u },
+    wechat: { icon: 'fa-weixin', label: '微信', href: (u, t) => '/share-qr/?u=' + u + '&t=' + t },
+    weibo: { icon: 'fa-weibo', label: '微博', href: (u, t) => 'https://service.weibo.com/share/share.php?url=' + u + '&title=' + t },
+    qq: { icon: 'fa-qq', label: 'QQ', href: (u, t) => 'http://connect.qq.com/widget/shareqq/index.html?url=' + u + '&title=' + t }
+  }
+
+  const init = () => {
+    const share = document.querySelector('.social-share')
+    if (!share || share.dataset.ready === 'true') return
+    share.dataset.ready = 'true'
+
+    const pageUrl = location.href
+    const u = encodeURIComponent(pageUrl)
+    const t = encodeURIComponent(PAGE_TITLE)
+
+    // 5 个站点一律用 <a>, 一律新标签页打开 —— 微信走站内二维码页, 其余走各自分享页。
+    const build = () => {
+      const frag = document.createDocumentFragment()
+      String(share.dataset.sites || '').split(',').map((s) => s.trim()).filter(Boolean).forEach((name) => {
+        const cfg = SITES[name]
+        if (!cfg) return
+        const a = document.createElement('a')
+        a.className = 'social-share-icon icon-' + name + ' fab ' + cfg.icon
+        a.setAttribute('aria-label', '分享到 ' + cfg.label)
+        a.href = cfg.href(u, t)
+        a.target = '_blank'
+        a.rel = 'noopener'
+        frag.appendChild(a)
+      })
+      share.appendChild(frag)
+    }
+    build()
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true })
+  else init()
+  document.addEventListener('pjax:complete', init)
+})()</script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/posts/%E6%9C%88%E4%B8%8B%E5%B0%8F%E4%BB%A4/" title="月下小令"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">月下小令</div></div><div class="info-2"><div class="info-item-1">原文 从前月，清影暗蠕蠕。林下罗浮添绮梦，巫山云雨莫相辜。钗碎燕飞无。 今月下，复看玉痕书。墙外风吹花欲瘦，径间寒照草偏芜。何处唤神图？     译文忆往昔月下，淡淡月影缓缓游走。昔日林间如同罗浮仙境，满是缱绻美梦，曾相约切莫辜负彼此情深。可到头来钗断人分、劳燕分飞，美好尽数落空。如今又逢月夜，再翻看染了泪痕的书信。院外晚风摧得花木憔悴，小路在冷月下荒草丛生，去哪里寻回当初心心念念的圆满与故人？ 解析这首《月下小令》以今昔对照的双重结构，勾勒出词人由追忆到现实的深沉悲慨。上阕“从前月”起笔，以“清影暗蠕蠕”营造朦胧幽微的怀旧氛围，继而连用“罗浮绮梦”“巫山云雨”两个仙恋典故，暗喻往昔情事的幻美与缱绻，而“钗碎燕飞无”陡作跌宕，以物象的碎裂与离散，暗示美好时光的骤然终结，虚笔铺陈与实笔收束之间形成强烈张力。下阕“今月下”转写当下，“玉痕书”既是对往事的文字追录，亦暗含岁月留痕之意；后两句“墙外风吹花欲瘦”“径间寒照草偏芜”以对仗工稳的景语，描绘月下庭院之萧瑟——“瘦”字赋花以憔悴之态，“芜”字予草以荒凉之色，实则皆为词人内心寂寥的外射；结句“何处唤神图”以问作结，既回应上阕“罗浮”...</div></div></div></a><a class="pagination-related" href="/posts/%E8%A5%BF%E6%B1%9F%E6%9C%88%C2%B7%E6%98%A5%E8%89%B2%E4%B8%89%E5%88%86%E8%BF%87%E4%BA%8C/" title="西江月·春色三分过二"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">西江月·春色三分过二</div></div><div class="info-2"><div class="info-item-1">原文 春色三分过二，相思一半成风。此情长似月当空，夜夜西窗不梦。 花影参差帘押，漏声迢递纱笼。柔肠结尽几千重，犹被残更擒纵。   译文暮春光景已然大半消逝，满腔相思大半化作飘忽长风。这份绵长牵挂如同悬在夜空的孤月，夜夜独守西窗，辗转难入梦乡。 斑驳花影错落映在帘边，滴答漏声缓缓漫过纱笼。寸寸柔肠郁结千层万叠，偏偏还要被残夜更鼓不断牵绊折磨。  解析这首词以暮春夜景为背景，通过“春色”“月”“花影”“漏声”等典型物象的组合，营造出幽独凄清的闺怨氛围。上阕以“春色三分过二”点明时序流逝，以“相思一半成风”将抽象情感量化，暗示其飘忽难捉，继而以“月当空”的永恒与“西窗不梦”的现实形成反差，强化了相思无处可寄的无奈；下阕转入室内外景致的工笔描绘，“花影参差”与“漏声迢递”分别从视觉和听觉两个维度烘托长夜的寂寥，最后“柔肠结尽几千重”以具象化手法极言愁思之深，而结句“犹被残更擒纵”则运用拟人，将“残更”赋予操控人心的意志，使全词在传统闺怨主题上翻出一层对时间压迫的深层叹惋。全词语言凝练，意象绵密，结构上由外而内、由景入情，既继承了花间词派借物传情的含蓄传统，又以其独特的时空感知拓展了词作的...</div></div></div></a></nav><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="waline-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>其他文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/%E5%88%AB%E8%B5%8B/" title="别赋">别赋</a><time datetime="2026-08-29T14:00:00.000Z" title="发表于 2026-08-29 22:00:00">2026-08-29</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/%E5%93%80%E6%B1%9F%E5%8D%97%E8%B5%8B/" title="哀江南赋">哀江南赋</a><time datetime="2026-08-29T13:00:00.000Z" title="发表于 2026-08-29 21:00:00">2026-08-29</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/%E6%B4%9B%E7%A5%9E%E8%B5%8B/" title="洛神赋">洛神赋</a><time datetime="2026-08-29T11:00:00.000Z" title="发表于 2026-08-29 19:00:00">2026-08-29</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/%E7%A6%BB%E9%AA%9A/" title="离骚">离骚</a><time datetime="2026-08-29T15:00:00.000Z" title="发表于 2026-08-29 23:00:00">2026-08-29</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><script src="/rose-galaxy/vendor/medium-zoom/medium-zoom.min.js"></script><div class="js-pjax"><script>(() => {
+  let initFn = window.walineFn || null
+  const isMoments = GLOBAL_CONFIG_SITE.pageType === 'moments'
+  const option = null
+
+  const destroyWaline = ele => ele.destroy()
+
+  const initWaline = (Fn, el = document, path = window.location.pathname) => {
+    const waline = Fn({
+      el: el.querySelector('#waline-wrap'),
+      serverURL: 'https://yibao11-github-io.vercel.app',
+      pageview: false,
+      dark: 'html[data-theme="dark"]',
+      comment: true,
+      ...option,
+      path: isMoments ? path : (option && option.path) || path
+    })
+
+    if (isMoments) {
+      window.momentsComment.destroyWaline = () => {
+        destroyWaline(waline)
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+  }
+
+  const loadWaline = (el, path) => {
+    if (initFn) initWaline(initFn, el, path)
+    else {
+      btf.getCSS('/rose-galaxy/vendor/waline/waline.min.css')
+        .then(() => import('/rose-galaxy/vendor/waline/waline.min.js'))
+        .then(({ init }) => {
+          initFn = init || Waline.init
+          initWaline(initFn, el, path)
+          window.walineFn = initFn
+        })
+    }
+  }
+
+  if (isMoments) {
+    'Waline' === 'Waline'
+      ? window.momentsComment = { loadComment: loadWaline } 
+      : window.loadOtherComment = loadWaline
+    return
+  }
+
+  if ('Waline' === 'Waline' || !false) {
+    if (false) btf.loadComment(document.getElementById('waline-wrap'),loadWaline)
+    else setTimeout(loadWaline, 0)
+  } else {
+    window.loadOtherComment = loadWaline
+  }
+})()</script></div><script src="/rose-galaxy/js/nova-ux.js?v=20260831-p48"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="搜索文章" type="text"/></div><hr/><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=5.7.0"></script></div></div></body></html>

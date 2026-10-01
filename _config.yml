@@ -1,0 +1,108 @@
+# Hexo Configuration
+# Reconstructed from the original static build (mikejosion.github.io).
+# Placeholders: title / author / description / url / deploy repo will be
+# replaced with your own identity later.
+
+# Site
+title: Yibao
+subtitle: ''
+description: '技术笔记、软件环境搭建与安全练习的个人记录。'
+keywords:
+author: Yibao
+language: zh-CN
+timezone: Asia/Shanghai
+
+# URL
+url: https://yibao11.github.io/
+# 站点资源版本号(单源): 生成器与模板引用会自动跟随。
+# 规则 YYYYMMDD-pNN —— 20260831 是起始版本, pNN 为递增序号(每次改动被引用的 css/js 就 +1)。
+version: 20260831-p48
+permalink: posts/:title/
+permalink_defaults:
+pretty_urls:
+  trailing_index: false
+  trailing_html: false
+
+# Directory
+source_dir: source
+# 构建产物输出到 main/docs（单仓库自包含）。
+# GitHub Pages 直接以本仓库 main 分支的 /docs 目录为发布源 —— 不再依赖任何兄弟目录或额外分支。
+# 克隆这一个仓库即可完成"构建 → 提交 → 上线"全流程。
+public_dir: docs
+tag_dir: articles
+archive_dir: archives
+category_dir: categories
+code_dir: downloads/code
+i18n_dir: :lang
+
+# Writing
+new_post_name: :title.md
+default_layout: post
+titlecase: false
+external_link:
+  enable: true
+  field: site
+  exclude:
+filename_case: 0
+render_drafts: false
+post_asset_folder: false
+relative_link: false
+future: true
+syntax_highlighter: highlight.js
+highlight:
+  line_number: true
+  auto_detect: false
+  tab_replace: ''
+  wrap: true
+  hljs: false
+prismjs:
+  preprocess: true
+  line_number: true
+  tab_replace: ''
+
+# Category & Tag
+default_category: uncategorized
+category_map:
+tag_map:
+
+# Metadata elements
+meta_generator: true
+
+# Date / Time format
+date_format: YYYY-MM-DD
+time_format: HH:mm:ss
+# 文章"更新时间"的判定由 scripts/post-date.js 接管(判定链: front matter updated
+# → 源文件 git 最后提交日 → mtime → date)。这里的 mtime 只是它拿不到 git 时的兜底,
+# 保留 hexo 默认值即可 —— 不要指望它本身能给出正确日期(检出会刷新 mtime)。
+updated_option: mtime
+
+# Pagination
+per_page: 10
+pagination_dir: page
+
+# Include / Exclude file(s)
+include:
+  - '.nojekyll'
+exclude:
+ignore:
+# Phase 1: the whole original site lives in source/ as static files.
+# skip rendering so they are copied to public/ byte-identically.
+skip_render:
+  - '**/*.html'
+
+# Extensions
+theme: nova
+
+# Deployment
+deploy:
+  type: git
+  repo: https://github.com/yibao11/yibao11.github.io.git
+  branch: public
+  ignore_hidden: false
+
+# Local search data file (static search.xml, maintained by hand)
+search:
+  path: search.xml
+  field: post
+  content: true
+  format: html

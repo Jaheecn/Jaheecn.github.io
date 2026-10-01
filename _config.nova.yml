@@ -1,0 +1,145 @@
+# Butterfly theme config - reconstructed from the original static build.
+# Phase 1: static pages (source/) do not consume this file; it documents the
+# original theme settings so generated pages (posts, archives) match later.
+# Phase 2 will complete/verify every key against the original site.
+
+# Nav menu (2026-08-15: archives/categories/templates/Gallery removed,
+# moments promoted to top level)
+
+nav:
+  logo: /img/brand/magic-cube-logo.png
+  display_title: true
+  display_post_title: false
+menu:
+  首页: /
+  文章: /articles/
+  工程: /projects/
+  音乐: /music/
+  说说: /moments/
+  关于: /about/
+
+# Sidebar avatar (2026-09-03: 由 logo1.jpg 更换为 headpicture.jpg, 与关于页头像一致)
+avatar:
+  img: /img/brand/headpicture.jpg
+  effect: false
+
+# Site data shown in sidebar (2026-08-15: archives/categories removed, block dropped)
+# site_data:
+#   posts: 23
+#   tags: 16
+
+# Dark / light mode (original defaults to dark)
+# object form so the theme renders the #darkmode rightside button on
+# hexo-rendered pages (post pages); static pages carry their own button
+darkmode:
+  enable: true
+  button: true
+
+# PJAX 说明(A3, 2026-09-02): 本站 PJAX 由 themes/butterfly/layout/parts-common/footer.html
+# 的自定义实例实现(前缀排除 + 404 兜底), 不依赖主题自带 third-party/pjax.pug。
+# ★ 勿开启下方开关: 主题版渲染链(additional-js → third-party/pjax)在本站自制 base.pug
+# 下不存在, 开启会导致双实例/行为不一致。需要调整请在 footer.html 内维护。
+# （2026-09-02 实测对比: 主题版方案体验与自定义版一致, 但丢失前缀排除/404 兜底, 弃用。）
+pjax:
+  enable: false
+  exclude:
+
+# Local search (original: search.xml, preload=false, top_n=1, unescape=true, 8 hits/page)
+search:
+  use: local_search
+  placeholder:
+  local_search:
+    preload: false
+    top_n_per_article: 1
+    unescape: true
+    pagination:
+      enable: false
+      hitsPerPage: 8
+    CDN:
+
+# Code highlight (original: highlight.js with copy + lang label)
+highlight:
+  enable: true
+  line_number: true
+  autodetect: false
+  copy: true
+  lang: true
+  height_limit: false
+  fullpage: false
+  macStyle: false
+
+# Lightbox (original: medium_zoom)
+lightbox: medium_zoom
+
+# Footer (will be replaced with your identity in phase 2)
+footer:
+  owner: Yibao
+  since: 2025
+
+
+# ---- DeYmo custom layer for hexo-rendered pages (articles from _posts) ----
+display_mode: dark
+
+# 文章页统一背景图:sitename 参考站 go语法总结 同款 leetcode.webp,同位置
+# (header 400px, background center/cover, 暗色遮罩),2026-08-17
+default_top_img: /img/hero/post-hero-banner.webp
+
+inject:
+  head:
+    - <link rel="stylesheet" href="/css/custom.css?v=__VERSION__">
+    - <link rel="stylesheet" href="/rose-galaxy/css/project-detail-page.css?v=__VERSION__">
+    - <link rel="stylesheet" href="/rose-galaxy/css/nova-player.css?v=__VERSION__">
+    # 页级 CSS 全量全局预载(A 方案 2026-09-03): 直入/PJAX 均零异步窗口(共享缓存,
+    # 文件小); 移除 body 内 PAGE_STYLES 与 head extraCss 双份机制。
+    - <link rel="stylesheet" href="/rose-galaxy/css/nova-home.css?v=__VERSION__">
+    - <link rel="stylesheet" href="/rose-galaxy/css/tag-page.css?v=__VERSION__">
+    - <link rel="stylesheet" href="/rose-galaxy/css/projects-page.css?v=__VERSION__">
+    - <link rel="stylesheet" href="/rose-galaxy/css/music-page.css?v=__VERSION__">
+    - <link rel="stylesheet" href="/rose-galaxy/css/about-page.css?v=__VERSION__">
+    - <link rel="stylesheet" href="/rose-galaxy/css/moments-page.css?v=__VERSION__">
+    - <script defer src="/rose-galaxy/js/lib/site-config.js?v=__VERSION__"></script>
+    - <script defer src="/rose-galaxy/js/lib/utils.js?v=__VERSION__"></script>
+    - <script defer src="/rose-galaxy/js/nova-player.js?v=__VERSION__"></script>
+  bottom:
+    - <script src="/rose-galaxy/js/nova-ux.js?v=__VERSION__"></script>
+
+# Side widgets (2026-08-16: archives/categories widgets disabled; they
+# link to pages removed on 2026-08-15)
+aside:
+  card_archives:
+    enable: false
+  card_categories:
+    enable: false
+
+# ---- 评论系统 (P2.7: Waline v2 后端 + Neon PostgreSQL) ----
+comments:
+  use: [Waline]
+  text: true
+  lazyload: false
+  count: true
+  card_post_count: true
+waline:
+  serverURL: https://yibao11-github-io.vercel.app
+  pageview: false
+  option:
+
+# ---- CDN 资源覆盖 (P0 本地化延续) ----
+# 覆盖原因: 站点有 9 个页面走定制 _partials/head.pug(已本地化), 但文章/分类/归档/首页列表
+# 共 5 个 layout 仍走主题原版 includes/head.pug, 后者从 theme.asset.* 取 CDN 地址。
+# 在此覆盖后两条引用即指向同源自托管, 无需改动原版 head 结构(保留其 BlogPosting 结构化数据)。
+# ?v= 版本号由 scripts/asset-version.js 构建时注入。
+CDN:
+  option:
+    waline_css: /rose-galaxy/vendor/waline/waline.min.css
+    waline_js: /rose-galaxy/vendor/waline/waline.min.js
+    fontawesome: /rose-galaxy/vendor/fontawesome/css/all.min.css
+    egjs_infinitegrid: /rose-galaxy/vendor/infinitegrid/infinitegrid.min.js
+    # lightbox: medium_zoom 时由 includes/additional-js.pug:9 取 theme.asset[theme.lightbox]。
+    # 本地 vendor 早已就位, 但此前只有定制 _partials/head.pug 走本地, 原版 head 页面仍取 CDN。
+    medium_zoom: /rose-galaxy/vendor/medium-zoom/medium-zoom.min.js
+    # 分享按钮(阶段6 任务B)已改为自实现: 图标用站内 FontAwesome, 二维码用本地 qrcode-generator,
+    # 不再需要 sharejs/sharejs_css 覆盖项(原图标字体在官方包里不存在, 图标从未显示过)。
+
+
+
+

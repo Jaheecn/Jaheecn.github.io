@@ -1,0 +1,81 @@
+<section class="nova-music-page" aria-labelledby="nova-music-title">
+  <section class="nova-music-hero" aria-labelledby="nova-music-title">
+    <div class="nova-music-background" aria-hidden="true"></div>
+    <div class="nova-music-overlay" aria-hidden="true"></div>
+
+    <div class="nova-music-shell">
+      <section class="nova-music-info-panel">
+        <header class="nova-music-heading">
+          <p class="nova-music-eyebrow">NOVA · MIDNIGHT PLAYLIST</p>
+          <h1 id="nova-music-title">夜里的旋律</h1>
+          <div class="nova-music-heading-rule" aria-hidden="true">
+            <span></span><img class="nova-music-rose nova-music-rose--rule" src="/img/brand/nova-rose-original-rule.png" width="22" height="22" decoding="async" alt="" aria-hidden="true"><span></span>
+          </div>
+          <p>有些歌不是用来播放的，<br>是用来陪着深夜慢慢流动的。</p>
+        </header>
+
+        <div class="nova-music-player">
+          <div class="nova-music-current">
+            <div>
+              <h2 class="nova-music-current-title">歌单载入中</h2>
+              <p class="nova-music-current-artist">B站收藏夹 · music</p>
+            </div>
+          </div>
+
+          <div class="nova-music-progress">
+            <input class="nova-music-progress-input" type="range" min="0" max="1000" value="0" aria-label="播放进度">
+            <div class="nova-music-time">
+              <span class="nova-music-current-time">00:00</span>
+              <span class="nova-music-duration">00:00</span>
+            </div>
+          </div>
+
+          <div class="nova-music-controls">
+            <button class="nova-music-control nova-music-previous" type="button" aria-label="上一首"><i class="fas fa-step-backward" aria-hidden="true"></i></button>
+            <button class="nova-music-control nova-music-toggle" type="button" aria-label="播放"><i class="fas fa-play" aria-hidden="true"></i></button>
+            <button class="nova-music-control nova-music-next" type="button" aria-label="下一首"><i class="fas fa-step-forward" aria-hidden="true"></i></button>
+          </div>
+
+          <div class="nova-music-meta">
+            <span>☁ 歌曲来源 · B站收藏夹</span>
+            <span class="nova-music-count">完整歌单载入中</span>
+            <button class="nova-music-mini-toggle" type="button" aria-pressed="false" title="离开音乐页后继续播放">
+              <span class="nova-music-mini-toggle-label">悬浮窗</span>
+              <span class="nova-music-mini-toggle-track" aria-hidden="true"></span>
+            </button>
+          </div>
+          <button class="nova-music-retry" type="button" hidden="">重新载入歌单</button>
+        </div>
+      </section>
+
+      <section class="nova-music-card-stage" aria-label="当前歌曲窗口">
+        <button class="nova-music-card" type="button" data-slot="0"><img src="/img/music/music4-preview.webp" data-src="/img/music/music4.webp" width="640" height="960" loading="lazy" decoding="async" alt="夜色歌单卡片 4"><span class="nova-music-card-shade"></span><span class="nova-music-card-content"><strong></strong><small></small></span></button>
+        <button class="nova-music-card" type="button" data-slot="1"><img src="/img/music/music5-preview.webp" data-src="/img/music/music5.webp" width="640" height="960" loading="lazy" decoding="async" alt="夜色歌单卡片 5"><span class="nova-music-card-shade"></span><span class="nova-music-card-content"><strong></strong><small></small></span></button>
+        <button class="nova-music-card" type="button" data-slot="2"><img src="/img/music/music1.webp" data-src="/img/music/music1.webp" width="640" height="960" loading="eager" fetchpriority="high" decoding="async" alt="夜色歌单卡片 1"><span class="nova-music-card-shade"></span><span class="nova-music-card-content"><strong></strong><small></small><i aria-hidden="true"><b></b><b></b><b></b></i></span></button>
+        <button class="nova-music-card" type="button" data-slot="3"><img src="/img/music/music2-preview.webp" data-src="/img/music/music2.webp" width="640" height="960" loading="lazy" decoding="async" alt="夜色歌单卡片 2"><span class="nova-music-card-shade"></span><span class="nova-music-card-content"><strong></strong><small></small></span></button>
+        <button class="nova-music-card" type="button" data-slot="4"><img src="/img/music/music3-preview.webp" data-src="/img/music/music3.webp" width="640" height="960" loading="lazy" decoding="async" alt="夜色歌单卡片 3"><span class="nova-music-card-shade"></span><span class="nova-music-card-content"><strong></strong><small></small></span></button>
+      </section>
+    </div>
+
+    <a class="nova-music-scroll" href="#nova-music-notes" aria-label="滚动到歌单札记"><span></span></a>
+    
+  </section>
+
+  <section class="nova-music-notes" id="nova-music-notes">
+    <div class="nova-music-notes-copy">
+      <p>PLAYLIST NOTES</p>
+      <h2><img class="nova-music-rose nova-music-rose--notes" src="/img/brand/magic-cube-logo.png" width="28" height="28" loading="lazy" decoding="async" alt="" aria-hidden="true">歌单札记</h2>
+      <p>你也会为前奏停留吗？</p>
+      <p class="nova-music-notes-meta"><span class="nova-music-notes-count">完整歌单</span> · BILIBILI COLLECTION · UPDATED 2026</p>
+    </div>
+    <div class="nova-music-notes-visual" aria-hidden="true"></div>
+  </section>
+
+  <section class="nova-music-comments">
+    <header class="nova-music-comments-heading">
+      <span class="nova-music-eyebrow">NIGHT MESSAGES</span>
+      <h2>评论</h2>
+    </header>
+    <!--NOVA-COMMENT-CORE-->
+  </section>
+</section>

@@ -1,0 +1,99 @@
+extends ./base.pug
+
+block headOpts
+  - page.bodyClass = 'nova-tag-route'
+  - var tagUrl = encodeURI(siteUrl + '/articles/' + page.tagName + '/')
+  - page.headOpts = { title: '文章: ' + page.tagName + ' | Yibao', siteTitle: '文章: ' + page.tagName, description: '浏览 Yibao 博客中标记为“' + page.tagName + '”的文章与学习记录。', ogUrl: tagUrl, canonical: tagUrl, pageType: 'tag', extraHead: page.ldjson }
+
+block content
+  != page.shellTop
+  h1#site-title.nova-tag-title= page.tagName
+  p.nova-tag-description 文章本天成，妙手偶得之。
+  a.nova-tag-scroll-hint(href='#nova-tag-notes') EXPLORE THE NOTES
+  | </div></header>
+  main.nova-tag-content#content-inner
+    section.nova-tag-summary(aria-label=page.tagName + ' 文章概览')
+      div
+        strong= page.count
+        span NOTES
+        small 相关文章
+      div
+        strong= page.firstYear
+        span FIRST RECORD
+        small 最早记录
+      div
+        strong= page.lastDate
+        span LAST UPDATED
+        small 最近更新
+      div
+        strong= page.tagName
+        span MAIN CATEGORY
+        small 主要分类
+    div.nova-tag-layout#nova-tag-notes
+      section.nova-tag-main
+        header.nova-tag-main-header
+          div
+            span TOPIC NOTES
+            h2 主题笔记
+            p= page.mainDesc
+          b= page.count + ' NOTES'
+        div.nova-tag-post-list
+          each post, i in page.posts
+            - var url = postUrl(post)
+            - var cid = 'nova-tag-note-' + page.seed + '-' + (i + 1)
+            article.nova-tag-post-card(id=cid data-note-title=post.title data-note-index=(i + 1) data-note-href=url)
+              a.nova-tag-post-cover(href=url aria-label='阅读 ' + post.title)
+                img(src='/img/covers/' + coverFor(post) alt=post.title loading='lazy' decoding='async' onerror="this.onerror=null;this.src='/img/covers/tech-notes.webp'" width='1200' height='900')
+              div.nova-tag-post-content
+                div.nova-tag-post-meta
+                  span= page.tagName
+                  time(datetime=date(post.date, 'YYYY-MM-DD') + 'T00:00:00.000Z')= date(post.date, 'YYYY-MM-DD')
+                h2
+                  a(href=url)= post.title
+                p= summaryBodyOf(post, 90)
+                a.nova-tag-post-action(href=url) 阅读笔记
+                  span →
+      aside.nova-tag-sidebar
+        section.nova-tag-side-card.nova-tag-profile
+          header
+            span TOPIC PROFILE
+            h2 文章简介
+          h3= page.tagName
+          p 围绕该主题整理的代码、笔记与实践记录。
+          div
+            b= page.count + ' NOTES'
+            small= page.yearRange
+          a(href='/articles/') 查看全部文章 →
+        section.nova-tag-side-card.nova-tag-current-note(aria-live='polite')
+          header
+            span CURRENT NOTE
+            h2 当前阅读
+          p.nova-tag-current-title= page.tagName
+          div.nova-tag-current-meta
+            span.nova-tag-current-count= page.count + ' NOTES'
+            span.nova-tag-current-percent 向下浏览专题笔记
+          div.nova-tag-progress(aria-hidden='true')
+            i
+          div.nova-tag-current-actions
+            a.nova-tag-current-open(href='#nova-tag-notes') 查看当前文章
+            a(href='#nova-tag-notes') 返回专题顶部 ↑
+        section.nova-tag-side-card.nova-tag-reading-path
+          header
+            span READING PATH
+            h2 阅读路径
+          each post, i in page.posts
+            - var rid = 'nova-tag-note-' + page.seed + '-' + (i + 1)
+            a.nova-tag-reading-link(href='#' + rid data-note-target=rid)
+              span= String(i + 1).padStart(2, '0')
+              strong= post.title
+              i(aria-hidden='true')
+        section.nova-tag-side-card.nova-tag-related
+          header
+            span RELATED TAGS
+            h2 相关标签
+          div
+            each t in page.allTags
+              if t.name !== page.tagName
+                a.nova-tag-related-link(href=encodeURI('/articles/' + t.name + '/'))= t.name
+                  span= t.count
+  != page.shellBottom

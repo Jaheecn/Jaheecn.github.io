@@ -1,0 +1,8 @@
+extends ./base.pug
+
+block headOpts
+  - page.bodyClass = 'nova-moments-route'
+  - page.headOpts = { title: '说说 | Yibao', siteTitle: '说说', description: '记录学习之外的日常想法、生活片段与随手札记。', ogUrl: siteUrl + '/moments/', canonical: siteUrl + '/moments/', pageType: 'page', extraHead: '<link rel="preload" as="image" href="/img/hero/moments-hero.webp" fetchpriority="high" type="image/webp">' }
+
+block content
+  != page.body

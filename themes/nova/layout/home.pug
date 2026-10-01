@@ -1,0 +1,13 @@
+//- 首页(P5 改版, 2026-08-27): 纯壳。
+//- 精选工程/最新文章卡片由 scripts/home-generator.js 注入 mid.html 占位;
+//- LATEST SIGNAL 由生成器注入 top.html 占位。本模板不再渲染数据。
+extends ./base.pug
+
+block headOpts
+  - page.bodyClass = 'nova-home-active'
+  - page.headOpts = { title: 'Yibao', siteTitle: 'Yibao', description: '技术笔记、软件环境搭建与安全练习的个人记录。', ogUrl: siteUrl + '/', canonical: siteUrl + '/', pageType: 'home', extraHead: '<link rel="alternate" href="' + siteUrl + '/atom.xml" title="Yibao" type="application/atom+xml"><link rel="preload" as="font" href="/rose-galaxy/fonts/cormorant-garamond-latin.woff2" type="font/woff2" crossorigin=""><link rel="preload" as="font" href="/rose-galaxy/fonts/inter-latin.woff2" type="font/woff2" crossorigin=""><link rel="stylesheet" href="/rose-galaxy/css/nova-fonts.css?v=' + config.version + '"><link rel="preload" as="image" href="/img/hero/background02.webp" fetchpriority="high" type="image/webp"><script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","@id":"' + siteUrl + '/#website","name":"Yibao","url":"' + siteUrl + '/","description":"技术笔记、软件环境搭建与安全练习的个人记录。","inLanguage":"zh-CN","creator":{"@type":"Person","name":"Yibao","url":"' + siteUrl + '/"}}</script>' }
+
+block content
+  != page.shellTop
+  != page.mid
+  != page.shellBottom

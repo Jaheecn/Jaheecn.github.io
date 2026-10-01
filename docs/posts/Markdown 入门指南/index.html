@@ -1,0 +1,393 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark"><head><!-- hexo injector head_begin start --><link rel="preload" as="image" href="/img/hero/post-hero-banner.webp" fetchpriority="high" type="image/webp"><script>
+;(function () {
+  try {
+    var hour = new Date().getHours()
+    var dark = hour >= 18 || hour < 7
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light')
+    /* 阶段5 · P0-B: 首页 hero 大图按当前主题预加载。
+       day/night 是两张按主题二选一的背景图(CSS 引用), 原先要等 CSS 下载+解析后浏览器才发现,
+       实测 startTime 被推到 8443ms。这里在 head 阶段就确定主题并 preload 对应那张, 让它与
+       CSS/HTML 并行下载。
+       注意: 本脚本注入在 <head>, 此时 document.body 尚不存在, 故用 URL 路径判定首页。 */
+    var p = location.pathname
+    if (p === '/' || p === '/index.html') {
+      var l = document.createElement('link')
+      l.rel = 'preload'
+      l.as = 'image'
+      l.type = 'image/webp'
+      l.fetchPriority = 'high'
+      l.href = dark ? '/img/hero/night.webp' : '/img/hero/day.webp'
+      document.head.appendChild(l)
+    }
+  } catch (e) {}
+})()
+</script><!-- hexo injector head_begin end --><meta charset="UTF-8"><meta name="referrer" content="no-referrer"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Markdown 入门指南 | Yibao</title><meta name="author" content="Yibao"><meta name="copyright" content="Yibao"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#0d0d0d"><meta name="description" content="Markdown 概述、工作原理以及用途。 Markdown 是什么？Markdown 是一种轻量级的标记语言，可用于在纯文本文档中添加格式化元素。Markdown 由 John Gruber 于 2004 年创建，如今已成为世界上最受欢迎的标记语言之一。 使用 Markdown 与使用 WYSIWYG 编辑器不同。在 Microsoft Word 之类的应用程序中，单击按钮以设置单词和短语的格式"><meta property="og:type" content="article"><meta property="og:title" content="Markdown 入门指南"><meta property="og:url" content="https://yibao11.github.io/posts/Markdown%20%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/"><meta property="og:site_name" content="Yibao"><meta property="og:description" content="Markdown 概述、工作原理以及用途。 Markdown 是什么？Markdown 是一种轻量级的标记语言，可用于在纯文本文档中添加格式化元素。Markdown 由 John Gruber 于 2004 年创建，如今已成为世界上最受欢迎的标记语言之一。 使用 Markdown 与使用 WYSIWYG 编辑器不同。在 Microsoft Word 之类的应用程序中，单击按钮以设置单词和短语的格式"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="https://yibao11.github.io/img/hero/post-hero-banner.webp"><meta property="article:published_time" content="2026-08-16T16:00:00.000Z"><meta property="article:modified_time" content="2026-08-30T23:29:42.000Z"><meta property="article:author" content="Yibao"><meta property="article:tag" content="Markdown语法"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://yibao11.github.io/img/hero/post-hero-banner.webp"><link rel="shortcut icon" href="/img/brand/favicon-small.png"><link rel="canonical" href="https://yibao11.github.io/posts/Markdown%20%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/"><link rel="preconnect" href="//busuanzi.ibruce.info"><link rel="stylesheet" href="/css/index.css?v=5.7.0"><link rel="stylesheet" href="/rose-galaxy/vendor/fontawesome/css/all.min.css?v=7.3.1"><script>(() => {
+
+const saveToLocal = {
+  set: (key, value, ttl) => {
+    const data = { value }
+
+    if (ttl != null) {
+      data.expiry = Date.now() + ttl * 86400000
+    }
+
+    localStorage.setItem(key, JSON.stringify(data))
+  },
+  get: key => {
+    const itemStr = localStorage.getItem(key)
+    if (!itemStr) return
+
+    try {
+      const data = JSON.parse(itemStr)
+
+      if (data.expiry && Date.now() > data.expiry) {
+        localStorage.removeItem(key)
+        return
+      }
+
+      return data.value
+    } catch {
+      localStorage.removeItem(key)
+    }
+  }
+}
+
+const scriptCache = new Map()
+const cssCache = new Map()
+window.btf = {
+  saveToLocal,
+  getScript: (url, attr = {}) => {
+    if (scriptCache.has(url)) {
+      return scriptCache.get(url)
+    }
+
+    const promise = new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+
+      script.src = url
+      script.async = true
+
+      for (const key in attr) {
+        script.setAttribute(key, attr[key])
+      }
+
+      script.onload = resolve
+      script.onerror = reject
+
+      document.head.appendChild(script)
+    })
+
+    scriptCache.set(url, promise)
+
+    return promise
+  },
+  getCSS: (url, id) => {
+    if (cssCache.has(url)) {
+      return cssCache.get(url)
+    }
+
+    const promise = new Promise((resolve, reject) => {
+      const link = document.createElement('link')
+
+      link.rel = 'stylesheet'
+      link.href = url
+
+      if (id) {
+        link.id = id
+      }
+
+      link.onload = resolve
+      link.onerror = reject
+
+      document.head.appendChild(link)
+    })
+
+    cssCache.set(url, promise)
+
+    return promise
+  },
+  addGlobalFn: (key, fn, name = false, parent = window) => {
+    if (!true && key.startsWith('pjax')) return
+    const globalFn = parent.globalFn || {}
+    globalFn[key] = globalFn[key] || {}
+    globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+    parent.globalFn = globalFn
+  }
+}
+
+
+  const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+  const activateDarkMode = () => {
+    document.documentElement.dataset.theme = 'dark'
+    if (metaThemeColor !== null) {
+      metaThemeColor.setAttribute('content', '#080B14')
+    }
+  }
+  const activateLightMode = () => {
+    document.documentElement.dataset.theme = 'light'
+    if (metaThemeColor !== null) {
+      metaThemeColor.setAttribute('content', '#F7F4F1')
+    }
+  }
+
+  btf.activateDarkMode = activateDarkMode
+  btf.activateLightMode = activateLightMode
+const asideStatus = saveToLocal.get('aside-status')
+  if (asideStatus !== undefined) {
+    document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+  }
+
+
+  const detectApple = () => {
+    if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+      document.documentElement.classList.add('apple')
+    }
+  }
+  detectApple()
+
+})()</script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"top_n_per_article":1,"unescape":true,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共有 ${hits} 个结果"}},
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'medium_zoom',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: '/rose-galaxy/vendor/infinitegrid/infinitegrid.min.js?v=4.13.0',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: "Markdown 入门指南",
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: "post"
+}</script><link rel="stylesheet" href="/css/custom.css?v=20260831-p48"><link rel="stylesheet" href="/rose-galaxy/css/project-detail-page.css?v=20260831-p48"><link rel="stylesheet" href="/rose-galaxy/css/nova-player.css?v=20260831-p48"><link rel="stylesheet" href="/rose-galaxy/css/nova-home.css?v=20260831-p48"><link rel="stylesheet" href="/rose-galaxy/css/tag-page.css?v=20260831-p48"><link rel="stylesheet" href="/rose-galaxy/css/projects-page.css?v=20260831-p48"><link rel="stylesheet" href="/rose-galaxy/css/music-page.css?v=20260831-p48"><link rel="stylesheet" href="/rose-galaxy/css/about-page.css?v=20260831-p48"><link rel="stylesheet" href="/rose-galaxy/css/moments-page.css?v=20260831-p48"><script defer src="/rose-galaxy/js/lib/site-config.js?v=20260831-p48"></script><script defer src="/rose-galaxy/js/lib/utils.js?v=20260831-p48"></script><script defer src="/rose-galaxy/js/nova-player.js?v=20260831-p48"></script><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Markdown 入门指南",
+  "url": "https://yibao11.github.io/posts/Markdown%20%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/",
+  "image": "https://yibao11.github.io/img/brand/headpicture.jpg",
+  "datePublished": "2026-08-16T16:00:00.000Z",
+  "dateModified": "2026-08-30T23:29:42.000Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Markdown Guide",
+      "url": "https://www.markdown.xyz/getting-started/"
+    }
+  ]
+}</script><meta name="generator" content="Hexo 8.1.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/brand/headpicture.jpg" onerror="this.onerror=null;this.src='/img/misc/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/articles/"><div class="headline">文章</div><div class="length-num">13</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/articles/"><span> 文章</span></a></div><div class="menus_item"><a class="site-page" href="/projects/"><span> 工程</span></a></div><div class="menus_item"><a class="site-page" href="/music/"><span> 音乐</span></a></div><div class="menus_item"><a class="site-page" href="/moments/"><span> 说说</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/img/hero/post-hero-banner.webp);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="/img/brand/magic-cube-logo.png" alt="Logo"><span class="site-name">Yibao</span></a></span><div id="menus"><div id="search-button"><span class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></span></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/articles/"><span> 文章</span></a></div><div class="menus_item"><a class="site-page" href="/projects/"><span> 工程</span></a></div><div class="menus_item"><a class="site-page" href="/music/"><span> 音乐</span></a></div><div class="menus_item"><a class="site-page" href="/moments/"><span> 说说</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><span> 关于</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Markdown 入门指南</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-08-16T16:00:00.000Z" title="发表于 2026-08-17 00:00:00">2026-08-17</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-08-30T23:29:42.000Z" title="更新于 2026-08-31 07:29:42">2026-08-31</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span><span class="post-meta-separator">|</span><span class="post-meta-commentcount"><i class="far fa-comments fa-fw post-meta-icon"></i><span class="post-meta-label">评论数:</span><a href="/posts/Markdown%20%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/#post-comment"><span class="waline-comment-count" data-path="/posts/Markdown%20%E5%85%A5%E9%97%A8%E6%8C%87%E5%8D%97/"><i class="fa-solid fa-spinner fa-spin"></i></span></a></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><p>Markdown 概述、工作原理以及用途。</p>
+<h2 id="Markdown-是什么？"><a href="#Markdown-是什么？" class="headerlink" title="Markdown 是什么？"></a>Markdown 是什么？</h2><p>Markdown 是一种轻量级的标记语言，可用于在纯文本文档中添加格式化元素。Markdown 由 <a target="_blank" rel="noopener" href="https://daringfireball.net/projects/markdown/">John Gruber</a> 于 2004 年创建，如今已成为世界上最受欢迎的标记语言之一。</p>
+<p>使用 Markdown 与使用 <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/WYSIWYG">WYSIWYG</a> 编辑器不同。在 Microsoft Word 之类的应用程序中，单击按钮以设置单词和短语的格式，并且，更改立即可见。而 Markdown 与此不同，当你创建 Markdown 格式的文件时，可以在文本中添加 Markdown 语法，以指示哪些单词和短语看起来应该有所不同。</p>
+<p>例如，要将一个短语表示为标题的话，只须在短语前面添加一个井号即可（例如， <code># Heading One</code>）。或者要加粗一个短语的话，只须在短语前后各加两个星号即可（例如，<code>**this text is bold**</code>）。可能需要一段时间你才能习惯文本中的 Markdown 语法，尤其是如果你已习惯了所见即所得的应用程序的话。以下屏幕截展示了 Markdown 文件在 <a target="_blank" rel="noopener" href="https://www.markdown.xyz/tools/vscode/">Visual Studio Code 编辑器</a> 中的显示效果。</p>
+<p><img src="https://www.markdown.xyz/assets/images/vscode.png" alt="Markdown file in the Visual Studio Code text editor"></p>
+<p>你可以使用文本编辑器为纯文本文件添加 Markdown 格式的元素。或者，你也可以安装针对 macOS、Windows、Linux、iOS 和 Android 操作系统的 Markdown 应用程序。或者还可以使用一些基于 Web 的应用程序用于 Markdown 编写。</p>
+<p>依赖于你所使用的应用程序，你可能无法实时预览格式化的文档。但是没关系。<a target="_blank" rel="noopener" href="https://daringfireball.net/projects/markdown/">根据 Gruber 的说法</a>，Markdown 的语法被设计为可读性强且不显眼，因此即使 Markdown 文件中的文本未经过渲染也易于阅读。</p>
+<blockquote>
+<p>Markdown 语法的首要设计目标是尽可能易读。基于这个目标，Markdown 格式的文档能够以纯文本形式原样发布，而不会看起来像被填满了标签或格式化指令。</p>
+</blockquote>
+<h2 id="为什么要使用-Markdown？"><a href="#为什么要使用-Markdown？" class="headerlink" title="为什么要使用 Markdown？"></a>为什么要使用 Markdown？</h2><p>你可能想知道为什么人们使用 Markdown 而不是所用即所得（WYSIWYG）编辑器。当你可以通过按下界面中的按钮来设置文本格式时，为什么还要使用 Markdown 来书写呢？事实证明，人们使用 Markdown 而不是 WYSIWYG 编辑器的原因有两个：</p>
+<ul>
+<li>Markdown 处处可用。人们使用它来创建 <a target="_blank" rel="noopener" href="https://www.markdown.xyz/getting-started/#websites">网站</a>、<a target="_blank" rel="noopener" href="https://www.markdown.xyz/getting-started/#documents">文档</a>、<a target="_blank" rel="noopener" href="https://www.markdown.xyz/getting-started/#notes">便签</a>、<a target="_blank" rel="noopener" href="https://www.markdown.xyz/getting-started/#books">书籍</a>、<a target="_blank" rel="noopener" href="https://www.markdown.xyz/getting-started/#presentations">演示文稿</a>、<a target="_blank" rel="noopener" href="https://www.markdown.xyz/getting-started/#email">邮件</a> 和 <a target="_blank" rel="noopener" href="https://www.markdown.xyz/getting-started/#documentation">技术文档</a>。</li>
+<li>Markdown 是可移植的。几乎可以使用任何应用程序打开包含 Markdown 格式的文本文件。如果你不喜欢当前使用的 Markdown 应用程序了，则可以将 Markdown 文件导入另一个 Markdown 应用程序中。这与 Microsoft Word 等文字处理应用程序形成了鲜明的对比，Microsoft Word 将你的内容锁定在专有文件格式中。</li>
+<li>Markdown 是独立于平台的。你可以在运行任何操作系统的任何设备上创建 Markdown 格式的文本。</li>
+<li>Markdown 能适应未来的变化。即使你正在使用的应用程序将来会在某个时候不能使用了，你仍然可以使用文本编辑器读取 Markdown 格式的文本。当涉及需要无限期保存的书籍、大学论文和其他里程碑式的文件时，这是一个重要的考虑因素。</li>
+<li>Markdown 无处不在。例如 <a target="_blank" rel="noopener" href="https://www.markdown.xyz/tools/reddit/">Reddit</a> 和 GitHub 等网站都支持 Markdown，许多桌面和基于 Web 的应用程序也都支持 Markdown。</li>
+</ul>
+<h2 id="工欲善其事，必先利其器"><a href="#工欲善其事，必先利其器" class="headerlink" title="工欲善其事，必先利其器"></a>工欲善其事，必先利其器</h2><p>Markdown 入门的最佳方式就是多使用它。由于有大量免费工具的存在，这比以前任何时候都更容易开始上手了。</p>
+<p>你甚至都不需要下载任何程序，就可以使用几种在线的 Markdown 编辑器来编写 Markdown。<a target="_blank" rel="noopener" href="https://dillinger.io/">Dillinger</a> 是最好的在线 Markdown 编辑器之一。进入其站点就可以开始在左侧窗格中书写了。渲染后的文档在右侧窗格预览。</p>
+<p><img src="https://www.markdown.xyz/assets/images/dillinger.png" alt="Dillinger Markdown editor"></p>
+<p>阅读本指南时，你可以打开 Dillinger 网站。这样，你就可以一边学习 Markdown 语法一边练习了。熟悉 Markdown 之后，你可以在台式计算机或移动设备上安装支持 Markdown 的应用程序。</p>
+<h2 id="Markdown-的工作原理"><a href="#Markdown-的工作原理" class="headerlink" title="Markdown 的工作原理"></a>Markdown 的工作原理</h2><p>Dillinger 让 Markdown 的编写变得容易，因为它隐藏了幕后发生的事情，但是该过程的总体工作方式是值得探索的。</p>
+<p>在使用 Markdown 格式书写时，文本内容存储在带有 <code>.md</code> 或 <code>.markdown</code> 扩展名的纯文本文件中。那然后呢？你的 Markdown 格式的文件如何转换为 HTML 或可打印的文档呢？</p>
+<p>简单来说，你需要一个能够处理 Markdown 文件的 <em>Markdown 应用程序</em>。有许多应用程序可供选择，从简单的脚本到类似于 Microsoft Word 的桌面应用程序，应有尽有。尽管它们在视觉上有所不同，但所有应用程序都执行相同的操作。像 Dillinger 一样，它们都是将 Markdown 格式的文本转换为 HTML，以便可以在 Web 浏览器中显示。</p>
+<p>Markdown 应用程序使用一种称为 <em>Markdown 处理器</em>（也通常称为“解析器”或“实现”）的东西将获取到的 Markdown 格式的文本输出为 HTML 格式。此时，可以在 Web 浏览器中查看你的文档，或者将其与样式表组合并打印。你可以在下图看到此过程的直观表示。</p>
+<p><strong>注意：</strong> Markdown 应用程序和处理工具是两个单独的组件。为了简洁起见，在下图中，我将它们组合为一个元素（即 “Markdown应用程序”）。</p>
+<p><img src="https://www.markdown.xyz/assets/images/markdown-flowchart.png" alt="The Markdown Process"></p>
+<p>总而言之，这是一个四步的过程：</p>
+<ol>
+<li>使用文本编辑器或 Markdown 专用的应用程序创建 Markdown 文件。该文件应带有 <code>.md</code> 或 <code>.markdown</code> 扩展名。</li>
+<li>在 Markdown 应用程序中打开 Markdown 文件。</li>
+<li>使用 Markdown 应用程序将 Markdown 文件转换为 HTML 文档。</li>
+<li>在 web 浏览器中查看 HTML 文件，或使用 Markdown 应用程序将其转换为其他文件格式，例如 PDF。</li>
+</ol>
+<p>从你的角度来看，该过程将根据你使用的应用程序的不同而有所不同。例如，Dillinger 本质上将第 1-3 步组合到一个单一、无缝的界面中，你要做的就是在左窗格中键入内容，然后转换结果就在右窗格中就神奇地出现了。但是，如果你使用的是其他工具（例如带有静态网站生成器的文本编辑器），则会发现该过程更为明显。</p>
+<h2 id="Markdown-有什么用？"><a href="#Markdown-有什么用？" class="headerlink" title="Markdown 有什么用？"></a>Markdown 有什么用？</h2><p>Markdown 是做笔记、为网站创建内容以及生成可打印文档的快速、简便的方法。</p>
+<p>学习 Markdown 语法并不需要很长时间，一旦你知道如何使用它，你就可以在几乎所有地方使用 Markdown 进行书写了。大多数人使用 Markdown 来为网站创建内容，但是 Markdown 也可以很好地格式化从电子邮件到购物清单的所有内容。</p>
+<p>下面是一些你可以使用 Markdown 的场景。</p>
+<h3 id="网站"><a href="#网站" class="headerlink" title="网站"></a>网站</h3><p>Markdown 是为 web 而设计的，因此，市面上有很多专门用于创建网站内容的应用程序就不足为奇了。</p>
+<p>如果你您正在寻找利用 Markdown 文件创建网站的最简单方法，请试试 <a target="_blank" rel="noopener" href="https://blot.im/">blot.im</a>。当你在 Blot 上注册之后，它将会在你的计算机上创建一个 Dropbox 文件夹。你只需将 Markdown 文件拖放到该文件夹中，然后嗖的一声，这些文件就在你的网站上了。再简单不过了。</p>
+<p>如果您熟悉 HTML、CSS和版本管理工具，请试试 <a target="_blank" rel="noopener" href="https://www.markdown.xyz/tools/jekyll/">Jekyll</a>，这是一个广受欢迎的静态网站生成器，它能将 Markdown 文件转换为 HTML 网站。这种方法的优势之一是 <a target="_blank" rel="noopener" href="https://www.markdown.xyz/tools/github-pages/">GitHub Pages</a> 为 Jekyll 生成的网站提供免费托管服务。如果 Jekyll 不是你的理想之选，你可以在 <a target="_blank" rel="noopener" href="https://jamstack.org/generators/">其它大量可用的静态站点生成器</a> 中选择一个。</p>
+<p><strong>注意：</strong> 此 <em>Markdown 指南</em> 就是用 Jekyll 创建的。你可以在 <a target="_blank" rel="noopener" href="https://github.com/mattcone/markdown-guide">GitHub</a> 上查看其源码。</p>
+<p>如果你想使用内容管理系统（CMS）来支撑你的网站，请试试 <a target="_blank" rel="noopener" href="https://www.markdown.xyz/tools/ghost/">Ghost</a>。Ghost 是一个免费的开源博客平台，拥有一个出色的 Markdown 编辑器。如果你是 WordPress 用户，你将很高兴地知道 WordPress.com 上托管的网站都 <a target="_blank" rel="noopener" href="https://wordpress.com/support/wordpress-editor/blocks/markdown-block/">支持 Markdown</a> 了。自托管的 WordPress 网站可以使用 <a target="_blank" rel="noopener" href="https://jetpack.com/support/markdown/">Jetpack 插件</a>实现对 Markdown 的支持。</p>
+<h3 id="文件资料"><a href="#文件资料" class="headerlink" title="文件资料"></a>文件资料</h3><p>Markdown 并不具备像 Microsoft Word 这样的文字处理程序的所有功能，但是对于创建基本文件（例如作业和信件）来说已经足够了。你可以使用 Markdown 文档创作工具来创建 Markdown 格式的文档并将其导出为 PDF 或 HTML 格式。PDF 格式是关键，因为一旦有了 PDF 文档，您就可以使用它进行任何操作：打印、通过电子邮件发送或将其上传到网站。</p>
+<p>这是我推荐的一些Markdown文档创作工具：</p>
+<ul>
+<li><strong>Mac:</strong> <a target="_blank" rel="noopener" href="https://www.markdown.xyz/tools/macdown/">MacDown</a>, <a target="_blank" rel="noopener" href="https://www.markdown.xyz/tools/ia-writer/">iA Writer</a> 或 <a target="_blank" rel="noopener" href="https://www.markdown.xyz/tools/marked-2/">Marked 2</a></li>
+<li><strong>iOS &#x2F; Android:</strong> <a target="_blank" rel="noopener" href="https://www.markdown.xyz/tools/ia-writer/">iA Writer</a></li>
+<li><strong>Windows:</strong> <a target="_blank" rel="noopener" href="https://wereturtle.github.io/ghostwriter/">ghostwriter</a> 或 <a target="_blank" rel="noopener" href="https://markdownmonster.west-wind.com/">Markdown Monster</a></li>
+<li><strong>Linux:</strong> <a target="_blank" rel="noopener" href="https://github.com/retext-project/retext">ReText</a> 或 <a target="_blank" rel="noopener" href="https://wereturtle.github.io/ghostwriter/">ghostwriter</a></li>
+<li><strong>Web:</strong> <a target="_blank" rel="noopener" href="https://www.markdown.xyz/tools/dillinger/">Dillinger</a> 或 <a target="_blank" rel="noopener" href="https://www.markdown.xyz/tools/stackedit/">StackEdit</a></li>
+</ul>
+<p><strong>提示：</strong> <a target="_blank" rel="noopener" href="https://ia.net/writer/templates/">iA Writer</a> 提供了模板用于预览、打印和导出 Markdown 格式的文档。例如，“ Academic – MLA 样式”的模板会缩进段落并添加双倍行间距。</p>
+<h3 id="笔记"><a href="#笔记" class="headerlink" title="笔记"></a>笔记</h3><p>在几乎所有方面，Markdown 都是记笔记的理想语法。不幸的是，两个最受欢迎的笔记应用程序 <a target="_blank" rel="noopener" href="https://evernote.com/">Evernote</a> 和 <a target="_blank" rel="noopener" href="https://www.onenote.com/">OneNote</a> 目前都不支持 Markdown。好消息是，其他一些笔记应用程序 <em>是</em> 支持 Markdown 的：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://www.markdown.xyz/tools/simplenote/">Simplenote</a> 是适用于所有平台的免费、简单的笔记应用程序。</li>
+<li><a target="_blank" rel="noopener" href="https://www.markdown.xyz/tools/notable/">Notable</a> 是可以在各种平台上运行的笔记应用程序。</li>
+<li><a target="_blank" rel="noopener" href="https://www.markdown.xyz/tools/bear/">Bear</a> 是适用于 Mac 和 iOS 设备的类似 Evernote 的应用程序。默认情况下，它并不专门针对 Markdown 的，但是你可以启用 Markdown 兼容模式。</li>
+<li><a target="_blank" rel="noopener" href="https://www.markdown.xyz/tools/joplin/">Joplin</a> 是一款保护个人隐私的笔记应用程序。支持所有平台。</li>
+<li><a target="_blank" rel="noopener" href="https://www.markdown.xyz/tools/boostnote/">Boostnote</a> 自称是“专为程序员设计的开源笔记应用程序”。</li>
+</ul>
+<p>如果你无法放弃 Evernote，可以试试 <a target="_blank" rel="noopener" href="https://marxi.co/">Marxico</a>，一个专门针对 Evernote 的基于订阅付费的 Markdown编辑器，或在 Evernote 网站上使用 <a target="_blank" rel="noopener" href="https://www.markdown.xyz/tools/markdown-here/">Markdown Here</a> 插件。</p>
+<h3 id="书籍"><a href="#书籍" class="headerlink" title="书籍"></a>书籍</h3><p>想要自行出版小说？请试试 <a target="_blank" rel="noopener" href="https://leanpub.com/">Leanpub</a>，该服务可将你的 Markdown 格式的文件转换为电子书。Leanpub 以 PDF、EPUB 和 MOBI 文件格式输出你的图书。如果你要创建纸版书籍，可以将 PDF 文件上传到类似 <a target="_blank" rel="noopener" href="https://kdp.amazon.com/">Kindle Direct Publishing</a> 之类的服务提供商处。要了解有关使用 Markdown 编写和自行出版书籍的更多信息，请阅读 <a target="_blank" rel="noopener" href="https://medium.com/techspiration-ideas-making-it-happen/how-i-wrote-and-published-my-novel-using-only-open-source-tools-5cdfbd7c00ca">此博文</a>。</p>
+<h3 id="演示文稿"><a href="#演示文稿" class="headerlink" title="演示文稿"></a>演示文稿</h3><p>信不信由你，你可以将 Markdown 格式的文件转换成演示文稿。用 Markdown 创建演示文稿需要一点时间来适应，但是一旦你掌握了它，你就能体会到比使用 PowerPoint 或 Keynote 之类的应用程序更快、更容易。<a target="_blank" rel="noopener" href="https://remarkjs.com/">Remark</a>（<a target="_blank" rel="noopener" href="https://github.com/gnab/remark">GitHub 仓库</a>）和 <a target="_blank" rel="noopener" href="https://jdan.github.io/cleaver/">Cleaver</a>（<a target="_blank" rel="noopener" href="https://github.com/jdan/cleaver">GitHub 仓库</a>）、<a target="_blank" rel="noopener" href="https://marp.app/">Marp</a> （<a target="_blank" rel="noopener" href="https://github.com/marp-team/marp">GitHub project</a>） 一样，是一种基于浏览器的、流行的 Markdown 幻灯片工具。如果你使用的是 Mac，并且希望安装一个应用程序来使用的话，请试试 <a target="_blank" rel="noopener" href="https://www.decksetapp.com/">Deckset</a>、<a target="_blank" rel="noopener" href="https://hyperdeck.io/">Hyperdeck</a>。</p>
+<h3 id="邮件"><a href="#邮件" class="headerlink" title="邮件"></a>邮件</h3><p>如果你需要发送大量电子邮件，并且对大多数电子邮件提供商网站上可用的格式设置控件感到厌倦，那么你将很高兴地发现有一种使用 Markdown 编写电子邮件的简便方法：<a target="_blank" rel="noopener" href="https://www.markdown.xyz/tools/markdown-here/">Markdown Here</a> 是一个免费、开源的浏览器扩展程序，可将 Markdown 格式的文本转换为可用于发送的 HTML。</p>
+<h3 id="协作"><a href="#协作" class="headerlink" title="协作"></a>协作</h3><p>协作和团队通信程序是工作和居家时与同事和朋友交流的一种受欢迎的方式。虽然这些应用程序没有提供完整的 Markdown 功能，但是它们已经实现的功能却是很实用的。例如，无需使用所见即所得（WYSIWYG）界面就可以使用粗体和斜体来显示文字。<a target="_blank" rel="noopener" href="https://www.markdown.xyz/tools/slack/">Slack</a>、<a target="_blank" rel="noopener" href="https://www.markdown.xyz/tools/discord/">Discord</a>、<a target="_blank" rel="noopener" href="https://www.markdown.xyz/tools/wiki-js/">Wiki.js</a> 和 <a target="_blank" rel="noopener" href="https://www.markdown.xyz/tools/mattermost/">Mattermost</a> 都是很好的协作工具。</p>
+<h3 id="文档"><a href="#文档" class="headerlink" title="文档"></a>文档</h3><p>Markdown 非常适合技术文档。像 GitHub 这样的公司越来越多地转向使用 Markdown 来创建其文档了，请查看此 <a target="_blank" rel="noopener" href="https://github.com/blog/1939-how-github-uses-github-to-document-github">博文</a> 以了解如何将 Markdown 格式的文档迁移到 <a target="_blank" rel="noopener" href="https://www.markdown.xyz/tools/jekyll/">Jekyll</a>。如果你是为产品或服务编写文档，请试试以下的便捷工具：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://readthedocs.org/">Read the Docs</a> 可以将你所开源的 Markdown 文件生成文档网站。只需将你的 GitHub 仓库连接到他们的服务，然后你就可以将内容推送到该仓库中，Read the Docs 会完成其余的工作。他们还为 <a target="_blank" rel="noopener" href="https://readthedocs.com/">商业实体提供服务</a>。</li>
+<li><a target="_blank" rel="noopener" href="https://www.markdown.xyz/tools/mkdocs/">MkDocs</a> 是一个快速、简单的静态站点生成器，专门用于构建项目文档。文档源文件使用 Markdown 编写，并使用一个 YAML 配置文件进行配置。MkDocs 有多个 <a target="_blank" rel="noopener" href="https://www.mkdocs.org/user-guide/styling-your-docs/">内置主题</a>，包括移植自 <a target="_blank" rel="noopener" href="https://readthedocs.org/">Read the Docs</a> 的文档主题。最新的一个主题是 <a target="_blank" rel="noopener" href="https://squidfunk.github.io/mkdocs-material/">MkDocs Material</a>。</li>
+<li><a target="_blank" rel="noopener" href="https://www.markdown.xyz/tools/docusaurus/">Docusaurus</a> 是一个静态网站生成器，专门用于创建文档网站。它支持翻译、搜索和版本控制。</li>
+<li><a target="_blank" rel="noopener" href="https://vuepress.vuejs.org/">VuePress</a> 是基于 <a target="_blank" rel="noopener" href="https://vuejs.org/">Vue</a> 构建的静态站点生成器，并针对编写技术文档进行了优化。</li>
+<li><a target="_blank" rel="noopener" href="https://www.markdown.xyz/tools/jekyll/">Jekyll</a> 前面已经提到过它了，但它也是将 Markdown 文件生成文档网站的一个不错的选择。如果你选择 Jekyll，请务必试试 <a target="_blank" rel="noopener" href="https://idratherbewriting.com/documentation-theme-jekyll/">Jekyll 文档主题</a>。</li>
+</ul>
+<h2 id="Markdown-方言"><a href="#Markdown-方言" class="headerlink" title="Markdown 方言"></a>Markdown 方言</h2><p>使用 Markdown 的过程中，最令人困惑的地方是：实际上每个 Markdown 应用程序都实现了稍有不同的 Markdown 语法。Markdown 的这些变体通常被称为 <em>flavors（方言）</em>。掌握你的应用程序所实现的 Markdown 语法是你需要注意的。</p>
+<p>为了让你了解各 Markdown 方言的概念，将它们比作语言的方言（language dialects）可能会有所帮助。纽约人就像伦敦人一样讲英语，但这两个城市使用的方言之间有很大的不同。使用不同 Markdown 应用程序的人也是如此。<a target="_blank" rel="noopener" href="https://www.markdown.xyz/tools/dillinger/">Dillinger</a> 支持的 Markdown 格式与 <a target="_blank" rel="noopener" href="https://www.markdown.xyz/tools/ulysses/">Ulysses</a> 有着很大的不同。</p>
+<p>实际上，这意味着当一个应用程序说它支持 “Markdown” 时，你永远也不会确切地知到它的实际意思。它说的是仅支持 <a target="_blank" rel="noopener" href="https://www.markdown.xyz/basic-syntax/">基本语法</a>？还是所有基本语法加 <a target="_blank" rel="noopener" href="https://www.markdown.xyz/extended-syntax/">扩展语法</a> ？或者是某些语法的组合呢？在你阅读其文档或开始使用该应用程序之前，你永远都不会知道。</p>
+<p>如果你只是新手，我能给你的最好建议就是选择一个具有良好 Markdown 支持的应用程序。这对保持 Markdown 文件的可移植性大有帮助。你可能需要在其它应用程序中保存或使用你的 Markdown 文件，要实现这一点，你应当从使用一个具有良好 Markdown 支持的应用程序开始。你可以在 <a target="_blank" rel="noopener" href="https://www.markdown.xyz/tools/">Markdown 工具列表</a> 中找到合适的应用程序。</p>
+<h2 id="其它资源"><a href="#其它资源" class="headerlink" title="其它资源"></a>其它资源</h2><p>网上有很多资源用来学习 Markdown。以下列出一些：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://daringfireball.net/projects/markdown/">John Gruber’s Markdown documentation</a>. Markdown 的创建者编写的原始指南。</li>
+<li><a target="_blank" rel="noopener" href="https://www.markdowntutorial.com/">Markdown Tutorial</a>. 一个开源网站，你能用浏览器在这个网站上尝试 Markdown。</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/mundimark/awesome-markdown">Awesome Markdown</a>. Markdown 工具和学习资源列表。</li>
+<li><a target="_blank" rel="noopener" href="https://dave.autonoma.ca/blog/2019/05/22/typesetting-markdown-part-1">Typesetting Markdown</a>. 这是一个系列教程，介绍了使用 <a target="_blank" rel="noopener" href="https://pandoc.org/">pandoc</a> 和 <a target="_blank" rel="noopener" href="https://www.contextgarden.net/">ConTeXt</a> 对 Markdown 文档进行排版的系统。</li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a target="_blank" rel="noopener" href="https://www.markdown.xyz/getting-started/">Markdown Guide</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a target="_blank" rel="noopener" href="https://www.markdown.xyz/getting-started/">https://www.markdown.xyz/getting-started/</a></span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/articles/Markdown%E8%AF%AD%E6%B3%95/">Markdown语法</a></div><div class="post-share"><div class="social-share" data-image="/img/brand/headpicture.jpg" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="/rose-galaxy/css/share-fa.css?v=20260831-p48"><script>(() => {
+  const PAGE_TITLE = "Markdown 入门指南"
+  // sites -> FontAwesome 图标类 + 链接模板。仅用站内已自托管的 FontAwesome 7 图标,
+  // 未列出的站点直接不渲染, 不引入新字体。
+  // 微信特例: 微信没有公开的网页分享接口, 无法像 QQ/微博那样跳到对方分享页,
+  // 只能给二维码让用户用微信扫。这里改为在新标签页打开站内二维码页 /share-qr/
+  // (与 QQ 一致的"新页面打开"体验), 而非原方案的内嵌浮层。
+  const SITES = {
+    facebook: { icon: 'fa-facebook', label: 'Facebook', href: (u, t) => 'https://www.facebook.com/sharer/sharer.php?u=' + u },
+    x: { icon: 'fa-x-twitter', label: 'X', href: (u, t) => 'https://x.com/intent/tweet?text=' + t + '&url=' + u },
+    wechat: { icon: 'fa-weixin', label: '微信', href: (u, t) => '/share-qr/?u=' + u + '&t=' + t },
+    weibo: { icon: 'fa-weibo', label: '微博', href: (u, t) => 'https://service.weibo.com/share/share.php?url=' + u + '&title=' + t },
+    qq: { icon: 'fa-qq', label: 'QQ', href: (u, t) => 'http://connect.qq.com/widget/shareqq/index.html?url=' + u + '&title=' + t }
+  }
+
+  const init = () => {
+    const share = document.querySelector('.social-share')
+    if (!share || share.dataset.ready === 'true') return
+    share.dataset.ready = 'true'
+
+    const pageUrl = location.href
+    const u = encodeURIComponent(pageUrl)
+    const t = encodeURIComponent(PAGE_TITLE)
+
+    // 5 个站点一律用 <a>, 一律新标签页打开 —— 微信走站内二维码页, 其余走各自分享页。
+    const build = () => {
+      const frag = document.createDocumentFragment()
+      String(share.dataset.sites || '').split(',').map((s) => s.trim()).filter(Boolean).forEach((name) => {
+        const cfg = SITES[name]
+        if (!cfg) return
+        const a = document.createElement('a')
+        a.className = 'social-share-icon icon-' + name + ' fab ' + cfg.icon
+        a.setAttribute('aria-label', '分享到 ' + cfg.label)
+        a.href = cfg.href(u, t)
+        a.target = '_blank'
+        a.rel = 'noopener'
+        frag.appendChild(a)
+      })
+      share.appendChild(frag)
+    }
+    build()
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true })
+  else init()
+  document.addEventListener('pjax:complete', init)
+})()</script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/posts/Markdown%20%E6%89%A9%E5%B1%95%E8%AF%AD%E6%B3%95/" title="Markdown 扩展语法"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Markdown 扩展语法</div></div><div class="info-2"><div class="info-item-1">构建在 Markdown 基本语法上的扩展功能。 概述即便 John Gruber 的原始设计文档中所列出的 Markdown 基本语法 已经囊括了许多满足日常所需的元素，但对于某些人来说仍然不够。这就是 Markdown 扩展语法出现的缘由。 一些个人和组织通过添加表格（tables）、代码块（code blocks）、语法高亮、将 URL 自动转换为链接和脚注（footnotes）等额外的元素来扩展 Markdown 的基本语法。这些额外添加的元素可以通过使用构建于 Markdown 之上的轻量级标记语言或通过向兼容的 Markdown 解析器添加扩展来启用这些新元素。 可用性并非所有的 Markdown 应用程序都支持扩展语法。你需要确认你所使用的应用程序是否支持你所需要使用的扩展语法。如果不支持，则有可能是需要开启相应的扩展模块。 轻量级标记语言目前有几种轻量级标记语言是 Markdown 的 超集 。它们支持 Gruber 的基本语法，并在其基础上添加了一些额外的元素，例如表格（tables）、代码块（code blocks）、语法高亮、将 URL 自动转换为链接和脚注...</div></div></div></a><a class="pagination-related" href="/posts/Markdown%20%E5%AE%9E%E7%94%A8%E8%AF%AD%E6%B3%95/" title="Markdown 实用语法"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Markdown 实用语法</div></div><div class="info-2"><div class="info-item-1">本文以Typora作演示书写页面，不能完成的操作切换到源代码模式界面进行（打开\关闭源代码界面：ctrl+/），在这个界面，你可以一窥端倪  一、段落和字体格式   格式 书写界面 源代码界面    换行 软回车^1 双空格回车   换段^2 回车 双回车   分割线  —   斜体 右键 *文字*   加粗 右键 *文字*   斜体加粗  ***文字***   删除线  ~~文字~~   演示（换段）  这是新的一行   这是新的一行  这是新的一段 二、标题   标题级数 格式    一级标题（主标题） # 标题   二级标题 ## 标题   …^3 #…# 标题   三、列表和勾选框3.1列表   列表符 有序列表 无序列表    *    +    - 1. 列表2. 列表3. 列表 * 列表+ 列表- 列表   1.    2.    3. 2. 列表3. 列表4. 列表 * 列表+ 列表- 列表   演示  这是有序列表 有序列表是一段的不同行，书写界面回车自动添加列表符 有序列表数字可以不从1开始，但必须连续   这是无序列表，呈无先后关系的并列内容   用*,+,...</div></div></div></a></nav><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="waline-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Markdown-%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="toc-number">1.</span> <span class="toc-text">Markdown 是什么？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E4%BD%BF%E7%94%A8-Markdown%EF%BC%9F"><span class="toc-number">2.</span> <span class="toc-text">为什么要使用 Markdown？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B7%A5%E6%AC%B2%E5%96%84%E5%85%B6%E4%BA%8B%EF%BC%8C%E5%BF%85%E5%85%88%E5%88%A9%E5%85%B6%E5%99%A8"><span class="toc-number">3.</span> <span class="toc-text">工欲善其事，必先利其器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Markdown-%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="toc-number">4.</span> <span class="toc-text">Markdown 的工作原理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Markdown-%E6%9C%89%E4%BB%80%E4%B9%88%E7%94%A8%EF%BC%9F"><span class="toc-number">5.</span> <span class="toc-text">Markdown 有什么用？</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BD%91%E7%AB%99"><span class="toc-number">5.1.</span> <span class="toc-text">网站</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%96%87%E4%BB%B6%E8%B5%84%E6%96%99"><span class="toc-number">5.2.</span> <span class="toc-text">文件资料</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%94%E8%AE%B0"><span class="toc-number">5.3.</span> <span class="toc-text">笔记</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B9%A6%E7%B1%8D"><span class="toc-number">5.4.</span> <span class="toc-text">书籍</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%94%E7%A4%BA%E6%96%87%E7%A8%BF"><span class="toc-number">5.5.</span> <span class="toc-text">演示文稿</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%82%AE%E4%BB%B6"><span class="toc-number">5.6.</span> <span class="toc-text">邮件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8D%8F%E4%BD%9C"><span class="toc-number">5.7.</span> <span class="toc-text">协作</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%96%87%E6%A1%A3"><span class="toc-number">5.8.</span> <span class="toc-text">文档</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Markdown-%E6%96%B9%E8%A8%80"><span class="toc-number">6.</span> <span class="toc-text">Markdown 方言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B6%E5%AE%83%E8%B5%84%E6%BA%90"><span class="toc-number">7.</span> <span class="toc-text">其它资源</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>其他文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/Markdown%20%E5%AE%9E%E7%94%A8%E8%AF%AD%E6%B3%95/" title="Markdown 实用语法">Markdown 实用语法</a><time datetime="2026-08-16T16:00:00.000Z" title="发表于 2026-08-17 00:00:00">2026-08-17</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/Markdown%20%E6%89%A9%E5%B1%95%E8%AF%AD%E6%B3%95/" title="Markdown 扩展语法">Markdown 扩展语法</a><time datetime="2026-08-16T16:00:00.000Z" title="发表于 2026-08-17 00:00:00">2026-08-17</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/Markdown%20%E8%AF%AD%E6%B3%95%E9%80%9F%E6%9F%A5%E8%A1%A8/" title="Markdown 语法速查表">Markdown 语法速查表</a><time datetime="2026-08-16T16:00:00.000Z" title="发表于 2026-08-17 00:00:00">2026-08-17</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/Markdown%20%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95/" title="Markdown 基本语法">Markdown 基本语法</a><time datetime="2026-08-16T16:00:00.000Z" title="发表于 2026-08-17 00:00:00">2026-08-17</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.2</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.7.0</a></span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.7.0"></script><script src="/js/main.js?v=5.7.0"></script><script src="/rose-galaxy/vendor/medium-zoom/medium-zoom.min.js"></script><div class="js-pjax"><script>(() => {
+  let initFn = window.walineFn || null
+  const isMoments = GLOBAL_CONFIG_SITE.pageType === 'moments'
+  const option = null
+
+  const destroyWaline = ele => ele.destroy()
+
+  const initWaline = (Fn, el = document, path = window.location.pathname) => {
+    const waline = Fn({
+      el: el.querySelector('#waline-wrap'),
+      serverURL: 'https://yibao11-github-io.vercel.app',
+      pageview: false,
+      dark: 'html[data-theme="dark"]',
+      comment: true,
+      ...option,
+      path: isMoments ? path : (option && option.path) || path
+    })
+
+    if (isMoments) {
+      window.momentsComment.destroyWaline = () => {
+        destroyWaline(waline)
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+  }
+
+  const loadWaline = (el, path) => {
+    if (initFn) initWaline(initFn, el, path)
+    else {
+      btf.getCSS('/rose-galaxy/vendor/waline/waline.min.css')
+        .then(() => import('/rose-galaxy/vendor/waline/waline.min.js'))
+        .then(({ init }) => {
+          initFn = init || Waline.init
+          initWaline(initFn, el, path)
+          window.walineFn = initFn
+        })
+    }
+  }
+
+  if (isMoments) {
+    'Waline' === 'Waline'
+      ? window.momentsComment = { loadComment: loadWaline } 
+      : window.loadOtherComment = loadWaline
+    return
+  }
+
+  if ('Waline' === 'Waline' || !false) {
+    if (false) btf.loadComment(document.getElementById('waline-wrap'),loadWaline)
+    else setTimeout(loadWaline, 0)
+  } else {
+    window.loadOtherComment = loadWaline
+  }
+})()</script></div><script src="/rose-galaxy/js/nova-ux.js?v=20260831-p48"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><i class="fas fa-spinner fa-pulse" id="loading-status" hidden="hidden"></i><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="text-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据加载中</span></div><div class="local-search-input"><input placeholder="搜索文章" type="text"/></div><hr/><div id="local-search-results"></div><div class="ais-Pagination" id="local-search-pagination" style="display:none;"><ul class="ais-Pagination-list"></ul></div><div id="local-search-stats"></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=5.7.0"></script></div></div></body></html>

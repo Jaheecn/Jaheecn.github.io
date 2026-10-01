@@ -1,0 +1,8 @@
+extends ./base.pug
+
+block headOpts
+  - page.bodyClass = ''
+  - page.headOpts = { title: '404 · 页面未找到 | Yibao', siteTitle: '页面未找到', description: '请求的页面可能已经移动或不存在，请返回 Yibao 博客首页继续浏览。', pageType: '404' }
+
+block content
+  != page.body

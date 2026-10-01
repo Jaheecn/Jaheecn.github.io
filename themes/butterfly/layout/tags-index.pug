@@ -1,0 +1,42 @@
+extends ./base.pug
+
+block headOpts
+  - page.bodyClass = 'nova-tag-route nova-tags-route'
+  - page.headOpts = { title: '文章 | Yibao', siteTitle: '文章', description: '通过文章查找 Yibao 博客中的技术笔记、算法练习与学习记录。', ogUrl: siteUrl + '/articles/', canonical: siteUrl + '/articles/', pageType: 'page', extraHead: page.ldjson }
+
+block content
+  != page.shellTop
+  section.nova-tag-summary.nova-tags-summary(aria-label='文章概览')
+    div
+      strong= page.topicsCount
+      span TOPICS
+      small 主题总数
+    div
+      strong= page.articlesCount
+      span ARTICLES
+      small 文章总数
+    div
+      strong= page.topTopicCount
+      span TOP TOPIC
+      small= page.topTopicName
+    div
+      strong= page.latestDate
+      span LATEST UPDATE
+      small= page.latestTitle
+  section.nova-tags-index#nova-tags-index
+    header
+      span TOPIC COLLECTION
+      h2 主题索引
+      p 按文章浏览全部公开记录。
+    div.nova-tags-grid
+      each t, i in page.tags
+        a.nova-tags-card(href=encodeURI('/articles/' + t.name + '/'))
+          span= String(i + 1).padStart(2, '0')
+          div
+            h2= t.name
+            p= '围绕' + t.name + '整理的文章与学习记录。'
+          strong= t.count
+            small  NOTES
+          i(aria-hidden='true') →
+  | </main>
+  != page.shellBottom

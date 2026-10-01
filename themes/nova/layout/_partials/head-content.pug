@@ -1,0 +1,247 @@
+//- head 内容单一实现 (阶段6 · D: head 双轨收敛)
+//- 原 _partials/head.pug 的 mixin head(opts) 主体: 只产出 <head> 的内容, 不自带 <head> 标签,
+//- 以便两套 layout 共用 —— 定制 base.pug 与主题原版 includes/layout.pug 都调用它。
+//- ⚠ 若需要 showToc 这类"既供本文件用、又供 widget 用"的变量, 必须在**调用方顶层**计算
+//-   (见 includes/layout.pug); mixin 内部的 - 代码块变量不会外泄到 widget。
+//- ⚠ 下面的 doctype 有两个作用, 都不要删:
+//-   ① 它由本文件输出, 因此两个调用方(base.pug / includes/layout.pug)都**不再**写 doctype
+//-      —— 否则会输出两个 <!DOCTYPE html>;
+//-   ② Pug 按"编译时是否见过 doctype"决定标签形态: 有它 => <meta ...>, 没有 => <meta .../>。
+//-      本文件是 mixin 定义处, 调用方写在它后面的 doctype 对本文件无效, 必须在此声明。
+doctype html
+
+//- 首帧主题脚本由 scripts/inject-theme.js 的 head_begin injector 统一注入(文章页同源)
+mixin headContent(opts)
+  meta(charset='UTF-8')
+  meta(name='referrer' content='no-referrer')
+  meta(http-equiv='X-UA-Compatible' content='IE=edge')
+  meta(name='viewport' content='width=device-width, initial-scale=1.0,viewport-fit=cover')
+  title= opts.title
+  meta(name='author' content='Yibao')
+  meta(name='copyright' content='Yibao')
+  meta(name='format-detection' content='telephone=no')
+  meta(name='theme-color' content=opts.themeColor || '#080B14')
+  if opts.description
+    meta(name='description' content=opts.description)
+  meta(property='og:type' content=opts.ogType || 'website')
+  meta(property='og:title' content=opts.ogTitle || opts.siteTitle || opts.title)
+  if opts.ogUrl
+    meta(property='og:url' content=opts.ogUrl)
+  meta(property='og:site_name' content='Yibao')
+  if opts.description
+    meta(property='og:description' content=opts.description)
+  meta(property='og:locale' content='zh_CN')
+  //- og:image / twitter:image follow the page's real hero image. The chain mirrors
+  //- includes/header/index.pug (page.top_img then page.cover then
+  //- theme.default_top_img), so the shared card matches the image the page shows.
+  - var headImage = full_url_for(page.top_img || page.cover || theme.default_top_img || '/img/brand/headpicture.jpg')
+  meta(property='og:image' content=headImage)
+  if opts.articleDate || opts.articleUpdated
+    meta(property='article:published_time' content=opts.articleDate || opts.articleUpdated)
+    meta(property='article:modified_time' content=opts.articleUpdated || opts.articleDate)
+    meta(property='article:author' content='Yibao')
+  //- 文章标签: 原版 head 由 open_graph() 逐条输出 article:tag, 共享实现里显式生成
+  if opts.articleTags
+    each _tag in opts.articleTags
+      meta(property='article:tag' content=_tag)
+  meta(name='twitter:card' content='summary')
+  meta(name='twitter:image' content=headImage)
+  link(rel='shortcut icon' href=opts.favicon || '/img/brand/favicon-small.png')
+  if opts.canonical
+    link(rel='canonical' href=opts.canonical)
+  link(rel='preconnect' href='//busuanzi.ibruce.info')
+  link(rel='stylesheet' href='/css/index.css?v=5.7.0')
+  //- 阶段5 · P0: FontAwesome 由 jsDelivr CDN 改为同源自托管(实测 CDN 单请求 7.3s, 与 FCP 差 77ms,
+  //- 即首屏由它单点决定; 本地资源在同源、无额外 DNS/TLS)。资源: source/rose-galaxy/vendor/fontawesome/
+  //- infinitegrid 同样本地化(实测本站无 recent-post-items/masonry 容器, 该库实际不触发加载;
+  //- 保留 GLOBAL_CONFIG.infinitegrid.js 以免 main.js 取值时报错)。
+  link(rel='stylesheet' href='/rose-galaxy/vendor/fontawesome/css/all.min.css?v=7.3.1')
+  script.
+    (() => {
+
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        const data = { value }
+
+        if (ttl != null) {
+          data.expiry = Date.now() + ttl * 86400000
+        }
+
+        localStorage.setItem(key, JSON.stringify(data))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return
+
+        try {
+          const data = JSON.parse(itemStr)
+
+          if (data.expiry && Date.now() > data.expiry) {
+            localStorage.removeItem(key)
+            return
+          }
+
+          return data.value
+        } catch {
+          localStorage.removeItem(key)
+        }
+      }
+    }
+
+    const scriptCache = new Map()
+    const cssCache = new Map()
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => {
+        if (scriptCache.has(url)) {
+          return scriptCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const script = document.createElement('script')
+
+          script.src = url
+          script.async = true
+
+          for (const key in attr) {
+            script.setAttribute(key, attr[key])
+          }
+
+          script.onload = resolve
+          script.onerror = reject
+
+          document.head.appendChild(script)
+        })
+
+        scriptCache.set(url, promise)
+
+        return promise
+      },
+      getCSS: (url, id) => {
+        if (cssCache.has(url)) {
+          return cssCache.get(url)
+        }
+
+        const promise = new Promise((resolve, reject) => {
+          const link = document.createElement('link')
+
+          link.rel = 'stylesheet'
+          link.href = url
+
+          if (id) {
+            link.id = id
+          }
+
+          link.onload = resolve
+          link.onerror = reject
+
+          document.head.appendChild(link)
+        })
+
+        cssCache.set(url, promise)
+
+        return promise
+      },
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!true && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+
+
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+      const activateDarkMode = () => {
+        document.documentElement.dataset.theme = 'dark'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#080B14')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.dataset.theme = 'light'
+        if (metaThemeColor !== null) {
+          metaThemeColor.setAttribute('content', '#F7F4F1')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+    const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+
+
+      const detectApple = () => {
+        if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+
+    })()
+  script.
+    const GLOBAL_CONFIG = {
+      root: '/',
+      algolia: undefined,
+      localSearch: {"path":"/search.xml","preload":false,"top_n_per_article":1,"unescape":true,"pagination":{"enable":false,"hitsPerPage":8},"languages":{"hits_empty":"未找到符合您查询的内容：${query}","hits_stats":"共有 ${hits} 个结果"}},
+      translate: undefined,
+      highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+      copy: {
+        success: '复制成功',
+        error: '复制失败',
+        noSupport: '浏览器不支持'
+      },
+      relativeDate: {
+        homepage: false,
+        post: false
+      },
+      runtime: '',
+      dateSuffix: {
+        just: '刚刚',
+        min: '分钟前',
+        hour: '小时前',
+        day: '天前',
+        month: '个月前'
+      },
+      copyright: undefined,
+      lightbox: 'medium_zoom',
+      Snackbar: undefined,
+      infinitegrid: {
+        js: '/rose-galaxy/vendor/infinitegrid/infinitegrid.min.js?v=4.13.0',
+        buttonText: '加载更多'
+      },
+      isPhotoFigcaption: false,
+      islazyloadPlugin: false,
+      isAnchor: false,
+      percent: {
+        toc: true,
+        rightside: false,
+      },
+      autoDarkmode: false
+    }
+  script#config-diff.
+    var GLOBAL_CONFIG_SITE = {
+      title: !{JSON.stringify(opts.siteTitle || '')},
+      isHighlightShrink: !{opts.isHighlightShrink === undefined ? 'undefined' : opts.isHighlightShrink},
+      isToc: !{opts.isToc === true},
+      pageType: !{JSON.stringify(opts.pageType || 'page')}
+    }
+  != (theme.inject && theme.inject.head ? theme.inject.head.join('') : '')
+  //- 页级 CSS(A 方案 2026-09-03): 已全量全局注入(butterfly.yml inject.head, 见上),
+  //- 此处不再输出 extraCss——各 pug headOpts.extraCss 值为废弃配置(保留无影响)。
+  //- 结构化数据(阶段6 · D): 主题原版 head 会 include structured_data(文章页 BlogPosting 即来自它),
+  //- 定制 head 此前没有这一项 —— 那 9 个页面靠各自 headOpts 手写 JSON-LD 顶上。
+  //- 迁移后两者共用本文件, 故在此补回主题组件。
+  //- 两个必须的守卫(否则会出现空标签):
+  //-   ① 页面已自带 LDJSON(extraHead 里含 ld+json)时跳过, 避免同一页出现两份结构化数据;
+  //-   ② structured_data.pug 对"非 post 且非首页"的页面会走完所有分支、jsonLdScript 保持
+  //-      undefined, 而它末尾是无条件 `script(...)` => 会输出一个**空的**
+  //-      <script type="application/ld+json"></script>。实测原版 head 在 404/说说页输出的正是
+  //-      这个空标签, 属主题自带瑕疵; 这里按页面类型显式限定, 顺带把它修掉。
+  if (opts.pageType === 'post' || opts.pageType === 'home') && !(opts.extraHead && opts.extraHead.indexOf('application/ld+json') !== -1)
+    include ../includes/head/structured_data.pug
+
+  != opts.extraHead || ''

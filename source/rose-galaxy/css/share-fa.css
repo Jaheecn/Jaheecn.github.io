@@ -1,0 +1,223 @@
+/* 文章分享按钮 (阶段6 · 任务B: 替换 sharejs 图标字体)
+   原状: 主题用 butterfly-extsrc 的 sharejs + share.min.css, 图标靠自带的 "iconfont" 字体,
+         而该字体 (fonts/iconfont.woff2) 在官方 npm 包里根本不存在 —— CDN 上同样 404,
+         实测 ::before content 为空、5 个 26x26 的空格, 图标从建站起就没显示过;
+         且 .social-share * { font-family: "iconfont" !important } 会覆盖任何其他图标字体。
+   现方案: 保留原布局与各平台配色, 只把图标源换成站内已自托管的 FontAwesome 7
+         (head.pug 里 /rose-galaxy/vendor/fontawesome/css/all.min.css, 全站已加载, 含 fa-brands)。
+   关键: 本文件**不得声明 font-family** —— FontAwesome 7 的图标由 .fab 类提供
+         (--fa-family / content: var(--fa)), 一旦在此覆盖字体, 图标会重新变成空白。 */
+
+.social-share {
+  font-size: 16px;
+  font-style: normal;
+  line-height: 1;
+  display: inline-block;
+}
+
+.social-share a,
+.social-share button {
+  position: relative;
+  text-decoration: none;
+  margin: 4px;
+  display: inline-block;
+  outline: none;
+}
+
+/* 微信按钮用 <button>: 能获得焦点, 从而用 :focus-within 控制浮层(移动端也能收起)。
+   ⚠ 这里绝不能写 font-family —— FontAwesome 7 靠 .fab 的 --fa-family 决定 ::before 字体,
+     一旦在此 inherit/覆盖, 微信图标的 ::before 会落回系统字体, 画不出来(实测踩过)。 */
+.social-share button.social-share-icon {
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  color: inherit;
+  font-size: 17px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 键盘可达性: 仅在键盘聚焦时显示轮廓 */
+.social-share .social-share-icon:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.social-share .social-share-icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  font-size: 17px;
+  border-radius: 50%;
+  line-height: 1;
+  border: 1px solid #666;
+  color: #666;
+  text-align: center;
+  vertical-align: middle;
+  transition: background 0.4s ease-out 0s, color 0.4s ease-out 0s;
+}
+
+/* FontAwesome 7: 图标靠 ::before 的 content:var(--fa) 绘制, 需给它块级定位与居中 */
+.social-share .social-share-icon::before {
+  display: inline-block;
+  line-height: 1;
+}
+
+.social-share .social-share-icon:hover {
+  background: #666;
+  color: #fff;
+}
+
+/* 各平台品牌色 (沿用原 share.min.css 取值) */
+.social-share .icon-weibo {
+  color: #ff763b;
+  border-color: #ff763b;
+}
+.social-share .icon-weibo:hover {
+  background: #ff763b;
+}
+
+.social-share .icon-qq {
+  color: #56b6e7;
+  border-color: #56b6e7;
+}
+.social-share .icon-qq:hover {
+  background: #56b6e7;
+}
+
+.social-share .icon-facebook {
+  color: #44619d;
+  border-color: #44619d;
+}
+.social-share .icon-facebook:hover {
+  background: #44619d;
+}
+
+.social-share .icon-x {
+  color: #000;
+  border-color: #000;
+}
+.social-share .icon-x:hover {
+  background: #000;
+}
+
+.social-share .icon-wechat {
+  position: relative;
+  color: #7bc549;
+}
+/* 微信的图标色与边框色都必须写到这里:
+   - 图标色若只写 .icon-wechat(0,2,0) 会被上面 .social-share .social-share-icon 的
+     基础色盖住, 需与它同级且后声明才生效;
+   - 边框色用 .social-share .icon-wechat(0,2,0) 即可盖过 .social-share .social-share-icon
+     的 #666。
+   注: 微信按钮已由 <button> 改回 <a>(点击改为新标签打开 /share-qr/ 二维码页),
+   因此这里不能再依赖 button 元素选择器。 */
+.social-share .icon-wechat,
+.social-share a.icon-wechat {
+  color: #7bc549;
+  border-color: #7bc549;
+}
+.social-share .icon-wechat:hover {
+  background: #7bc549;
+  color: #fff;
+}
+
+/* ---- 微信二维码浮层 ---- */
+.social-share .wechat-qrcode {
+  display: none;
+  position: absolute;
+  z-index: 30;
+  top: -206px;
+  left: -84px;
+  width: 200px;
+  height: 192px;
+  color: #666;
+  font-size: 12px;
+  font-style: normal;
+  text-align: center;
+  background-color: #fff;
+  border: 1px solid #eee;
+  box-shadow: 0 2px 10px #aaa;
+  transition: opacity 200ms;
+}
+
+.social-share .wechat-qrcode.bottom {
+  top: 42px;
+  left: -84px;
+}
+
+.social-share .wechat-qrcode.bottom:after {
+  display: none;
+}
+
+.social-share .wechat-qrcode h4 {
+  font-weight: normal;
+  height: 26px;
+  line-height: 26px;
+  font-size: 12px;
+  background-color: #f3f3f3;
+  margin: 0;
+  padding: 0;
+  color: #777;
+}
+
+.social-share .wechat-qrcode .qrcode {
+  width: 130px;
+  height: 130px;
+  margin: 8px auto 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.social-share .wechat-qrcode .qrcode svg,
+.social-share .wechat-qrcode .qrcode canvas {
+  width: 130px;
+  height: 130px;
+  display: block;
+}
+
+/* 二维码点阵: 库输出的是硬编码 fill="black", 用 CSS 覆盖成微信品牌绿。
+   只命中 path, 白色底(<rect fill="white">)保持白色 —— 二维码必须有白底才可扫。 */
+.social-share .wechat-qrcode .qrcode svg path {
+  fill: #7bc549;
+}
+
+.social-share .wechat-qrcode .help p {
+  font-weight: normal;
+  line-height: 16px;
+  padding: 0;
+  margin: 0;
+  color: #999;
+}
+
+/* 小箭头: 指向下方按钮 */
+.social-share .wechat-qrcode:after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  margin-left: -6px;
+  bottom: -13px;
+  width: 0;
+  height: 0;
+  border-width: 8px 6px 6px 6px;
+  border-style: solid;
+  border-color: #fff transparent transparent transparent;
+}
+
+/* 桌面: 悬停展开; 移动端/键盘: 聚焦展开。
+   用 :focus-within 而非 JS 开关 —— 点击按钮本身即获得焦点、点外部自动失焦收起,
+   且点击浮层内部(二维码/文字)焦点仍留在按钮子树内, 不会误收起。 */
+.social-share .icon-wechat:hover .wechat-qrcode,
+.social-share .icon-wechat:focus-within .wechat-qrcode {
+  display: block;
+}
+
+/* 浮层贴近视口顶部时翻到按钮下方, 避免被裁掉 */
+.social-share .wechat-qrcode.is-below {
+  top: 42px;
+}

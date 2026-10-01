@@ -1,0 +1,59 @@
+- const coverVal = page.cover_type === 'img' ? page.cover : theme.avatar.img
+//- 分享按钮 (阶段6 · 任务B): 自实现, 替代 butterfly-extsrc/sharejs。
+//- 原因见 source/rose-galaxy/css/share-fa.css 顶部注释: 原方案的 "iconfont" 图标字体在官方
+//- npm 包里根本不存在(CDN 上同样 404), 5 个图标从建站起就是空白格子; 且它用
+//- font-family:"iconfont" !important 压住一切其他图标字体。
+//- 现方案: 链接规则照搬原版(实测有效)、图标换成站内已自托管的 FontAwesome 7 品牌图标;
+//- 微信因无公开分享接口, 改为在新标签页打开站内二维码页 /share-qr/(该页自行加载
+//- qrcode-generator 生成二维码) —— 文章页因此不必加载二维码库。
+//- 按钮由下方 JS 按 data-sites 生成(保持配置驱动), 此处只留容器。
+.social-share(data-image=url_for(coverVal) data-sites=theme.share.sharejs.sites)
+link(rel='stylesheet' href='/rose-galaxy/css/share-fa.css?v=__VERSION__')
+script.
+  (() => {
+    const PAGE_TITLE = !{JSON.stringify(page.title || config.title)}
+    // sites -> FontAwesome 图标类 + 链接模板。仅用站内已自托管的 FontAwesome 7 图标,
+    // 未列出的站点直接不渲染, 不引入新字体。
+    // 微信特例: 微信没有公开的网页分享接口, 无法像 QQ/微博那样跳到对方分享页,
+    // 只能给二维码让用户用微信扫。这里改为在新标签页打开站内二维码页 /share-qr/
+    // (与 QQ 一致的"新页面打开"体验), 而非原方案的内嵌浮层。
+    const SITES = {
+      facebook: { icon: 'fa-facebook', label: 'Facebook', href: (u, t) => 'https://www.facebook.com/sharer/sharer.php?u=' + u },
+      x: { icon: 'fa-x-twitter', label: 'X', href: (u, t) => 'https://x.com/intent/tweet?text=' + t + '&url=' + u },
+      wechat: { icon: 'fa-weixin', label: '微信', href: (u, t) => '/share-qr/?u=' + u + '&t=' + t },
+      weibo: { icon: 'fa-weibo', label: '微博', href: (u, t) => 'https://service.weibo.com/share/share.php?url=' + u + '&title=' + t },
+      qq: { icon: 'fa-qq', label: 'QQ', href: (u, t) => 'http://connect.qq.com/widget/shareqq/index.html?url=' + u + '&title=' + t }
+    }
+
+    const init = () => {
+      const share = document.querySelector('.social-share')
+      if (!share || share.dataset.ready === 'true') return
+      share.dataset.ready = 'true'
+
+      const pageUrl = location.href
+      const u = encodeURIComponent(pageUrl)
+      const t = encodeURIComponent(PAGE_TITLE)
+
+      // 5 个站点一律用 <a>, 一律新标签页打开 —— 微信走站内二维码页, 其余走各自分享页。
+      const build = () => {
+        const frag = document.createDocumentFragment()
+        String(share.dataset.sites || '').split(',').map((s) => s.trim()).filter(Boolean).forEach((name) => {
+          const cfg = SITES[name]
+          if (!cfg) return
+          const a = document.createElement('a')
+          a.className = 'social-share-icon icon-' + name + ' fab ' + cfg.icon
+          a.setAttribute('aria-label', '分享到 ' + cfg.label)
+          a.href = cfg.href(u, t)
+          a.target = '_blank'
+          a.rel = 'noopener'
+          frag.appendChild(a)
+        })
+        share.appendChild(frag)
+      }
+      build()
+    }
+
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true })
+    else init()
+    document.addEventListener('pjax:complete', init)
+  })()

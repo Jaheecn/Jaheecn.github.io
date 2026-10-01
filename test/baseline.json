@@ -1,0 +1,16 @@
+{
+  "publicFiles": 126,
+  "postDirs": 13,
+  "sourcePosts": 13,
+  "searchXml": 138155,
+  "sitemapXml": 2815,
+  "atomXml": 9524,
+  "latestSignal": "[文章] 变声器操作记录 @ 2026-10-01",
+  "featuredProjects": [
+    "pikachu",
+    "bluelotus",
+    "phpstudy"
+  ],
+  "note": "阶段3 批次J 建立; 新增文章/工程或有意改版后, 用 npm run verify -- --update-baseline 刷新",
+  "updatedAt": "2026-10-01"
+}

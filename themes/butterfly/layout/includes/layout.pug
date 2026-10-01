@@ -1,0 +1,115 @@
+//- head mixin 来源: _partials/head-content.pug(与 base.pug 共用同一份实现)
+include ../_partials/head-content.pug
+- var globalPageType = getPageType(page, is_home)
+- var htmlClassHideAside = theme.aside.enable && theme.aside.hide ? 'hide-aside' : ''
+- page.aside = globalPageType === 'archive' ? theme.aside.display.archive: globalPageType === 'category' ? theme.aside.display.category : globalPageType === 'tag' ? theme.aside.display.tag : page.aside
+- var hideAside = !theme.aside.enable || page.aside === false ? 'hide-aside' : ''
+- var pageType = globalPageType === 'post' ? 'post' : 'page'
+- pageType = page.type ? pageType + ' type-' + page.type : pageType
+
+//- head 统一(阶段6 · D): 改用 _partials/head-content.pug 这一份实现(与 base.pug 同源),
+//- 原 ./head.pug(含 config.pug / Open_Graph / structured_data / inject 等)不再 include。
+//- 配套: head-content.pug 内已补回 structured_data; Open_Graph 由定制 head 自身输出。
+- var siteUrl = (config.url || '').replace(/\/+$/, '')
+- var ldPageTitle = globalPageType === 'home' ? config.title : ((page.title || config.title) + ' | ' + config.title)
+- var ldCanonical = full_url_for(page.path || '/')
+-
+  //- showToc 必须在本文件**顶层**计算: 它不只给 GLOBAL_CONFIG_SITE 用,
+  //- includes/widget/index.pug 也读它决定是否渲染目录卡。放进 mixin 内会因作用域
+  //- 隔离而拿不到, 表现为文章页目录(TOC)整块消失 —— 迁移时实测踩到过。
+  var layoutTocEnable = (page.layout === 'post' && theme.toc.post) || (page.layout === 'page' && theme.toc.page)
+  var layoutPageToc = typeof page.toc === 'boolean' ? page.toc : layoutTocEnable
+  var showToc = !!(theme.aside.enable && page.aside !== false && layoutPageToc && (toc(page.content) !== '' || page.encrypt === true))
+  var layoutShrink = theme.code_blocks.shrink
+  var isHighlightShrink = layoutShrink === 'none'
+    ? 'undefined'
+    : (typeof page.highlight_shrink === 'boolean' ? page.highlight_shrink : (layoutShrink === true ? true : JSON.stringify(layoutShrink)))
+  //- 文章页特有字段: 与原版 head(open_graph + structured_data)逐项对齐。
+  //- description: 走主题同款兜底(摘要 -> 正文 -> 标题 -> 站点描述)。
+  //-   ⚠ 用直接 slice(0, 200) 而不是 truncate helper:
+  //-     hexo-util 的 truncate 内部是 `options.omission || '...'`, 传空串会被 || 兜回默认
+  //-     省略号 —— 实测传 { length:200, omission:'' } 后 description 只剩 "..."。
+  //-     且不传长度时默认只截 30 字符。直接切片既能给足 200, 又天然无省略号,
+  //-     与原版 head 的产出对齐。
+  //-   ⚠ 空白处理对齐原版: 先把换行换成空格(原版 open_graph 的做法, 不压缩连续空白),
+  //-     再 trim 掉首尾空白(正文开头的 \n 会变成一个前导空格), 最后取 200 字符无省略号。
+  var layoutIsPost = globalPageType === 'post'
+  var layoutDescSrc = page.description || (layoutIsPost ? (page.excerpt || page.content || page.title) : '') || config.description
+  var layoutDesc = layoutDescSrc ? strip_html(layoutDescSrc).replace(/\r?\n/g, ' ').trim().slice(0, 200) : ''
+  var layoutTags = (layoutIsPost && page.tags && page.tags.length) ? page.tags.toArray().map(function (t) { return t.name }) : []
+  var layoutThemeColor = (theme.theme_color && theme.theme_color.enable)
+    ? (theme.display_mode === 'dark'
+        ? (theme.theme_color.meta_theme_color_dark || '#0d0d0d')
+        : (theme.theme_color.meta_theme_color_light || '#ffffff'))
+    : (theme.display_mode === 'dark' ? '#0d0d0d' : '#ffffff')
+  page.headOpts = {
+    title: ldPageTitle,
+    siteTitle: page.title || config.title,
+    description: layoutDesc,
+    ogUrl: ldCanonical,
+    canonical: ldCanonical,
+    ogType: layoutIsPost ? 'article' : 'website',
+    articleDate: (layoutIsPost && page.date) ? page.date.toISOString() : '',
+    articleUpdated: (layoutIsPost && (page.updated || page.date)) ? (page.updated || page.date).toISOString() : '',
+    articleTags: layoutTags,
+    themeColor: layoutThemeColor,
+    pageType: globalPageType,
+    isToc: showToc,
+    isHighlightShrink: isHighlightShrink,
+    extraCss: '',
+    extraHead: (page.ldjson || '')
+  }
+
+//- doctype 由 _partials/head-content.pug 输出(它需要 doctype 才能让标签不自闭合),
+//- 此处不再重复声明; <head> 里调用那一个共享实现。
+html(lang=config.language data-theme=theme.display_mode class=htmlClassHideAside)
+  head
+    +headContent(page.headOpts)
+  body
+    !=partial('includes/loading/index', {}, {cache: true})
+
+    if theme.background
+      if !Array.isArray(theme.background)
+        #web_bg.bg-animation(style=getBgPath(theme.background))
+      else
+        #web_bg.bg-animation
+        - const bgStyleArr = theme.background.map(getBgPath)
+        script.
+          (() => {
+            const arr = !{JSON.stringify(bgStyleArr)}
+            const webBgDiv = document.getElementById('web_bg')
+
+            const setRandomBg = () => {
+              webBgDiv.style = arr[Math.floor(Math.random() * arr.length)]
+              requestAnimationFrame(() => webBgDiv.classList.add('bg-animation'))
+            }
+
+            document.addEventListener('pjax:send', () => {
+              webBgDiv.style = ''
+              webBgDiv.classList.remove('bg-animation')
+            })
+
+            document.addEventListener('pjax:complete', setRandomBg)
+            document.addEventListener('DOMContentLoaded', setRandomBg)
+          })()
+
+    !=partial('includes/sidebar', {}, {cache: true})
+
+    #body-wrap(class=pageType)
+      include ./header/index.pug
+
+      main#content-inner.layout(class=hideAside)
+        if body
+          div!= body
+        else
+          block content
+          if theme.aside.enable && page.aside !== false
+            include widget/index.pug
+
+      - const footerBg = theme.footer_img
+      - const footer_bg = footerBg ? footerBg === true ? bg_img : getBgPath(footerBg) : ''
+      footer#footer(style=footer_bg)
+        !=partial('includes/footer', {}, {cache: true})
+
+    include ./rightside.pug
+    include ./additional-js.pug

@@ -14,8 +14,8 @@
 
 | 位置 | 角色 | 能否修改 |
 | --- | --- | --- |
-| 本仓 `main` 分支 | **源码**(远端 `main` 分支) | ✅ **所有改造在这里做**；改完推 `origin main` 同步源码 |
-| 本仓 `public` 分支 | **产物**(远端 `public` 分支,Pages 直接发布它; 内容即本仓 `public/` 目录) | 产物由构建生成；**上线由它决定** |
+| 本仓(**单分支 `main`**) | **源码 + 产物**:源码在 `scripts/`/`source/`/`themes/`, 产物在 `docs/`(已被 main 跟踪) | ✅ **所有改造在这里做**；改完推 `origin main`, 源码与产物一起走 |
+| 线上发布 | **GitHub Pages 直接以本仓 `main` 分支的 `/docs` 目录为发布源** | 产物由构建生成；**上线只由 `docs/` 的内容决定** |
 | 独立仓库(Waline 后端, Vercel) | **后端**, 不在本仓 | 仅评论后端改动时动；前端按 URL 引用它, 通常不必动 |
 
 **本地预览**:仓库根目录下 `.\node_modules\.bin\hexo.cmd server -p 4015` → <http://127.0.0.1:4015/>
@@ -26,12 +26,12 @@
 **改完必跑的三道护栏**:
 
 ```bash
-npm run build                  # hexo generate → minify → 冒烟(10 项, 失败即非零退出)
-npm test                       # 68 项单元测试
-npm run verify -- --strict     # 18 项(结构断言 + 基线比对)
+npm run build                  # hexo generate → minify → 冒烟(11 项, 失败即非零退出)
+npm test                       # 69 项单元测试
+npm run verify -- --strict     # 19 项(结构断言 + 基线比对)
 ```
 
-**关键判据**:`public/` **127** 文件 · `posts/` **15** 目录 · `search.xml` **149,662** · `sitemap.xml` **3,256** · `atom.xml` **10,927** · 首页 LATEST SIGNAL `[文章] 绘世 Stable Diffusion @ 2026-09-03` · 精选工程顺序 `led-matrix → drone → line-car`
+**关键判据**:`docs/` **123** 文件 · `posts/` **13** 目录 · `search.xml` **138,155** · `sitemap.xml` **2,815** · `atom.xml` **9,524** · 首页 LATEST SIGNAL `[文章] 变声器操作记录 @ 2026-10-01` · 精选工程顺序 `pikachu → bluelotus → phpstudy`
 
 > ⚠️ 判据只看**字节数/条目数/排序首项**,**不要用文件哈希** —— hexo 生成器输出不确定,两次全量生成哈希不同但字节数相同。
 
@@ -118,7 +118,7 @@ hexo 加载 scripts/*.js(插件/生成器) + themes/nova/layout/*.pug(模板, �
 - **最新文章** = 文章按 `updated → 浏览量 → 标题` 取前 6(2 列 3 行)。
 - **浏览量**：`views-cache.json` 的 `pv` 段(= busuanzi 真实值 + 人工偏移);缺失时兜底 `projects-data.js` 的 `views` 字段(可选)。
 - **文章 updated**：由 `scripts/post-date.js` 统一改写(判定链与工程侧同构)：front matter 显式 `updated` → **源文件 git 最后提交日** → mtime → `date` 兜底。文章页 head 的 `dateModified`/`article:modified_time`、首页 LATEST SIGNAL 与"最新文章"排序都读这个值。
-  > ⚠️ **不要再依赖 hexo 的 `updated_option: mtime`** —— 它把"文件最后修改时间"当更新时间，而 mtime 记录的是**文件被复制/检出**的时刻、不是内容改动的时刻。实测(2026-09-13)：`LM-Studio-OpenCode 接入指南` 的 mtime 是 09-13，真实最后提交是 **08-31**(偏晚 13 天)；15 篇文章的 mtime 只聚成 3 个值(被成批复制的特征)；换机器/re-clone/CI 干净检出后全部文章的 mtime 会一起重置，`dateModified` 集体漂到同一天。
+  > ⚠️ **不要再依赖 hexo 的 `updated_option: mtime`** —— 它把"文件最后修改时间"当更新时间，而 mtime 记录的是**文件被复制/检出**的时刻、不是内容改动的时刻。实测(2026-09-13)：`LM-Studio-OpenCode 接入指南` 的 mtime 是 09-13，真实最后提交是 **08-31**(偏晚 13 天)；13 篇文章的 mtime 只聚成 3 个值(被成批复制的特征)；换机器/re-clone/CI 干净检出后全部文章的 mtime 会一起重置，`dateModified` 集体漂到同一天。
   > 代价与工程侧一致：**改完文章要 commit，日期才会前进**(与"改 → 提交 → 部署"的工作流一致)。无 git 时自动回退 mtime，不抛错。
 - **工程 updated**：`projects-data.js` 的 `updated:` 字段(可选) > **该工程资产目录的 git 最后提交日** > 目录内最新文件的 mtime > `date` 兜底。工程页概览第 4 栏"最近更新"与首页 LATEST SIGNAL 的工程日期统一读此链。
   > **注意路径是"资产目录"而非介绍文案**：判定看 `source/assets/projects/<工程名>/`(由 `downloads[0]` 的 href 推出)。所以**只改 `projects-intro.js` 的介绍文案不会让日期前进**，必须动资产文件并 commit。
@@ -145,7 +145,7 @@ git log -1 --format=%cI -- "source/_posts/<标题>.md"
 # 看某工程的资产提交日
 git log -1 --format=%cI -- "source/assets/projects/<工程名>/"
 # 看产物里实际写进去的值
-Select-String -Path .\public\posts\<标题>\index.html -Pattern 'dateModified'
+Select-String -Path .\docs\posts\<标题>\index.html -Pattern 'dateModified'
 ```
 - **概览统计条数据**：文章索引(/articles/)四栏 = TOPICS 主题总数 / ARTICLES 文章总数 / TOP TOPIC(最多文章主题+名称) / LATEST UPDATE(最新文章日期+标题)，数值由 `nova-tags.js` 注入；工程页(/projects/)四栏 = PROJECTS 项目总数 / TAGS 技术标签 / TOP PROJECT(真实 pv 最高的工程，pv 数字+工程名) / LATEST UPDATE(更新日期+工程名)，由 `projects-generator.js` 计算(真实 pv 取 `views-cache.json` 的 `lastRaw` 段；全部为 0 时第 3 栏兜底显示最新更新工程)。
 - **卡片注入**：mid.html 的 `<!--NOVA-FEATURED-->`/`<!--NOVA-RECENT-->` 与 top.html 的 `<!--NOVA-LATEST-->` 占位由生成器 `split().join()` 替换;卡片 HTML 拼装在 `home-generator.js` 的 `featuredCardsHtml`/`recentCardsHtml`/`latestSignal`。
@@ -169,7 +169,7 @@ Select-String -Path .\public\posts\<标题>\index.html -Pattern 'dateModified'
 - `minify.js`：构建后 JS 压缩(esbuild)，`npm run build` 自动跑
 - `smoke.js`：冒烟检查 / 结构断言 / 基线比对；也是 `npm run verify [-- --strict]` 的实现
 - `layout-guard.js`：布局回归护栏（CDP 无头实测：真实拉伸 / 横向溢出 / 容器宽度），`--baseline` 写基线
-- `lib/public-dir.js`：产物目录解析（读 `_config.yml` 的 `public_dir`）—— 凡需读产物的脚本都走它，勿硬编码 `public`
+- `lib/public-dir.js`：产物目录解析（读 `_config.yml` 的 `public_dir`，现为 `docs`）—— 凡需读产物的脚本都走它，勿硬编码目录名
 
 > 一次性/历史补丁脚本放 `scripts/` **会污染源文件**（hexo 执行该目录全部 js，见 Hexo 坑②）。历史上那些 `convert_*`/`patch_*`/`slice_*` 脚本已随 `py-tools/` 目录一并移除，**不要再往 `tools/` 或 `scripts/` 放一次性脚本**。
 
@@ -181,16 +181,18 @@ Select-String -Path .\public\posts\<标题>\index.html -Pattern 'dateModified'
 
 ### `test/`（测试与基线）
 
-- `*.test.js`：`node:test` 单元测试，**68 项**（`npm test`）
+- `*.test.js`：`node:test` 单元测试，**69 项**（`npm test`；2026-10-01 实测 **69 pass / 0 fail**）
 - `baseline.json`：基线比对基准（`publicFiles` / `postDirs` / 三 xml 字节数 / LATEST SIGNAL / 精选工程顺序）
   → 有意变更后用 `npm run verify -- --update-baseline` 刷新；**刷新时机必须在删除临时目录之后**，否则基线会残留错误数字
 
-> ⚠️ `project-date.test.js` 的「git 最后提交日生效(与 git log 动态对比)」用 `hasGit()` 探测当前目录是否为 git 仓库。**在本仓里跑 `npm test` 恒为 68 pass / 0 skipped**（本仓是真实 git 仓库）；已无"副本目录缺 `.git` 导致 67 pass"的情况。
+> ⚠️ `project-date.test.js` 的「git 最后提交日生效(与 git log 动态对比)」用 `hasGit()` 探测当前目录是否为 git 仓库。**在本仓里跑 `npm test` 恒为 69 pass / 0 skipped**（本仓是真实 git 仓库）；2026-10-01 曾实测 **67 pass / 1 fail**：`test/project-date.test.js:111`「返回值必须是 YYYY-MM-DD 或原样 date(供模板做 datetime 属性)」引用的还是改名前的老工程目录 `琛光无人机`（`source/assets/projects/` 下已无该目录），`projectUpdated()` 返回空串；已把该用例指向现存工程目录，现为 **69 pass / 0 fail**（用例若引用某个工程目录，该目录必须真实存在）。另：已无"副本目录缺 `.git` 导致 67 pass"的情况。
 
-### `docs/`（仓库文档资源，不随站点发布）
+### `docs/`（★ 构建产物目录 = GitHub Pages 发布源）
 
-- `preview-dark.png` / `preview-light.png`：README 深浅主题预览图(2026-09-03 由 source 移出并更新为当前首页截图)
-- `主题升级指南.md`：**nova 主题维护指南** —— nova 的结构、每类文件来源与维护方式（阶段6 主题迁移的产出）。文内提到生成用的 `_snapshots/` 核算脚本已于 2026-09-13 随快照目录删除，需重算时按文内说明重建。
+- **`hexo generate` 直接输出到这里**（`_config.yml` 的 `public_dir: docs`），`npm run build` 之后还会被 `tools/minify.js` 就地压缩（不改文件数）；产物**已被 git 跟踪**，随 `main` 一起提交推送 —— GitHub Pages 直接以 **main 分支的 `/docs` 目录**为发布源，**`docs/` 里有什么，线上就有什么**。
+- 纪律：**不要把非产物文件放进 `docs/`**（`.nojekyll` 是必需的例外）；`public/` 目录**已永久退役**，不要再手工创建它或往里搬东西。
+- **仓库文档资源不在产物里**：README 的深浅主题预览图（`preview-dark.png` / `preview-light.png`，2026-09-03 由 source 移出并更新为当前首页截图）与 `主题升级指南.md`（**nova 主题维护指南** —— nova 的结构、每类文件来源与维护方式，阶段6 主题迁移的产出；文内提到生成用的 `_snapshots/` 核算脚本已于 2026-09-13 随快照目录删除，需重算时按文内说明重建）现放在**仓库根目录的 `repository-docs/`**，不进产物、不会被 Pages 发布。
+  → 它们原先与产物混在同一个 `docs/` 目录里（`hexo generate` 不删孤儿文件，见 Hexo 坑⑦），2026-10-01 已移出：**`docs/` 现在是纯产物 = 123 文件**，`test/baseline.json` 的 `publicFiles` 也是 123；将来再挪动这类文件，记得移完重新构建并刷新基线（`npm run verify -- --update-baseline`），否则 `--strict` 会一直拿旧数字比对。
 
 ### `source/rose-galaxy/vendor/`（第三方库本地化，**勿删**）
 
@@ -248,38 +250,36 @@ P0(2026-09-11) 把外链库改为同源自托管，消除 jsDelivr 依赖。这�
 
 ## 构建与部署
 
-### 单仓双分支（源码 ↔ 产物，一一对应）
+### 单仓 · 单分支（源码 + 产物同走 `main`，Pages 从 `/docs` 发布）
 
-本仓**同一个 git 仓库的两个分支**，各自只推自己那一个分支；GitHub Desktop 里就是同一个仓库的两个分支，连接关系与下表一致：
+源码与产物都在**本仓 `main` 分支**上，没有第二个分支、没有兄弟目录 —— 克隆这一个仓库就能完成「构建 → 提交 → 上线」：
 
-| 分支 | 线上分支 | 内容 | 谁推它 |
-| --- | --- | --- | --- |
-| `main` | `main` | 源码（pug/scripts/source/_config） | 源码改动推这里（同步源码） |
-| `public` | `public` | 构建产物 = 本仓 `public/` 目录的内容（Pages 直接发布它） | 产物改动推这里（**上线由它决定**） |
+| 位置 | 内容 | 说明 |
+| --- | --- | --- |
+| 本仓 `main` 分支 | 源码（pug/scripts/source/_config）+ 产物 `docs/` | 所有改动都在这里做，改完推 `origin main` |
+| GitHub Pages | 直接以 **main 分支的 `/docs` 目录**为发布源 | 产物由构建生成；**上线只由 `docs/` 的内容决定** |
 
-- **`hexo generate` 直接输出到本仓 `public/`** —— `_config.yml` 的 `public_dir: public`（`public/` 已不再被 `.gitignore` 忽略, 它就是产物目录）。产品目录一律用 `tools/lib/public-dir.js` 解析，勿在脚本里硬编码 `public`。
+- **`hexo generate` 直接输出到本仓 `docs/`** —— `_config.yml` 的 `public_dir: docs`（`docs/` 不被 `.gitignore` 忽略, 它就是产物目录兼发布源）。产物目录一律用 `tools/lib/public-dir.js` 解析，勿在脚本里硬编码目录名。
 - **评论后端不在本仓**：Waline 是**独立仓库**、独立部署在 Vercel；前端通过 `_config.nova.yml` 的 `waline.serverURL`（`https://yibao11-github-io.vercel.app`）按 URL 引用它，前端改动通常不需要动它。
-- **源码与上线是两条线**：源码改动推 `origin main`（远端保存源码）；**真正上线的是 `public` 分支的产物提交** —— 只推 `main` 不会改变线上页面。
+- **源码与上线在同一个提交里**：没有"只推源码""只推产物"两条线了 —— `git push origin main` 之后 Pages 自动重建；**只改源码不构建 ⇒ 线上不会变**，因为 Pages 只发布 `docs/`。
 
-### 发布流程（改源码 → 同步源码 → 上线）
+### 发布流程（改源码 → 构建 → 提交推送 → 线上验证）
 
 1. 在本仓改源码并本地验证：`npm run build` + `npm test` + `npm run verify` 全绿
-2. 产物按第 1 步生成进本仓 `public/`（无需复制；生成即落位）
-3. **用户明确批准**后，把源码与产物分别提交到两个分支（顺序无关，但 `public` 才决定线上）：
+2. 产物按第 1 步生成进本仓 `docs/`（无需复制；生成即落位，且已被 main 跟踪）
+3. **用户明确批准**后一次性提交推送（源码与产物在同一个提交里一起走）：
    ```powershell
-   git add -A -- ':!public'     # 源码 → main 分支（public/ 已不被忽略, 需排除, 否则产物会混进 main 提交）
-   git commit -m "..." && git push origin main
-   # 产物 → public 分支：把本仓 public/ 的内容提交到 public 分支的根, 再 push origin public
+   git add -A && git commit -m "..." && git push origin main
    ```
 4. 线上验证：curl 关键路由(首页 / moments / articles / posts 示例 / projects / sitemap.xml) + 抽查资源版本号
 
-> ⚠️ **`hexo deploy` 不要再用**：它会在仓库根下重建 `.deploy_git` 并另推一条 public 历史，与本仓 `public` 分支打架（历史断裂会导致 Pages 不重建，需 `commit-tree` 修复）。产物统一由 `public` 分支推。
+> ⚠️ **`hexo deploy` 不要再用**（`npm run deploy` 同样别跑）：`_config.yml` 的 deploy 段仍指向 `yibao11.github.io` 的 **`public` 分支**，它会重建 `.deploy_git` 并强推一条与发布源无关的历史 —— 既不生效，又可能让"线上停在旧版"（历史断裂时 Pages 不重建，需 `commit-tree` 修复）。产物统一由 `main` 分支的 `docs/` 推。
 
 ```bash
 npm run build     # hexo generate && node tools/minify.js && node tools/smoke.js
 npm run server    # 本地预览(默认 4000; 惯用 -p 4015)
-npm test          # 68 项单元测试
-npm run verify    # 结构断言 10 项; 加 --strict 为 18 项(含基线比对)
+npm test          # 69 项单元测试
+npm run verify    # 结构断言 11 项; 加 --strict 为 19 项(含基线比对)
 ```
 
 > **`npm run build` 失败即非零退出** —— 2.1 修复(阶段2)后 minify 单文件失败会置非零,冒烟检查失败同样非零。构建返回非零**不要忽略**。
@@ -292,11 +292,11 @@ npm run verify    # 结构断言 10 项; 加 --strict 为 18 项(含基线比对
 > 强制规则（2026-08-27 立此存照；分期台账 STRUCTURE-REFACTOR.md 已归档下架，历史见 `CHANGELOG.md`）：
 
 1. 所有改动在本仓完成并本地验证（`npm run build` + `npm test` + `npm run verify`）；需要隔离试验时另建临时副本（不属于产品链路），其改动最终仍要回到本仓。
-2. **未经用户明确批准，禁止任何提交/推送/部署**（git push / GitHub Pages / `main` 与 `public` 两个分支 / Waline 后端仓库）。发布动作必须逐次明确授权。
+2. **未经用户明确批准，禁止任何提交/推送/部署**（git push / GitHub Pages / `main` 分支 / Waline 后端仓库）。发布动作必须逐次明确授权。
 3. 结构性/行为性决策先询问用户。
 4. 修复完成后只汇报验证结果并请求批准；禁止以"已验证/惯例/之前授权过"为由自行发布。
 5. GitHub 提交注释一律**英文简洁**(如 "Globalize page CSS into inject.head … v20260831-p37")。
-6. **源码推 main,上线看 public**:本仓源码改动推 `origin main` 同步源码;但**线上页面只由 `public` 分支的产物提交改变** —— 只推 `main` 不影响线上。
+6. **源码与上线在同一个提交里**:改完推 `origin main`(源码 + `docs/` 产物一起走);Pages 只发布 `docs/`,所以**只改源码不构建（`docs/` 没变）线上就不会变**。
 
 ---
 
@@ -309,7 +309,7 @@ npm run verify    # 结构断言 10 项; 加 --strict 为 18 项(含基线比对
 3. **编辑前先停 hexo server**(Windows 文件锁 → edit `ReplaceFileW EIO`);改 `scripts/*.js`、`_config*.yml`、**模板 `.pug`/`.html`** 后必须**重启 server** 再验证。
 4. **改模板后必须全量重建**:`npm run build` 走增量缓存,改了 `.pug` 也不会重生成所有页面 → 需 `.\node_modules\.bin\hexo.cmd generate --force`。**判据检查通过 ≠ 目标页已更新**。
 5. **页级 CSS 只有一处来源**:`_config.nova.yml inject.head`。**勿**恢复 head extraCss / body 内 PAGE_STYLES 双份机制(2026-09-03 A 方案已全局化, 死代码已清)。
-6. **发布流程**:`npm run build`(产物自动落本仓 `public/`)→ 用户批准后把本仓 `public/` 的内容提交到 `public` 分支 + `push origin public`。**`hexo deploy` 已弃用**(会在仓库根下重建 `.deploy_git` 另推一条 public 历史,与 `public` 分支打架)。
+6. **发布流程**:`npm run build`(产物自动落本仓 `docs/`,已被 main 跟踪)→ 用户批准后 `git add -A && git commit -m "..." && git push origin main`。**`hexo deploy` 已弃用**(它会在仓库根下重建 `.deploy_git`,强推一条与发布源无关的 `public` 分支历史)。
 7. **SCF 云函数**:响应勿加自定义 `Content-Length`(网关注入双 CT);前端 fetch 按响应体字节判定 base64, 勿再改回 audio 直连(网关注入 `application/json`, 实测不可行)。
 8. **hero 双海报只加载当前主题那一张**(单图策略 2026-09-13):`night.webp`/`day.webp` 通过 `--nova-hero-bg` 变量二选一(未生效的变量值不触发请求),另一张由 `nova-ux.js initHeroThemeSwap` 在切主题时按需加载 + 交叉淡入。**勿改回"两图都写在 CSS 里 + opacity 切换"** —— 浏览器会为 `opacity:0` 的 `::after` 也发请求,深色模式下白下载 `day.webp` 271 KB(实测)。
 
@@ -317,25 +317,27 @@ npm run verify    # 结构断言 10 项; 加 --strict 为 18 项(含基线比对
 
 1. **hexo 用 vm 包装加载 scripts/*.js**：`(async function(exports, require, module, __filename, __dirname, hexo){...})`——`hexo` 只作为参数传给**被直接加载的脚本**；**内部 `require` 的模块拿不到 hexo**（写共享模块勿在顶层用 hexo——曾致 "hexo is not defined"/"not a function"）。共享模块要么不依赖 hexo（如 site-config.js 直接读 yml），要么导出工厂由生成器传参——后者同样可能有加载顺序问题，**首选零依赖方案**。
 2. **hexo 会执行 scripts/ 下所有 .js**：一次性工具(顶层立即写文件)放这里会污染源文件——`pure_parts.js`/`extract_parts.js`/`slice_footer.js` 曾把 page-parts 与 footer.html 覆盖回旧版（"双 nav/横幅丢失"的元凶），后来连同 `py-tools/` 目录一并移除。
-3. **hexo server 不热加载配置/模板/插件**：改 `scripts/`、`_config*.yml`、**`.pug`/`.html` 模板**后必须**重启 server**；且 **server 会用内存旧脚本/旧模板重新生成并覆盖 public**——改动生成器后请**先停 server** 验证，验证完再重启。**server 占用文件时编辑器会报 `ReplaceFileW EIO`**，改文件前先停 server。
+3. **hexo server 不热加载配置/模板/插件**：改 `scripts/`、`_config*.yml`、**`.pug`/`.html` 模板**后必须**重启 server**；且 **server 会用内存旧脚本/旧模板重新生成并覆盖 `docs/`**——改动生成器后请**先停 server** 验证，验证完再重启。**server 占用文件时编辑器会报 `ReplaceFileW EIO`**，改文件前先停 server。
    ⚠️ 实测(2026-09-11)：改了 `head.pug` 后用本地预览(当时 4007)，页面**仍请求 CDN**，而 `generate` 产物已正确 —— 即 **server 用缓存的旧模板渲染**。识别方法：对比"server 返回的 HTML"与"产物目录里的文件"。
 4. **浏览器缓存**：CSS/JS 版本号未变时，强刷(Ctrl+Shift+R)或隐私窗口验证。
-5. **hexo partial `cache: true` 会缓存旧模板**：改 partial 后不生效，改用 `include` 或删 db.json + `hexo clean`。
+5. **hexo partial `cache: true` 会缓存旧模板**：改 partial 后不生效，改用 `include` 或删 db.json 后重新 generate（**别顺手 `hexo clean`**——它会删掉整个产物目录，见坑⑲）。
 6. **Hexo excerpt 是渲染后的 HTML**：生成摘要须先剥离 HTML 标签，否则残留未闭合标签破坏卡片 DOM。
-7. **hexo generate 不删孤儿文件**：删除文章/页面后需 `hexo clean` 再 generate；偶尔 `2026/`/空目录残留需手动删（server 竞争或 clean 未彻底时）。
+7. **hexo generate 不删孤儿文件**：删除文章/页面后**不要用 `hexo clean`**（它会删掉整个产物目录 `docs/`，见坑⑲）——用 `npx hexo generate --force` 重建；个别残留的空目录（如旧 `posts/<标题>/`）手动删掉即可。
 8. **headless 截图陷阱**：虚拟时钟会冻结入场动画、缓存旧 CSS，验证用全新 profile + 像素采样。
 9. **基线 `publicFiles` 随资源增减变化**：每次加/删资源都会让 `npm run verify -- --strict` 失败，属预期 → 用 `--update-baseline` 刷新；**但要在删完临时文件之后再刷**，否则基线会记下错误数字。
 10. **SCF 网关注入**:`Content-Type: application/json` 被强制附加(双头),二进制音频经 **base64 文本**传输;`audio.src` 直连会被浏览器拒播——前端必须 fetch→字节判定→base64 解码→Blob。
-11. **`hexo deploy` 会另起一条 public 历史**:它在仓库根下建 `.deploy_git` 并强推 public 分支,新提交若成孤儿(无共同祖先)Pages 不会重建,线上停在旧版。**已弃用**——产物统一由本仓 `public` 分支推送(见「构建与部署」)。
+11. **`hexo deploy` 会另起一条 public 历史**:它在仓库根下建 `.deploy_git` 并强推 public 分支,新提交若成孤儿(无共同祖先)Pages 不会重建,线上停在旧版。**已弃用**——`_config.yml` 的 deploy 段仍指向 `public` 分支,而 Pages 只认 main 的 `/docs`,推上去既不生效又添乱;产物统一随 `main` 提交(见「构建与部署」)。
 12. **主题版 PJAX / additional-js 为孤儿**:自制 `base.pug` 无渲染链,`theme.pjax.enable` 永远不要开(注释已写);要改 PJAX 只改 `parts-common/footer.html`。
 13. **agent 编辑纪律**:删除任何文件前确认「它是上游副本/一次性工具/被其他文件引用」;一次性脚本严禁放入 `scripts/`(hexo 会执行脚本目录全部 .js)。
-14. **hexo 增量构建:改模板不会重生成所有页面**(2026-09-11 实测):改了 `themes/**/projects.pug` 后 `npm run build` 报 `3 files generated`,`public/projects/index.html` 里**旧内容仍在**。→ 改 `.pug`/`.html` 后必须 `hexo generate --force`;**判据检查通过 ≠ 该页已更新**。
+14. **hexo 增量构建:改模板不会重生成所有页面**(2026-09-11 实测):改了 `themes/**/projects.pug` 后 `npm run build` 报 `3 files generated`,`docs/projects/index.html` 里**旧内容仍在**。→ 改 `.pug`/`.html` 后必须 `hexo generate --force`;**判据检查通过 ≠ 该页已更新**。
 15. **pug 在 `script.` 块内写 `//-` 不会被当注释**:它会被原样输出到产物 JS 文本里(实测产物出现 `//- 阶段5...`)。模板注释(`//-`、`//`)要写在**脚本块之外**。
 16. **`head_begin` 注入时机 `document.body` 不存在**:`scripts/inject-theme.js` 通过 injector 注入 `<head>`,此时 body 尚未解析 → 用 `document.body.classList.contains(...)` 判页面类型**永远为假**(曾导致首页 hero preload 完全没生效)。该时机请改用 URL 路径判定,如 `location.pathname === '/'`。
 17. **"零影响"测试会被运行时 DOM 欺骗**:静态扫 CSS 规则命中数得 `nova-player.css` = 0/240,据此判定"可删注入"是**错的** —— `.nova-mini-player` 由 `nova-player.js` 的 `buildMiniBar()` **运行时创建**(注释写明"非音乐页常驻"),静态永远看不到。→ 剔除/删除测试必须**触发真实交互**(如点播放)后再测;否则只能证明"当前静态状态无影响"。
-18. **minify 的 ENOENT 是竞态,不是"偶发"**(协调窗口定位,阶段2.1 已修):根因是 `walk()` 先枚举 `public/` 全部文件形成快照,再由 `statSync`/`readFileSync` 逐个读取,而这两个 IO **位于 try 之外**——快照与读取之间文件消失即抛未捕获异常,`main().catch` 直接 `process.exit(1)`,构建红掉。触发者是**并发写同一 `public/`**,最可能是 `hexo server` 与 `hexo generate` 同时运行(所以"重跑一次就好"只是碰运气避开窗口,**不是修复**)。
+18. **minify 的 ENOENT 是竞态,不是"偶发"**(协调窗口定位,阶段2.1 已修):根因是 `walk()` 先枚举 `docs/` 全部文件形成快照,再由 `statSync`/`readFileSync` 逐个读取,而这两个 IO **位于 try 之外**——快照与读取之间文件消失即抛未捕获异常,`main().catch` 直接 `process.exit(1)`,构建红掉。触发者是**并发写同一 `docs/`**,最可能是 `hexo server` 与 `hexo generate` 同时运行(所以"重跑一次就好"只是碰运气避开窗口,**不是修复**)。
     → **阶段 2.1 已实施修复**:那两个 IO 已移入 try;且该文件已从 `scripts/` 移到 `tools/minify.js`。校验方法:读 `tools/minify.js`,`statSync`/`readFileSync` 应在 `try {}` 块内。
-    本站另在**单文件失败非零退出**与**构建后冒烟检查(10 项)**两处加固,`npm run build` 返回非零不可忽略。
+    本站另在**单文件失败非零退出**与**构建后冒烟检查(11 项)**两处加固,`npm run build` 返回非零不可忽略。
+
+19. **`hexo clean` 会删掉整个产物目录 `docs/`**(2026-10-01 实测:输出 `Deleted public folder.`,连手工放进产物目录里的探针文件一起删):产物目录现在**同时是 GitHub Pages 的发布源**,被清掉后 `docs/` 整个消失、线上全 404,**必须重新 `npm run build`** 才能恢复 —— 所以 `npm run clean`(=`hexo clean`)只在"确定马上重建"时用。需要强制重生成时用 `npx hexo generate --force`(坑⑭ 的 `--force` 就是这条路径,不必先 clean);`npm run build` 本身只覆盖不删除,重复构建不会清掉遗留文件(坑⑦ 的孤儿文件正是这么留下的)。
 
 ---
 
@@ -366,9 +368,9 @@ npm run verify    # 结构断言 10 项; 加 --strict 为 18 项(含基线比对
 | 首页 hero 塌陷、白区 | 曾因 LATEST/闭合链双份(P1b 提取遗留)——检查 `home-parts/top.html` 占位 `<!--NOVA-LATEST-->` 与 `mid.html` 无旧闭合链；产物中 `nova-latest-signal`/`nova-scroll-hint` 应各 1 处 |
 | 生成器不输出(xml/索引缺失) | `scripts/` 加载失败(hexo is not defined / not a function) → 检查共享模块是否顶层用了 hexo；`ERROR Script load failed` 必先看 |
 | 文件被"还原" | `scripts/` 混入一次性工具 → 立即移出；从 git 恢复受影响的文件 |
-| 改动不生效 | hexo server 未重启(内存旧脚本/旧产物) → 停 server→clean→generate→重启 |
+| 改动不生效 | hexo server 未重启(内存旧脚本/旧产物) → 停 server→`hexo generate --force`→重启（**勿用 `hexo clean`**：它会删掉整个产物目录 `docs/`，见坑⑲） |
 | **改了模板但目标页没变** | hexo 增量构建未重生成该页 → `hexo generate --force`；不要因为冒烟检查通过就以为页面已更新（坑⑬） |
-| **预览用旧模板、产物却正确** | `hexo server` 缓存了 pug 模板 → 重启 server；对比"server 返回 HTML"与"public 产物"可确认（坑③） |
+| **预览用旧模板、产物却正确** | `hexo server` 缓存了 pug 模板 → 重启 server；对比"server 返回 HTML"与"docs/ 产物"可确认（坑③） |
 | **整站图标消失 / PJAX 失效 / 图片不能放大** | `source/rose-galaxy/vendor/` 被当"未使用资源"删了 → 从 git 恢复；这 4 个库只由 `head.pug`/`footer.html` 路径引用，源码里搜不到（操作守则 2） |
 | **首页 hero 预加载没生效** | 检查 `inject-theme.js` 是否又用了 `document.body` 判首页（该注入时机 body 不存在）→ 改用 `location.pathname`（坑⑮） |
 | **首页出现两张海报都下载 / 非当前主题那张白下载 271 KB** | CSS 里给 `.nova-hero-bg::after` 写死了背景图 → 改回无背景(单图策略);换图只改 `--nova-hero-bg` 变量（操作守则 8） |

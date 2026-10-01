@@ -32,8 +32,8 @@ const sizeOf = name => {
 }
 const readIf = p => { try { return fs.readFileSync(p, 'utf8') } catch (e) { return '' } }
 
-// 跳过版本控制与部署残留目录: 产物目录 public/ 就在本仓内, .git 是同一个仓库的(位于仓库根,
-// 不在 public/ 下); 保留 .git/.deploy_git 的排除是为了兜底 —— 一旦产物目录里出现这类残留,
+// 跳过版本控制与部署残留目录: 产物目录 docs/ 就在本仓内, .git 是同一个仓库的(位于仓库根,
+// 不在 docs/ 下); 保留 .git/.deploy_git 的排除是为了兜底 —— 一旦产物目录里出现这类残留,
 // 其中的内部文件会被算进"产物文件数"。
 const SKIP_DIRS = new Set(['.git', '.deploy_git', 'node_modules'])
 

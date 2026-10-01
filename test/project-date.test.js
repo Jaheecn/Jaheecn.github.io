@@ -109,7 +109,18 @@ test('④ 目录为空(仅目录 mtime) -> 不抛错且返回日期格式', () =
 })
 
 test('返回值必须是 YYYY-MM-DD 或原样 date(供模板做 datetime 属性)', () => {
-  const got = projectUpdated({ downloads: [{ url: linkOf('琛光无人机') }] })
-  assert.match(got, /^\d{4}-\d{2}-\d{2}$/)
-  assert.strictEqual(got.length, 10)
+  /* 直接喂当前工程数据, 不写死目录名 —— 工程改名/增删后本用例仍应有效。
+     模板用它渲染 <time datetime="...">, 所以每个工程都必须拿到合法的 YYYY-MM-DD。 */
+  const projects = require(path.join(ROOT, 'scripts', 'projects-data.js'))
+  assert.ok(Array.isArray(projects) && projects.length > 0, '工程数据不应为空')
+  for (const p of projects) {
+    const got = projectUpdated(p)
+    assert.match(got, /^\d{4}-\d{2}-\d{2}$/, `工程 ${p.id} 的日期格式不合法: ${JSON.stringify(got)}`)
+    assert.strictEqual(got.length, 10)
+  }
+})
+
+test('资产目录不存在时回退到 date, 且不抛错', () => {
+  const got = projectUpdated({ downloads: [{ url: linkOf('__does_not_exist__') }], date: '2026-09-18' })
+  assert.strictEqual(got, '2026-09-18')
 })

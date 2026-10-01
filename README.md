@@ -6,14 +6,14 @@
 
 | 深色主题 | 浅色主题 |
 | --- | --- |
-| ![深色主题预览](docs/preview-dark.png) | ![浅色主题预览](docs/preview-light.png) |
+| ![深色主题预览](repository-docs/preview-dark.png) | ![浅色主题预览](repository-docs/preview-light.png) |
 
 **站点由四类内容构成**
 
 | 版块 | 路径 | 说明 |
 | --- | --- | --- |
-| 文章 | `/articles/`、`/posts/<标题>/` | 15 篇：Markdown 写作工作流 8 篇 + 辞赋 5 篇 + 词 2 篇 |
-| 工程 | `/projects/`、`/projects/<id>/` | 5 个动手项目：单片机 3 + 建模 2 |
+| 文章 | `/articles/`、`/posts/<标题>/` | 13 篇：Markdown 语法 5 篇 + 赋文 5 篇 + 诗词 2 篇 + 工具 1 篇 |
+| 工程 | `/projects/`、`/projects/<id>/` | 5 个动手项目：pikachu / bluelotus / phpstudy / ssms / vmware |
 | 说说 | `/moments/` | 评论即说说，日常片段 |
 | 音乐 | `/music/` | B 站收藏夹歌单，悬浮窗跨页播放 |
 
@@ -25,12 +25,12 @@
 npm install          # 首次安装依赖
 
 npm run server       # 本地预览 http://localhost:4000
-npm run build        # 生成 public/：hexo generate → minify → 冒烟检查
-npm run clean        # 清理 public/ 与缓存
+npm run build        # 生成 docs/（GitHub Pages 的发布源）：hexo generate → minify → 冒烟检查
+npm run clean        # ⚠️ hexo clean 会删掉整个产物目录 docs/，之后必须重新 npm run build
 
-npm test             # 单元测试 68 项
-npm run verify       # 结构断言 10 项
-npm run verify -- --strict   # 结构 + 基线比对 18 项
+npm test             # 单元测试 69 项
+npm run verify       # 结构断言 11 项
+npm run verify -- --strict   # 结构 + 基线比对 19 项
 ```
 
 **改完东西怎么验**：`npm run build` 会在生成后自动跑冒烟检查，**失败即非零退出**。它检查产物文件数、三个生成物字节数、首页排序首项等关键指标，是最省事的回归手段。
@@ -38,7 +38,7 @@ npm run verify -- --strict   # 结构 + 基线比对 18 项
 **本地预览的两个注意点**
 
 - 改动 `scripts/*.js`、`_config*.yml`、模板后**必须重启 server**，否则预览用内存里的旧版本
-- 需要验证"真实产物"时**先停 server** 再 build，避免 server 与 generate 争抢 `public/`
+- 需要验证"真实产物"时**先停 server** 再 build，避免 server 与 generate 争抢 `docs/`
 
 **改坏了怎么发现**：`npm run verify -- --strict` 会拿产物与基线快照比对（文件数、文章目录数、三个生成物的字节数、首页排序首项）。**正常新增文章或工程后**，用 `npm run verify -- --update-baseline` 刷新基线；其余情况出现基线不符就说明出了问题。
 
@@ -50,11 +50,9 @@ npm run verify -- --strict   # 结构 + 基线比对 18 项
 
 ```
 Yibao-web/
-├── _config.yml                Hexo 站点配置，permalink: posts/:title/、public_dir: public
+├── _config.yml                Hexo 站点配置，permalink: posts/:title/、public_dir: docs
 ├── _config.nova.yml           主题配置：导航 / 搜索 / 资源注入 / 评论（原 _config.butterfly.yml）
 ├── package.json               Hexo 8.1.2 + 插件
-│
-├── public/                    ★ 构建产物目录，由 npm run build 生成；发布到本仓 public 分支
 │
 ├── scripts/                   Hexo 插件与生成器，只能放这类文件
 │   ├── site-config.js         ★ 站点配置单源，SITE 从 _config.yml 读取
@@ -76,7 +74,7 @@ Yibao-web/
 │   └── lib/public-dir.js      产物目录解析（读 _config.yml 的 public_dir）
 │
 ├── source/                    网站源文件
-│   ├── _posts/                15 篇文章 Markdown
+│   ├── _posts/                13 篇文章 Markdown
 │   ├── img/                   图片，按用途分层：hero / music / brand / misc / covers / projects
 │   ├── rose-galaxy/           ★ 自研定制层
 │   │   ├── css/               每页一个样式文件，类名前缀 nova-
@@ -103,13 +101,13 @@ Yibao-web/
 │   ├── music-playlist.json    歌单缓存
 │   └── refresh-music-playlist.js
 │
-├── docs/                      仓库文档，不随站点发布
-│   ├── preview-dark.png       预览图
-│   ├── preview-light.png
-│   └── 主题升级指南.md         nova 主题维护指南：结构、文件来源与维护方式
+├── docs/                      ★ 构建产物目录 = GitHub Pages 发布源（main 分支的 /docs）
+│   └── index.html 等           hexo generate + minify 的输出，已被 git 跟踪，随 main 一起推
+│
+├── repository-docs/           仓库文档资源：README 的深浅主题预览图 + 主题升级指南.md，不进产物
 │
 ├── test/                      测试与基线
-│   ├── *.test.js              node:test 单测，68 项
+│   ├── *.test.js              node:test 单测，69 项
 │   └── baseline.json          基线比对基准
 │
 ├── README.md                  本文档，面向使用者
@@ -129,7 +127,7 @@ Yibao-web/
 | 评论后端 | Waline v2，Vercel serverless + Neon PostgreSQL |
 | 字体 | 自托管 woff2 |
 | 第三方库 | FontAwesome / pjax / medium-zoom / infinitegrid 均已本地化，见 `source/rose-galaxy/vendor/` |
-| 部署目标 | GitHub Pages，根路径 |
+| 部署目标 | GitHub Pages：直接从 main 分支的 `/docs` 目录发布，根路径 |
 
 ---
 
@@ -169,7 +167,7 @@ Markdown 是一种轻量级的标记语言……
 | `url` | 否 | 底部版权卡"文章链接"指向的来源，作者名链接同步跟随。填"无"则显示为"无" |
 | `description` | 否 | 卡片摘要。不填则取正文首段，去 Markdown 符号后截 90 字 |
 
-**第二步**：`hexo clean && hexo generate`。
+**第二步**：`npx hexo generate --force`（**不要用 `hexo clean`**——它会删掉整个产物目录 `docs/`，删完必须重新构建）。
 
 **自动完成的事**：文章页生成、标签页更新或新建、`/articles/` 索引更新、`search.xml` / `sitemap.xml` / `atom.xml` 更新。填了 `order` 还会自动上首页。
 
@@ -183,18 +181,18 @@ Markdown 是一种轻量级的标记语言……
 {
   id: 'my-project',                 // 详情页路由名，唯一，小写加连字符
   title: '我的项目',
-  category: '单片机',                // 列表页显示的分类
-  categoryKey: 'mcu',               // 分组键：mcu 或 model
+  category: '安全工具',              // 列表页显示的分类（现有：虚拟机 / 数据库 / Web 环境 / 安全工具）
+  categoryKey: 'sec',               // 分组键，与 category 配套（现有：vm / db / web / sec）
   subtitle: '一句话副标题',
   date: '2026-08-27',               // 发表于，可省略
   description: '列表卡片简介，两行左右',
-  tags: ['STM32', 'PCB'],
+  tags: ['SQL 注入', 'XSS'],
   intro: '详情页介绍正文，支持段落，建议 300-500 字',
   cover: '/img/projects/my-project.webp',
   link: 'https://github.com/...',   // 源工程链接，可无
   linkLabel: 'GitHub',
-  downloads: [                      // 下载文件，可无
-    { name: '固件包.zip', url: '/assets/projects/我的项目/固件包.zip', sizeLabel: '12.4 MB', desc: '说明' }
+  downloads: [                      // 下载文件，可无（现有 5 个工程都是空数组，模板会自动隐藏该区块）
+    { name: '工具包.zip', url: '/assets/projects/我的项目/工具包.zip', sizeLabel: '12.4 MB', desc: '说明' }
   ]
 }
 ```
@@ -206,7 +204,7 @@ Markdown 是一种轻量级的标记语言……
 
 **第三步**：需要下载文件的话，放到 `source/assets/projects/我的项目/`，文件名与 `downloads[].url` 一致。
 
-**第四步**：`hexo clean && hexo generate`。列表卡片、详情页、右栏"其他工程"、概览统计都会自动更新。工程不进 feed，`search.xml` / `sitemap.xml` / `atom.xml` 不含工程。
+**第四步**：`npx hexo generate --force`（**不要用 `hexo clean`**，理由同第二步）。列表卡片、详情页、右栏"其他工程"、概览统计都会自动更新。工程不进 feed，`search.xml` / `sitemap.xml` / `atom.xml` 不含工程。
 
 ### 换页面背景图
 
@@ -382,7 +380,7 @@ Markdown 是一种轻量级的标记语言……
 | `README.md` | 使用者 | 本文档：怎么用、怎么加内容、各版块怎么运作 |
 | `AGENT.md` | AI / Agent | 维护手册：架构事实、操作守则、工程坑、排障清单 |
 | `CHANGELOG.md` | 追溯者 | 详细变更日志，逐条改动与文件清单 |
-| `docs/主题升级指南.md` | 维护者 | nova 主题维护指南：结构、每类文件来源、维护方式 |
+| `repository-docs/主题升级指南.md` | 维护者 | nova 主题维护指南：结构、每类文件来源、维护方式 |
 | `data/views-cache.md` | 维护者 | 浏览量缓存的字段含义与手动调整方法 |
 
 ---
@@ -414,13 +412,13 @@ Yibao-web 从一份静态站导出产物，长成现在这个带生成器、双�
 
 ## 相关仓库
 
-线上仓库 `yibao11/yibao11.github.io` 有 `main` 与 `public` 两个分支，**本地就是这一个仓库**（单仓自包含，克隆它即可完成「构建 → 提交 → 上线」）：
+线上仓库 `yibao11/yibao11.github.io`，**本地就是这一个仓库**（单仓自包含，克隆它即可完成「构建 → 提交 → 上线」）：源码与产物都在 `main` 分支上，**GitHub Pages 直接以 `main` 分支的 `/docs` 目录为发布源**。
 
-| 位置 | 线上分支 | 用途 |
+| 位置 | 内容 | 说明 |
 | --- | --- | --- |
-| 本仓 `main` 分支 | `main` | 源码（`scripts/` `source/` `themes/` `_config*.yml`） |
-| 本仓 `public` 分支 | `public` | GitHub Pages 产物，即本仓 `public/` 目录的内容；`npm run build` 直接生成到这里 |
+| 本仓 `main` 分支 | 源码（`scripts/` `source/` `themes/` `_config*.yml`） | 所有改动都在这里做 |
+| 本仓 `docs/` 目录 | GitHub Pages 产物（`npm run build` 生成的静态站） | 已被 git 跟踪，随 `main` 一起推；**只有它会改变线上页面** |
 
-源码改动推 `main`（同步源码），上线推 `public`（产物）——**只有 `public` 会改变线上页面**。GitHub Desktop 里这就是同一个仓库的两个分支。
+上线 = 构建后把 `main` 提交推送（产物已在 `docs/` 里，与源码同一个提交一起走），Pages 会自动重建。**`hexo deploy` 已弃用**，不要再走"推产物分支"那条老路。
 
 > 评论后端 Waline 是**另一个独立仓库**，已部署在 Vercel；本站只通过 `_config.nova.yml` 的 `waline.serverURL` 按 URL 引用它，克隆本仓不依赖它。

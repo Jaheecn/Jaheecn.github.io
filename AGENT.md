@@ -93,7 +93,7 @@ hexo 加载 scripts/*.js(插件/生成器) + themes/nova/layout/*.pug(模板, �
 | `site-config.js` | Node 构建期配置单源：`SITE`(从 `_config.yml` 的 url 解析，**顶层不碰 hexo**——见 Hexo 坑①) |
 | `parts-common.js` | 公共壳组装函数 + 组件读取(loading/sidebar/nav/footer/评论/按钮) |
 | `nova-tags.js` | 标签/索引页 + `search.xml`/`sitemap.xml`/`atom.xml` 生成器；`fmtDate` 来自 `lib/date.js`；search.xml 含歌曲条目(构建期抓取) |
-| `lib/music-playlist.js` | 音乐歌单(搜索索引数据源)：构建时请求 B 站云函数 `/api/playlist`，成功回写 `data/music-playlist.json` 缓存，失败用缓存兜底；加减歌曲零人工 |
+| `lib/music-playlist.js` | 音乐歌单(搜索索引数据源)：构建时请求网易云云函数 `/api/playlist`，成功回写 `data/music-playlist.json` 缓存，失败用缓存兜底；加减歌曲零人工 |
 | `home-generator.js` | 首页：shellTop + hero 段(LATEST 动态注入)+ mid(精选工程/最新文章卡注入)+ 页级 bottom + 公共尾；P5 数据规则见「首页 P5 数据流」 |
 | `page-generator.js` | 静态页：PAGES 配置表(pageClass/headerCls/mainCls/pre/showExtra/pageScripts) |
 | `projects-generator.js` | 工程页：列表 + 详情(下载链接由 `SITE + encodeURI(url)` 生成)；更新日期统一走 `lib/project-date.js` |
@@ -217,7 +217,7 @@ P0(2026-09-11) 把外链库改为同源自托管，消除 jsDelivr 依赖。这�
 | 配置件 | 位置 | 内容 | 维护提示 |
 | --- | --- | --- | --- |
 | Node 构建期 | `scripts/site-config.js` | `SITE` | 从 `_config.yml` 读；改域名改 yml |
-| 前端运行时 | `source/rose-galaxy/js/lib/site-config.js` | `window.NOVA_SITE.bili`(云函数代理/UID/收藏夹) | 换 B 站源只改这里；加载顺序:yml inject.head 位于 nova-player.js 之前(defer 保序) |
+| 前端运行时 | `source/rose-galaxy/js/lib/site-config.js` | `window.NOVA_SITE.music`(云函数代理/歌单 ID) | 换网易云歌单只改这里；加载顺序:yml inject.head 位于 nova-player.js 之前(defer 保序) |
 | 前端工具 | `source/rose-galaxy/js/lib/utils.js` | `window.NOVA_UTILS.formatTime / songName / songArtist` | 播放器/音乐页共用(C7/C10 收敛) |
 | 日期工具 | `scripts/lib/date.js` | `fmtDate` | |
 | 文章更新时间 | `scripts/post-date.js` | 改写 `post.updated`(git 提交日优先) | 改文章日期只用 front matter `updated:`；**勿依赖 `_config.yml` 的 `updated_option: mtime`** |
@@ -345,7 +345,7 @@ npm run verify    # 结构断言 11 项; 加 --strict 为 19 项(含基线比对
 
 - **写文章**：见 README「加文章」。
 - **加工程**：见 README「加工程」。
-- **换 B 站收藏夹源**：改 `source/rose-galaxy/js/lib/site-config.js` 的 `NOVA_SITE.bili` → bump `utils.js?` 无需，但 **bump site-config.js 引用处版本号**(yml inject) 防缓存。
+- **换网易云歌单源**：改 `source/rose-galaxy/js/lib/site-config.js` 的 `NOVA_SITE.music` → bump `utils.js?` 无需，但 **bump site-config.js 引用处版本号**(yml inject) 防缓存。
 - **换页脚横幅图**：替换 `source/img/hero/archive-bg.webp`(保持文件名)；改色 → `custom.css` 两套规则；**勿在页级 css 加 footer 背景**。
 - **换页面 hero 背景**：页面级 css(`{page}-page.css`)中对应 `#page-header`/`.nova-hero-bg` 规则 → 图片放 `img/hero/` → bump 该 css 版本号。
   - **首页(深浅双海报)**:不写 `background-image`,而是给两个主题变量各写一张 —— `html[data-theme="dark"] body.nova-home-active{--nova-hero-bg:url(night)}` / `[light]{...url(day)}`;换图只改变量值。`::after` 交叉淡入层默认无背景(单图策略),由 `nova-ux.js initHeroThemeSwap` 在切主题时注入 → **勿在 CSS 里给 `::after` 写死背景图**,那会让两张海报都被无条件下载(实测非当前主题那张白下载 271 KB)。

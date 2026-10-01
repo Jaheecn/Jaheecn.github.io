@@ -15,7 +15,7 @@
 | 文章 | `/articles/`、`/posts/<标题>/` | 13 篇：Markdown 语法 5 篇 + 赋文 5 篇 + 诗词 2 篇 + 工具 1 篇 |
 | 工程 | `/projects/`、`/projects/<id>/` | 5 个动手项目：pikachu / bluelotus / phpstudy / ssms / vmware |
 | 说说 | `/moments/` | 评论即说说，日常片段 |
-| 音乐 | `/music/` | B 站收藏夹歌单，悬浮窗跨页播放 |
+| 音乐 | `/music/` | 网易云音乐歌单，悬浮窗跨页播放 |
 
 ---
 

@@ -67,7 +67,7 @@
     state.className = 'nova-search-state'
     state.innerHTML = `
       <span class="nova-search-state__eyebrow">QUICK PASSAGE</span>
-      <strong>从这里进入夜航档案</strong>
+      <strong>从这里进入站内档案</strong>
       <p>输入关键词，或先浏览常用页面。</p>
       <nav aria-label="搜索快速入口">
         <a href="/articles/">文章</a>
@@ -87,7 +87,7 @@
         state.querySelector('p').textContent = '换一个更短的关键词，或从快速入口继续浏览。'
       } else {
         state.querySelector('.nova-search-state__eyebrow').textContent = 'QUICK PASSAGE'
-        state.querySelector('strong').textContent = '从这里进入夜航档案'
+        state.querySelector('strong').textContent = '从这里进入站内档案'
         state.querySelector('p').textContent = '输入关键词，或先浏览常用页面。'
       }
     }
@@ -528,6 +528,7 @@
     try {
       const v = sessionStorage.getItem(newKey)
       if (v !== null) return v
+      if (!legacyKey) return null
       const old = sessionStorage.getItem(legacyKey)
       if (old !== null) {
         try { sessionStorage.setItem(newKey, old); sessionStorage.removeItem(legacyKey) } catch (_) {}
@@ -537,13 +538,12 @@
     return null
   }
   const THEME_SESSION_KEY = 'nova-theme-session'
-  const THEME_SESSION_KEY_LEGACY = 'marlin-theme-session'
   const LOADING_SHOWN_KEY = 'nova-loading-shown'
   const LOADING_SHOWN_KEY_LEGACY = '__novaLoadingShown'
 
   const getSessionTheme = () => {
     try {
-      const value = readStoredKey(THEME_SESSION_KEY, THEME_SESSION_KEY_LEGACY)
+      const value = readStoredKey(THEME_SESSION_KEY)
       return value === 'dark' || value === 'light' ? value : null
     } catch (e) {
       return null

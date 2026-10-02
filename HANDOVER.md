@@ -1,6 +1,10 @@
 # 接管须知
 
-> 给刚拿到这个站的人和她/他的 AI 助手。**先读完这一页**，再看 `AGENT.md`（长期维护手册，写得很全）。
+> **这是原站主写给新站主的交接文档。**
+> 站点已从原站主名下**完整移交**给新站主：源码仓库、评论后端、音乐后端，以及 GitHub / Vercel / Neon / 腾讯云四个平台的账号，全部归新站主所有。
+> **不需要再注册任何账号**，直接用已经交接给你的账号登录即可。
+>
+> 建议顺序：先读这一页 → 再读 `AGENT.md`（长期维护手册，写得很全）。
 > 更新：2026-10-02
 
 ## 0. 三十秒定位
@@ -21,7 +25,7 @@
 
 ## 1. ⚠️ 第一件事：让本地仓库连上线上（必做）
 
-你收到的 `site` 压缩包里，git 历史是和线上**平行的另一条** —— **内容一模一样**（两边最终的 tree 都是 `6f426ba1`），但提交号不同。所以直接 `git pull` 会多出一个合并提交，`git push` 还可能被拒。
+原站主打包给你的 `site` 里，git 历史是**和线上平行的另一条** —— **文件内容一模一样**（两边最终的 tree 都是 `6f426ba1`），但提交号不同。原因是原站主那边用的是 GitHub API 推送而不是 `git push`，API 造出的提交对象和本地提交内容相同、SHA 不同。所以直接 `git pull` 会多出一个合并提交，`git push` 还可能被拒。
 
 **在动手改任何东西之前**，执行这两条一次性对齐（`main/` 和 `waline/` 各做一次）：
 
@@ -31,7 +35,7 @@ git fetch origin
 git reset --hard origin/main
 ```
 
-验证：`git log --oneline -1` 应显示 `d4f59f2`，`git status` 应显示 `nothing to commit`。之后 `git pull` / `git push` 就都是干净的了。
+验证：`git log --oneline -1` 出来的提交号，应该和 `git ls-remote origin main` 的结果一致，`git status` 应显示 `nothing to commit`。之后 `git pull` / `git push` 就都是干净的了。
 
 ```powershell
 cd ..\waline
@@ -40,11 +44,11 @@ git reset --hard origin/main
 ```
 
 > `git reset --hard` **不会删你的文件**，只把 git 记录对齐到线上；但它会丢弃**尚未提交**的改动，所以要在开始改东西之前做。
-> `git push` 第一次会让你登录 GitHub，用你自己的账号（`Jaheecn`）。
+> `git push` 第一次会让你登录 GitHub，用已经交接给你的账号（`Jaheecn`）。
 
-### 顺带一句：账号
+### 关于四个平台的账号
 
-GitHub / Vercel / Neon / 腾讯云这四个平台现在都归你了。**建议**把初始密码改成自己的并开两步验证（尤其 GitHub）—— 不做也照样能用，只是初始密码经过了第三方传递，始终有点风险。
+GitHub / Vercel / Neon / 腾讯云都已完成移交。**建议**把初始密码改成自己的、并给 GitHub 开两步验证 —— 不做也照样能用，只是初始密码经过了第三方传递，始终有点风险。
 
 ---
 
@@ -69,26 +73,31 @@ npm run verify -- --strict    # 结构断言 + 基线比对（19 项）
 
 ---
 
-## 3. ⭐ 第一件线上要做的事：注册评论管理员
+## 3. 评论后端：登录即可，不用注册
 
-打开 <https://jaheecn-github-io.vercel.app/ui/register> —— **第一个注册成功的账号就是管理员**，这一步只有你能做。
+评论后端是 **Vercel + Neon Postgres**，项目名 `jaheecn-github-io`，**管理员账号已经建好并交接给你了**，不需要再注册。
 
-**为什么最重要**：这个站的「说说」页内容 = 管理员在评论区的留言（设计叫「评论即说说」）。没注册、没留言时，说说页会显示成：
+管理后台：<https://jaheecn-github-io.vercel.app/ui> —— 用交接给你的那组账号直接登录。
+
+**为什么要关心它**：这个站的「说说」页内容 = 管理员在评论区的留言（设计叫「评论即说说」）。所以：
+
+- 在**说说页评论区**用管理员账号发一条 → 说说页就会出现卡片；
+- 管理员评论**不会**出现在普通评论区，而是被抽出来单独当说说卡片显示。
+
+没发过内容时，说说页会显示成这样 —— **这不是坏了**：
 
 ```
 TOTAL MOMENTS  —     LATEST UPDATE  —
 TO BE CONTINUED / 生活仍在继续。
 ```
 
-**这不是坏了**，就是还没有内容。注册 → 在说说页评论区发一条 → 说说卡片就出现了。
+Waline 是**按页面路径分开存评论**的：`/about/`、`/moments/`、每篇文章各是独立评论区。
 
 ---
 
-## 4. 清掉一条测试残留
+## 4. 建议清掉一条测试残留
 
-上一位站主验收时在 **`/about/`（关于页）** 留了 **1 条测试评论**（正文 `text`、昵称「匿名」）。登 <https://jaheecn-github-io.vercel.app/ui> 后台按页面 `/about/` 删掉即可。
-
-> Waline 是**按页面路径分开存评论**的：`/about/`、`/moments/`、每篇文章各是独立评论区。
+原站主验收时在 **`/about/`（关于页）** 留了 **1 条测试评论**（正文 `text`、昵称「匿名」），是公开可见的。登 <https://jaheecn-github-io.vercel.app/ui> 后台按页面 `/about/` 删掉即可。
 
 ---
 
@@ -147,7 +156,7 @@ source/rose-galaxy/js/moments-feed.js                      第 10 行
 
 ### 音乐：腾讯云函数
 
-函数 `yibao-netease-proxy`（广州 / Python 3.13 / 入口 `index.main_handler`），前端引用在 `source/rose-galaxy/js/lib/site-config.js` 第 12 行。
+函数 `yibao-netease-proxy`（广州 / Python 3.13 / 入口 `index.main_handler`），前端引用在 `source/rose-galaxy/js/lib/site-config.js` 第 12 行。腾讯云账号已随交接移交（**账号 ID `100053383049`**）。
 
 它读网易云歌单 → 返回 CDN 直链 → 前端直接把直链给 `audio.src`。三个坑：
 
@@ -182,18 +191,18 @@ source/rose-galaxy/js/moments-feed.js                      第 10 行
 
 那份手册写得很全，照着做基本不会错。只有一条前提变了：
 
-> 手册里反复强调「**未经用户明确批准，禁止任何提交 / 推送 / 部署**」—— 那是当年用来约束 AI 助手的。
+> 手册里反复强调「**未经用户明确批准，禁止任何提交 / 推送 / 部署**」—— 那是原站主用来约束 AI 助手的。
 
 **现在你就是那位「用户」。** 建议保留这个习惯（让 AI 先给你看改动和验证结果，你点头再推），只是批准人换成了你自己。
 
 ---
 
-## 10. 交接时还没做的两件事
+## 10. 移交时没有一起换掉的两样东西
 
-1. **首页主视觉和头像仍是上一位站主的图**：`source/img/hero/night.webp`（深色主题）、`day.webp`（浅色主题）、`source/img/brand/headpicture.jpg`（关于页头像）。都是纯装饰图、图内没有人名。想换就换成自己的，**文件名保持不变**即可。
-2. **12 篇文章继承自上一位站主**：5 篇 Markdown 语法教程 + 5 篇古典赋（别赋 / 哀江南赋 / 洛神赋 / 离骚 / 雪赋）+ 2 篇古典诗词（月下小令 / 西江月）。**没有任何个人隐私内容**，古典诗文本身就是公版。可以留作示例，也可以删掉换自己的；删文章后**别用 `hexo clean`**，用 `npx hexo generate --force` 重建。
+1. **首页主视觉和头像**：`source/img/hero/night.webp`（深色主题）、`day.webp`（浅色主题）、`source/img/brand/headpicture.jpg`（关于页头像）。原站主沿用了这套图，**纯装饰、图内没有人名**。想换就换成自己的，**文件名保持不变**即可。
+2. **12 篇文章**：5 篇 Markdown 语法教程 + 5 篇古典赋（别赋 / 哀江南赋 / 洛神赋 / 离骚 / 雪赋）+ 2 篇古典诗词（月下小令 / 西江月）。**没有任何个人隐私内容**，古典诗文本身是公版。可以留作示例，也可以删掉换自己的；删文章后**别用 `hexo clean`**，用 `npx hexo generate --force` 重建。
 
-原站长的品牌名、邮箱、GitHub、B 站账号、下载包等**已经全部清理干净**，不用管。
+更早那位站主的品牌名、邮箱、GitHub、B 站账号、下载包等**已经全部清理干净**，不用管。
 
 ---
 
@@ -218,6 +227,7 @@ source/rose-galaxy/js/moments-feed.js                      第 10 行
 
 - **版本号**只改 `_config.yml` 里 `version:` **一行**，重建即可 —— 全站 29 处 `?v=__VERSION__` 由 `scripts/asset-version.js` 自动替换。
 - 每次构建 `data/music-playlist.json` 会有 **1 行 diff**（回写时间戳，属设计行为，不是错误）。
+- 浏览量已随换站清零（`data/views-cache.json` 的 `pv` 为空），从 0 重新累计。
 
 ---
 

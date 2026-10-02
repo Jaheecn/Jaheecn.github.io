@@ -31,7 +31,7 @@ npm test                       # 69 项单元测试
 npm run verify -- --strict     # 19 项(结构断言 + 基线比对)
 ```
 
-**关键判据**:`docs/` **123** 文件 · `posts/` **13** 目录 · `search.xml` **138,155** · `sitemap.xml` **2,815** · `atom.xml` **9,524** · 首页 LATEST SIGNAL `[文章] 变声器操作记录 @ 2026-10-01` · 精选工程顺序 `pikachu → bluelotus → phpstudy`
+**关键判据**(2026-10-02 实测):`docs/` **121** 文件 · `posts/` **12** 目录 · `search.xml` **149,886** · `sitemap.xml` **3,465** · `atom.xml` **8,932** · 首页 LATEST SIGNAL `[文章] 哀江南赋 @ 2026-10-01` · 精选工程顺序 `pikachu → bluelotus → phpstudy` · 版本号 `20260831-p49`
 
 > ⚠️ 判据只看**字节数/条目数/排序首项**,**不要用文件哈希** —— hexo 生成器输出不确定,两次全量生成哈希不同但字节数相同。
 
@@ -92,7 +92,7 @@ hexo 加载 scripts/*.js(插件/生成器) + themes/nova/layout/*.pug(模板, �
 | --- | --- |
 | `site-config.js` | Node 构建期配置单源：`SITE`(从 `_config.yml` 的 url 解析，**顶层不碰 hexo**——见 Hexo 坑①) |
 | `parts-common.js` | 公共壳组装函数 + 组件读取(loading/sidebar/nav/footer/评论/按钮) |
-| `nova-tags.js` | 标签/索引页 + `search.xml`/`sitemap.xml`/`atom.xml` 生成器；`fmtDate` 来自 `lib/date.js`；search.xml 含歌曲条目(构建期抓取) |
+| `nova-tags.js` | 标签/索引页 + `search.xml`/`sitemap.xml`/`atom.xml` 生成器；`fmtDate` 来自 `lib/date.js`；**search.xml 含文章 + 音乐歌曲（构建期抓取）+ 全部工程**，sitemap.xml 含文章 + 工程，atom.xml 仅文章 |
 | `lib/music-playlist.js` | 音乐歌单(搜索索引数据源)：构建时请求网易云云函数 `/api/playlist`，成功回写 `data/music-playlist.json` 缓存，失败用缓存兜底；加减歌曲零人工 |
 | `home-generator.js` | 首页：shellTop + hero 段(LATEST 动态注入)+ mid(精选工程/最新文章卡注入)+ 页级 bottom + 公共尾；P5 数据规则见「首页 P5 数据流」 |
 | `page-generator.js` | 静态页：PAGES 配置表(pageClass/headerCls/mainCls/pre/showExtra/pageScripts) |
@@ -104,7 +104,7 @@ hexo 加载 scripts/*.js(插件/生成器) + themes/nova/layout/*.pug(模板, �
 | `data/views-cache.json` | 浏览量缓存(**在 `data/`, 不在 `scripts/`**)：`pv`(显示值=排序用) / `shift`(人工偏移) / `lastRaw`·`lastDisplay`(脚本维护)。**手动改只动 `pv` 段**，详见 `data/views-cache.md` |
 | `inject-theme.js` | 首帧主题注入(injector head_begin, 各页) + **首页 hero 海报按主题 preload**(night/day, P0 2026-09-11)。**只 preload 当前主题那一张**:另一张由 `nova-ux.js initHeroThemeSwap` 在切主题时按需加载(单图策略 2026-09-13, 见操作守则 8) |
 | `lib/date.js` | `fmtDate`(支持 moment 对象与 Date) |
-| `lib/feeds.js` | `search.xml`/`sitemap.xml`/`atom.xml` 三件套生成器 + `stripMd`/`summaryOf`/`escXml`/`htmlToText`/`postUrl`(阶段4 4.8 从 `nova-tags.js` 拆出) |
+| `lib/feeds.js` | `search.xml`/`sitemap.xml`/`atom.xml` 三件套生成器 + `stripMd`/`summaryOf`/`escXml`/`htmlToText`/`postUrl`(阶段4 4.8 从 `nova-tags.js` 拆出)。**工程侧入口**：`renderSearchXml(posts, songs, projects)` / `renderSitemap(posts, projects)` + `projectSearchText()`（工程索引正文）/ `projectLastmod()`（工程 date 是纯字符串，`fmtDate()` 吃不了）/ `byProjectDateDescThenId()`（工程排序兜底，2026-10-02 加） |
 | `lib/sort.js` | `toMs` + `byKeys` 排序工具(阶段4 N) |
 | `copyright-fields.js` | 文章 footer matter `author`/`url` → 主题版权卡字段映射 |
 
@@ -161,7 +161,7 @@ Select-String -Path .\docs\posts\<标题>\index.html -Pattern 'dateModified'
 
 - `img/` 按用途分层：`hero/`(页面横幅背景) `music/`(音乐页资源) `brand/`(品牌头像图标) `misc/`(杂项+站点预览图) `covers/`(文章封面) `projects/`(工程图)
 - `rose-galaxy/`：自定义层——`css/`(每页一个样式文件,前缀 `nova-`)、`js/`(页面脚本 + `lib/` 共享件)、`animation/`(动画脚本)、`fonts/`(自托管字体)
-- `assets/projects/<工程名>/`：下载文件(与页面路由 `projects/` 隔离,避免命名空间冲突)
+- `assets/projects/<工程名>/`：下载文件(与页面路由 `projects/` 隔离,避免命名空间冲突)。**现该目录为空** —— 换站迁移时删掉全部 5 个下载包(原 134.6 MB),5 个工程的 `downloads` 都是 `[]`,模板自动隐藏「资料下载」区块
 - `css/index.css`：**上游 Butterfly 副本，勿改**；`css/custom.css`：全站覆盖唯一去处
 
 ### `tools/`（构建与验证工具，hexo 不加载）
@@ -192,7 +192,7 @@ Select-String -Path .\docs\posts\<标题>\index.html -Pattern 'dateModified'
 - **`hexo generate` 直接输出到这里**（`_config.yml` 的 `public_dir: docs`），`npm run build` 之后还会被 `tools/minify.js` 就地压缩（不改文件数）；产物**已被 git 跟踪**，随 `main` 一起提交推送 —— GitHub Pages 直接以 **main 分支的 `/docs` 目录**为发布源，**`docs/` 里有什么，线上就有什么**。
 - 纪律：**不要把非产物文件放进 `docs/`**（`.nojekyll` 是必需的例外）；`public/` 目录**已永久退役**，不要再手工创建它或往里搬东西。
 - **仓库文档资源不在产物里**：README 的深浅主题预览图（`preview-dark.webp` / `preview-light.webp`，2026-10-02 用无头 Chrome 按 `?theme=dark|light` 重截当前站点并转 WebP，合计 272 KB，取代原站长时期的 3.8 MB PNG）与 `主题升级指南.md`（**nova 主题维护指南** —— nova 的结构、每类文件来源与维护方式，阶段6 主题迁移的产出；文内提到生成用的 `_snapshots/` 核算脚本已于 2026-09-13 随快照目录删除，需重算时按文内说明重建）现放在**仓库根目录的 `repository-docs/`**，不进产物、不会被 Pages 发布。
-  → 它们原先与产物混在同一个 `docs/` 目录里（`hexo generate` 不删孤儿文件，见 Hexo 坑⑦），2026-10-01 已移出：**`docs/` 现在是纯产物 = 123 文件**，`test/baseline.json` 的 `publicFiles` 也是 123；将来再挪动这类文件，记得移完重新构建并刷新基线（`npm run verify -- --update-baseline`），否则 `--strict` 会一直拿旧数字比对。
+  → 它们原先与产物混在同一个 `docs/` 目录里（`hexo generate` 不删孤儿文件，见 Hexo 坑⑦），2026-10-01 已移出：**`docs/` 现在是纯产物 = 121 文件**，`test/baseline.json` 的 `publicFiles` 也是 121；将来再挪动这类文件，记得移完重新构建并刷新基线（`npm run verify -- --update-baseline`），否则 `--strict` 会一直拿旧数字比对。
 
 ### `source/rose-galaxy/vendor/`（第三方库本地化，**勿删**）
 
@@ -310,7 +310,10 @@ npm run verify    # 结构断言 11 项; 加 --strict 为 19 项(含基线比对
 4. **改模板后必须全量重建**:`npm run build` 走增量缓存,改了 `.pug` 也不会重生成所有页面 → 需 `.\node_modules\.bin\hexo.cmd generate --force`。**判据检查通过 ≠ 目标页已更新**。
 5. **页级 CSS 只有一处来源**:`_config.nova.yml inject.head`。**勿**恢复 head extraCss / body 内 PAGE_STYLES 双份机制(2026-09-03 A 方案已全局化, 死代码已清)。
 6. **发布流程**:`npm run build`(产物自动落本仓 `docs/`,已被 main 跟踪)→ 用户批准后 `git add -A && git commit -m "..." && git push origin main`。**`hexo deploy` 已弃用**(它会在仓库根下重建 `.deploy_git`,强推一条与发布源无关的 `public` 分支历史)。
-7. **SCF 云函数**:响应勿加自定义 `Content-Length`(网关注入双 CT);前端 fetch 按响应体字节判定 base64, 勿再改回 audio 直连(网关注入 `application/json`, 实测不可行)。
+7. **音乐云函数(SCF)**:现架构是**腾讯云函数读网易云 + 前端直链播放**(2026-10-02 换源,取代旧的 B 站 base64 管道)。函数 `yibao-netease-proxy`(广州 / Python 3.13 / 入口 `index.main_handler`),源码为纯 ASCII(见坑⑩);端点 `/api/playlist?id=`(默认歌单)、`/api/song?id=`(元信息 + 网易云 CDN 直链)、`/stream2?id=`(兜底代理,Range/206)、`/api/info?id=`(调试)。三条纪律:
+   - **触发器必须用「函数 URL」**——腾讯云 API 网关已于 2025-06-30 停服,2024-07-01 起新老用户都不能再建 API 网关触发器。授权类型选**开放**,否则前端跨域被拒。
+   - `/stream2` 响应**不要加自定义 `Content-Length`**(网关注入双 CT)。但它现在只是兜底路径,主路径是直链。
+   - 前端主路径是 `audio.src = <网易云 https 直链>`(**不要改回**"整首下载成 Blob 再播"——那样要等 4 MB+ 下完才出声、无法拖动进度,还顶着网关体积上限)。
 8. **hero 双海报只加载当前主题那一张**(单图策略 2026-09-13):`night.webp`/`day.webp` 通过 `--nova-hero-bg` 变量二选一(未生效的变量值不触发请求),另一张由 `nova-ux.js initHeroThemeSwap` 在切主题时按需加载 + 交叉淡入。**勿改回"两图都写在 CSS 里 + opacity 切换"** —— 浏览器会为 `opacity:0` 的 `::after` 也发请求,深色模式下白下载 `day.webp` 271 KB(实测)。
 
 ## Hexo 工程坑
@@ -325,7 +328,9 @@ npm run verify    # 结构断言 11 项; 加 --strict 为 19 项(含基线比对
 7. **hexo generate 不删孤儿文件**：删除文章/页面后**不要用 `hexo clean`**（它会删掉整个产物目录 `docs/`，见坑⑲）——用 `npx hexo generate --force` 重建；个别残留的空目录（如旧 `posts/<标题>/`）手动删掉即可。
 8. **headless 截图陷阱**：虚拟时钟会冻结入场动画、缓存旧 CSS，验证用全新 profile + 像素采样。
 9. **基线 `publicFiles` 随资源增减变化**：每次加/删资源都会让 `npm run verify -- --strict` 失败，属预期 → 用 `--update-baseline` 刷新；**但要在删完临时文件之后再刷**，否则基线会记下错误数字。
-10. **SCF 网关注入**:`Content-Type: application/json` 被强制附加(双头),二进制音频经 **base64 文本**传输;`audio.src` 直连会被浏览器拒播——前端必须 fetch→字节判定→base64 解码→Blob。
+10. **云函数两个坑**:
+    - **① 代码里不能有非 ASCII 字符**。腾讯云控制台的 Cloud Studio 在线编辑器**按 GBK 解 UTF-8**,从剪贴板粘贴带中文的 Python 会变成 mojibake,部署后报 `SyntaxError: invalid non-printable character U+E576`。**做法**:源码保持纯 ASCII(注释也用英文),粘贴前用 `Get-Content -Raw | Set-Clipboard` 载入、粘完回读校验非 ASCII 计数为 0。同源经验:**用 API 造 GitHub blob 时 PowerShell 5.1 会把中文 JSON body 编成 Latin-1**(报 `Problems parsing JSON`),要 `-Body ([Text.Encoding]::UTF8.GetBytes($json))`。
+    - **② 历史的 base64 管道已废弃**。旧方案(`/stream2` 以 base64 文本传二进制、前端 fetch→字节判定→解码→Blob)是为绕开"网关注入 `Content-Type: application/json` 导致 `audio.src` 直连被拒播"。**换网易云后此问题不再存在**:`/api/song` 解析出的是网易云 CDN 的 `https` 直链(CDN 不校验 Referer,实测五种 Referer 全部 206),直接赋给 `audio.src` 即可,还顺带拿到渐进播放与原生 Range 拖动。**勿再改回整首下载**。
 11. **`hexo deploy` 会另起一条 public 历史**:它在仓库根下建 `.deploy_git` 并强推 public 分支,新提交若成孤儿(无共同祖先)Pages 不会重建,线上停在旧版。**已弃用**——`_config.yml` 的 deploy 段仍指向 `public` 分支,而 Pages 只认 main 的 `/docs`,推上去既不生效又添乱;产物统一随 `main` 提交(见「构建与部署」)。
 12. **主题版 PJAX / additional-js 为孤儿**:自制 `base.pug` 无渲染链,`theme.pjax.enable` 永远不要开(注释已写);要改 PJAX 只改 `parts-common/footer.html`。
 13. **agent 编辑纪律**:删除任何文件前确认「它是上游副本/一次性工具/被其他文件引用」;一次性脚本严禁放入 `scripts/`(hexo 会执行脚本目录全部 .js)。
@@ -350,8 +355,8 @@ npm run verify    # 结构断言 11 项; 加 --strict 为 19 项(含基线比对
 - **换页面 hero 背景**：页面级 css(`{page}-page.css`)中对应 `#page-header`/`.nova-hero-bg` 规则 → 图片放 `img/hero/` → bump 该 css 版本号。
   - **首页(深浅双海报)**:不写 `background-image`,而是给两个主题变量各写一张 —— `html[data-theme="dark"] body.nova-home-active{--nova-hero-bg:url(night)}` / `[light]{...url(day)}`;换图只改变量值。`::after` 交叉淡入层默认无背景(单图策略),由 `nova-ux.js initHeroThemeSwap` 在切主题时注入 → **勿在 CSS 里给 `::after` 写死背景图**,那会让两张海报都被无条件下载(实测非当前主题那张白下载 271 KB)。
 - **PJAX 过渡伪影(R1-B, 2026-09-05)**：切换页面瞬间的整屏"玫瑰色蒙版"是页面重挂时全屏层 CSS transition 首帧过渡造成的(非展示层/浏览器问题)。机制 = `custom.css` 的 `html.nova-no-transitions *` 冻结规则 + `nova-ux.js` `beginNavigation`/`finishNavigation` 加/移除该 html 类(切换 250ms 后解锁)。**勿删这两处**;若优化过渡,需同时保留机制,否则伪影复发。
-- **工程按钮图标(linkIcon)**：`projects-data.js` 工程条目可选 `linkIcon` 字段(如 `'kurtips'`),`projects-generator.js` 两层映射已透传,`project-detail.pug` 按字段渲染对应图标(`source/img/projects/kurtips-fox.png` 为 KurTips 官方标识,官方无 SVG 资源);无该字段的工程保持 GitHub 图标。
-- **更新工程(日期同步)**：替换/新增 `source/assets/projects/<工程名>/` 下资源 → 工程页"最近更新"与首页 LATEST SIGNAL 自动更新为目录内最新文件 mtime(无需改代码);无文件时回退 `projects-data.js` 的 `date`(仅年份)。
+- **工程按钮图标(linkIcon)**：**换站后已无使用者**。`projects-data.js` 的工程条目仍可选 `linkIcon` 字段、`projects-generator.js:78,175` 仍透传它,但现 5 个工程都不设该字段(旧的 `'kurtips'` 分支与 `source/img/projects/kurtips-fox.png` 已随工程改版删除)。工程条目若无 `link`/`link2`,`project-detail.pug` 会**整块隐藏**「工程链接」,所以新工程不写链接就不显示该区块。
+- **更新工程(日期同步)**：替换/新增 `source/assets/projects/<工程名>/` 下资源 → 工程页"最近更新"与首页 LATEST SIGNAL 自动更新为目录内最新文件 mtime(无需改代码);**该目录现为空**,所以 5 个工程目前都回退到 `projects-data.js` 的 `date`(完整 `YYYY-MM-DD`,不是只有年份 —— 只写年份会让冒烟的"更新于均为 YYYY-MM-DD"断言失败)。
 - **版本号升级**：只改 `_config.yml` 的 `version:` 一行(权威源) → 重建即可,全站 29 处 `?v=__VERSION__` 占位符由 `asset-version.js` 自动替换。**不需要**再手工同步任何字面量(2026-09-13 起)。
   验证方法:`npm run build` 后全仓搜 `20260831-p<旧号>` 应只剩代码注释里的历史标记(CSS/JS 注释中"某功能于 vX 引入"),不应出现在 `?v=` URL 里。
 - **发说说(瞬间页)**：管理员在瞬间页评论区留言即说说——「评论即说说」由 `moments-feed.js` 渲染(说说流仅在页面加载/PJAX 时拉取,**无自动重拉/轮询**);评论区管理员评论在**本次会话内保持可见可管理(如删除),刷新后自动隐藏**(一次性扫描,非持续观察);右侧「最近状态」收藏为本地 localStorage(`nova-moments-mood-v2`):点心形增删、最新置顶、7 条内完整展示超出滚动、服务端已删除说的收藏自动清除(prune 对账)。
@@ -378,4 +383,5 @@ npm run verify    # 结构断言 11 项; 加 --strict 为 19 项(含基线比对
 | **产物 HTML 里出现 `//-` 文本** | pug 注释写在了 `script.` 块内 → 移到脚本块外（坑⑭） |
 | footer 横幅异常 | 页级 css 又有 footer 背景规则 → 删；`custom.css` 两套规则(md 主题前缀)是唯一来源 |
 | 评论不见 | Waline 按 path 存储——页面路径变更后旧评论不显示(非 bug)；需迁移在数据层处理 |
+| **评论整块加载不出来(控制台报连接失败)** | **已知环境问题(2026-10-02 记档)**:`*.vercel.app` 在中国大陆被 DNS 污染 + SNI 阻断。实测本地 DNS→`159.138.20.20`(伪造)、8.8.8.8→`31.13.70.13`(竟是 Facebook 的 IP)、1.1.1.1→`31.13.75.12`、223.5.5.5→`128.242.240.155`;用真实 IP 直连(`curl --resolve ...:443:64.29.17.3`)报 `Connection was reset`。**对照全通**:`vercel.com`(200/1.34s)、`jaheecn.github.io`(200/0.61s)、`music.163.com`(200/0.61s)、腾讯云函数 URL。`cname.vercel-dns.com` 解析正常 → **被墙的是 `vercel.app` 域名本身,不是 Vercel 的 IP**。Vercel 侧两条部署都是 Ready/Production,后端没坏。**解法**:① 买便宜域名 CNAME 到 `cname.vercel-dns.com` 并改 6 处前端 `serverURL`(最省事);② 把 Waline 迁到腾讯云 SCF;③ 用 SCF 反代 Vercel(需先验腾讯广州出口能否访问 vercel.app)。 |
 | 新说说发布后左侧流不出现 | 说说流仅在页面加载/PJAX 时拉取(设计如此,无自动重拉)→ 刷新页面即可;评论区管理员评论会话内可见属预期(刷新后隐藏);右侧收藏点心形即实时增删 |

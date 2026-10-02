@@ -1,6 +1,6 @@
 # Jahee-web — 个人网站
 
-一个以「深夜幕蓝 + 玫瑰星系粒子」为视觉核心的个人网站。基于 [jaheecn.github.io](https://jaheecn.github.io) 的静态构建产物重建，采用 Hexo 8.1.2 + 自研 nova 主题（`themes/nova/`）+ rose-galaxy 定制层，并在此基础上做了个性化与开放共享。
+一个以「深夜幕蓝 + 玫瑰星系粒子」为视觉核心的个人网站。最早由一份 Butterfly 站的静态导出产物反推重建为 Hexo 工程，采用 Hexo 8.1.2 + 自研 nova 主题（`themes/nova/`）+ rose-galaxy 定制层；2026-10-01 起完成**换站迁移**——站长身份、站点文案、全部原创内容、配图与后端全部替换为现站长 Jahee 的，并改为**单仓自包含**结构。
 
 线上地址：<https://jaheecn.github.io>
 
@@ -12,10 +12,10 @@
 
 | 版块 | 路径 | 说明 |
 | --- | --- | --- |
-| 文章 | `/articles/`、`/posts/<标题>/` | 13 篇：Markdown 语法 5 篇 + 赋文 5 篇 + 诗词 2 篇 + 工具 1 篇 |
-| 工程 | `/projects/`、`/projects/<id>/` | 5 个动手项目：pikachu / bluelotus / phpstudy / ssms / vmware |
+| 文章 | `/articles/`、`/posts/<标题>/` | 12 篇：Markdown 语法 5 篇 + 赋文 5 篇 + 诗词 2 篇 |
+| 工程 | `/projects/`、`/projects/<id>/` | 5 个软件学习条目：vmware / ssms / phpstudy / bluelotus / pikachu |
 | 说说 | `/moments/` | 评论即说说，日常片段 |
-| 音乐 | `/music/` | 网易云音乐歌单，悬浮窗跨页播放 |
+| 音乐 | `/music/` | 网易云音乐歌单 79 首，悬浮窗跨页播放 |
 
 ---
 
@@ -60,6 +60,8 @@ Jahee-web/
 │   ├── nova-tags.js           ★ 标签页与索引页 + search.xml / sitemap.xml / atom.xml
 │   ├── home-generator.js      首页生成器
 │   ├── page-generator.js      静态页生成器：music / moments / about / 404
+│   ├── post-date.js           文章更新时间：显式 updated → 源文件 git 提交日 → mtime → date
+│   ├── post-generator.js      ★ 覆盖 hexo 内置 post 生成器，让 prev/next 排序确定（日期降序 + 路径升序）
 │   ├── projects-generator.js  工程页生成器：列表 + 详情
 │   ├── projects-data.js       工程数据：清单 / 封面 / 下载
 │   ├── projects-intro.js      工程详情介绍文案
@@ -74,7 +76,7 @@ Jahee-web/
 │   └── lib/public-dir.js      产物目录解析（读 _config.yml 的 public_dir）
 │
 ├── source/                    网站源文件
-│   ├── _posts/                13 篇文章 Markdown
+│   ├── _posts/                12 篇文章 Markdown
 │   ├── img/                   图片，按用途分层：hero / music / brand / misc / covers / projects
 │   ├── rose-galaxy/           ★ 自研定制层
 │   │   ├── css/               每页一个样式文件，类名前缀 nova-
@@ -84,7 +86,7 @@ Jahee-web/
 │   │   └── vendor/            ★ 本地化的第三方库：fontawesome / pjax / medium-zoom / infinitegrid
 │   ├── css/index.css          Butterfly 上游副本，请勿修改
 │   ├── css/custom.css         全站覆盖规则的唯一去处
-│   └── assets/projects/       工程下载文件，按工程名分包
+│   └── assets/projects/       工程下载文件，按工程名分包（**目录为空**：现 5 个工程都不提供下载）
 │
 ├── themes/nova/layout/        ★ 站点模板层（`_config.yml` 的 theme: nova）
 │   ├── base.pug               基础布局：html + head + body（静态页）
@@ -204,7 +206,7 @@ Markdown 是一种轻量级的标记语言……
 
 **第三步**：需要下载文件的话，放到 `source/assets/projects/我的项目/`，文件名与 `downloads[].url` 一致。
 
-**第四步**：`npx hexo generate --force`（**不要用 `hexo clean`**，理由同第二步）。列表卡片、详情页、右栏"其他工程"、概览统计都会自动更新。工程不进 feed，`search.xml` / `sitemap.xml` / `atom.xml` 不含工程。
+**第四步**：`npx hexo generate --force`（**不要用 `hexo clean`**，理由同第二步）。列表卡片、详情页、右栏"其他工程"、概览统计都会自动更新。工程**会进** `search.xml` 与 `sitemap.xml`（标题/分类/副标题/描述/长文/标签拼成索引正文，URL 为 `/projects/<id>/`），只有 `atom.xml` 不含工程。
 
 ### 换页面背景图
 
@@ -242,7 +244,7 @@ Markdown 是一种轻量级的标记语言……
 
 ### 发一条说说
 
-管理员在说说页评论区留言即可，`moments-feed.js` 会把站长评论渲染成说说卡片。判定条件是三重匹配：`user_id=1`、昵称 Jahee、administrator 标记。
+管理员在说说页评论区留言即可，`moments-feed.js` 会把站长评论渲染成说说卡片。判定是三重判据、**任一命中即站长**：`user_id=1`、昵称 Jahee、administrator 标记。
 
 说说流只在页面加载和 PJAX 切页时拉取，没有轮询。新发说说后刷新页面即可看到。
 
@@ -279,13 +281,13 @@ Markdown 是一种轻量级的标记语言……
 
 | 文件 | 内容 | 用途 |
 | --- | --- | --- |
-| `search.xml` | 全部文章的纯文本索引 | 站内本地搜索 |
-| `sitemap.xml` | 文章 URL + 更新日期 | SEO |
-| `atom.xml` | Atom feed | 订阅 |
+| `search.xml` | 全部文章 + 音乐歌单 + 全部工程的纯文本索引 | 站内本地搜索 |
+| `sitemap.xml` | 文章 URL + 工程 URL + 更新日期 | SEO |
+| `atom.xml` | Atom feed（仅文章） | 订阅 |
 
 搜索索引会剔除代码块与内联代码，摘要从命中位置附近截取约 120 字符，对话框内两行截断，因此摘要永远不会显示源码。`hexo-generator-feed` 已卸载，避免与生成器重复输出。
 
-音乐歌单也会进搜索索引，每首歌是独立条目，点击可通过 `?song=<bvid>` 直达定位播放。
+音乐歌单也会进搜索索引，每首歌是独立条目，点击可通过 `?song=<id>` 直达定位播放（`id` 是网易云歌曲 ID）。
 
 ### 首页
 
@@ -303,7 +305,7 @@ Markdown 是一种轻量级的标记语言……
 
 - **浏览量**：`data/views-cache.json` 的 `pv` 段，等于 busuanzi 真实值加人工偏移
 - **文章更新时间**：Hexo 原生 `updated`，md 里没写就取文件最后修改时间
-- **工程更新时间**：优先 `projects-data.js` 的 `updated` 字段，其次取 `source/assets/projects/<工程名>/` 目录内最新文件的 mtime，最后回退 `date`。所以更新工程只要替换目录里的文件，日期自动变化
+- **工程更新时间**：优先 `projects-data.js` 的 `updated` 字段，其次取 `source/assets/projects/<工程名>/` 目录内最新文件的 mtime，最后回退 `date`。所以更新工程只要替换目录里的文件，日期自动变化（现该目录为空，5 个工程都直接回退到 `date`）
 
 静态骨架在 `themes/nova/layout/home-parts/{top,mid,bottom}.html`，改动时请保持占位注释与 DOM 结构。卡片 HTML 由 `home-generator.js` 的 `featuredCardsHtml` / `recentCardsHtml` / `latestSignal` 拼装。
 
@@ -387,13 +389,14 @@ Markdown 是一种轻量级的标记语言……
 
 ## 历史记录
 
-Jahee-web 从一份静态站导出产物，长成现在这个带生成器、双主题与自研交互层的个人站点，前后约一个月。
+Jahee-web 从一份静态站导出产物，长成现在这个带生成器、双主题与自研交互层的个人站点，前后约一个半月。
 
 下表按时间倒序记录每个阶段**读者能感知到的变化**；逐条改动与实现细节见 `CHANGELOG.md`。
 
 | 时间 | 阶段 | 主要变化 | 效果 |
 | --- | --- | --- | --- |
-| 09-11 | 结构化改造 | 清死代码、修 6 个真实缺陷、建测试护栏；第三方库转同源自托管；9 张图重新压缩；首页大图按主题预加载；粒子发光改缓存纹理；删除孤儿图片 | 首屏大图加载起点 **8.4 秒 → 0.2 秒**；外部域名请求 **7 → 2**；图片合计 **1.94 MB → 1.07 MB**；护栏 **68 项单测 + 18 项断言** |
+| 10-01 ~ 10-02 | **换站迁移** | 站长身份、站点文案与全部配图替换为现站长的；15 篇旧文精简为 12 篇自有内容；工程页由 5 个硬件作品改为 5 个**软件学习条目**（VMware / SSMS / phpstudy / BlueLotus / Pikachu），取消外链与资料下载；音乐源由 B 站收藏夹改为**自建云函数读网易云歌单**（79 首，直链播放）；评论后端重部署为**自有 Vercel + Neon Postgres**；发布结构由"多仓 + 产物分支"改为**单仓单分支、Pages 直接发 `/docs`**；补齐构建可复现性 | 全站零原站痕迹；图片合计再降一档（预览图 3.8 MB → 272 KB、头像 −81%）；构建**逐字节可复现** |
+| 09-11 | 结构化改造 | 清死代码、修 6 个真实缺陷、建测试护栏；第三方库转同源自托管；9 张图重新压缩；首页大图按主题预加载；粒子发光改缓存纹理；删除孤儿图片 | 首屏大图加载起点 **8.4 秒 → 0.2 秒**；外部域名请求 **7 → 2**；图片合计 **1.94 MB → 1.07 MB**；护栏 **68 项单测 + 18 项断言**（现已增长到 **69 + 19**） |
 | 09-05 | 切页伪影修复 | 站内无刷新跳转会闪出一层玫瑰色蒙版，根因是全屏层过渡动画的首帧；改为切换期间冻结过渡、就绪后解锁；工程按钮换官方标识 | 跳转瞬间不再有整屏色块闪过 |
 | 09-04 | 说说页与首屏 | 说说页重做：评论区的管理员留言直接变成说说卡片，带标签识别与收藏；首屏遮罩时长减半，六个页面 hero 图预加载 | 说说由手工维护变为**评论即发布**；消除"先见裸页面再上样式" |
 | 09-03 | 收敛重复 | 页面级样式只留一处来源，删掉并行注入机制；工程日期、主题色、字体收敛到单一出处；大图全面 WebP 化 | 改一处即全站生效；单张图最大 **4.1 MB → 215 KB** |

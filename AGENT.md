@@ -383,5 +383,6 @@ npm run verify    # 结构断言 11 项; 加 --strict 为 19 项(含基线比对
 | **产物 HTML 里出现 `//-` 文本** | pug 注释写在了 `script.` 块内 → 移到脚本块外（坑⑭） |
 | footer 横幅异常 | 页级 css 又有 footer 背景规则 → 删；`custom.css` 两套规则(md 主题前缀)是唯一来源 |
 | 评论不见 | Waline 按 path 存储——页面路径变更后旧评论不显示(非 bug)；需迁移在数据层处理 |
-| **评论整块加载不出来(控制台报连接失败)** | **已知环境问题(2026-10-02 记档)**:`*.vercel.app` 在中国大陆被 DNS 污染 + SNI 阻断。实测本地 DNS→`159.138.20.20`(伪造)、8.8.8.8→`31.13.70.13`(竟是 Facebook 的 IP)、1.1.1.1→`31.13.75.12`、223.5.5.5→`128.242.240.155`;用真实 IP 直连(`curl --resolve ...:443:64.29.17.3`)报 `Connection was reset`。**对照全通**:`vercel.com`(200/1.34s)、`jaheecn.github.io`(200/0.61s)、`music.163.com`(200/0.61s)、腾讯云函数 URL。`cname.vercel-dns.com` 解析正常 → **被墙的是 `vercel.app` 域名本身,不是 Vercel 的 IP**。Vercel 侧两条部署都是 Ready/Production,后端没坏。**解法**:① 买便宜域名 CNAME 到 `cname.vercel-dns.com` 并改 6 处前端 `serverURL`(最省事);② 把 Waline 迁到腾讯云 SCF;③ 用 SCF 反代 Vercel(需先验腾讯广州出口能否访问 vercel.app)。 |
+| **评论加载不出来 / 说说页计数是 `—`** | **Waline 后端（Vercel）与 GitHub 都需要外网才能稳定打开**——不开代理时可能连不上，属环境问题。开了外网后自检：`GET https://jaheecn-github-io.vercel.app/comment?path=/moments/` 返回 `{"count":0,…}`、`/user` 返回 `{"errno":0,…}`、`/ui/register` 返回 200，三者都通即后端正常；此时若 `count:0`，就是**真的还没有评论/说说**（说说由管理员评论驱动，管理员没留言过就是空的，属预期）。**注意本机 `curl` 的 TLS 栈对这类站点会报 `schannel: failed to receive handshake`，不能拿它当可达性判据，用 `Invoke-WebRequest` 或浏览器复核。** |
+| 评论/说说有脏数据 | Waline 按 `path` 存——每条路径（含 `/about/`）是独立评论区。清理要登 `/ui/register` 后台，或在 Neon 里按 path 删。**当前有一条测试残留**：`/about/` 下 1 条正文为 `text`、昵称"匿名"的早期连通性测试评论，交付前应删掉。 |
 | 新说说发布后左侧流不出现 | 说说流仅在页面加载/PJAX 时拉取(设计如此,无自动重拉)→ 刷新页面即可;评论区管理员评论会话内可见属预期(刷新后隐藏);右侧收藏点心形即实时增删 |

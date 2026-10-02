@@ -1,10 +1,10 @@
 {
-  "publicFiles": 123,
-  "postDirs": 13,
-  "sourcePosts": 13,
-  "searchXml": 147416,
-  "sitemapXml": 2815,
-  "atomXml": 9524,
+  "publicFiles": 121,
+  "postDirs": 12,
+  "sourcePosts": 12,
+  "searchXml": 146444,
+  "sitemapXml": 2586,
+  "atomXml": 8932,
   "latestSignal": "[文章] 哀江南赋 @ 2026-10-01",
   "featuredProjects": [
     "pikachu",
@@ -12,5 +12,5 @@
     "phpstudy"
   ],
   "note": "阶段3 批次J 建立; 新增文章/工程或有意改版后, 用 npm run verify -- --update-baseline 刷新",
-  "updatedAt": "2026-10-01"
+  "updatedAt": "2026-10-02"
 }

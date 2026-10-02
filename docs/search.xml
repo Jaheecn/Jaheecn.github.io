@@ -3113,48 +3113,6 @@ Superscript
 你可以 下载此速查表的 Markdown 源码文件，并在你自己的 Markdown 程序中使用。]]></content>
   </entry>
 <entry>
-    <title>变声器操作记录</title>
-    <url>/posts/变声器操作记录/</url>
-    <content><![CDATA[一、前置
-1.1软件
-
-virtual voice
-音频转接
-
-voicemeeter bannana
-
-音频转接
-
-Retrieval-based-Voice-Conversion-WebUI
-
-变声器
-
-w-okada&#x2F;voice-changer
-
-变声器
-
-1.2输入与输出
-
- 
-麦克风&#x2F;麦克风阵列—变声—虚拟扬声器—中断—虚拟麦克风——通话输入&#x2F;耳机&#x2F;扬声器
-
- 
-
-麦克风&#x2F;麦克风阵列—变声—voicemeeter input通道—A1—虚拟扬声器—通路—虚拟麦克风—A2—耳机&#x2F;扬声器
-
-麦克风&#x2F;麦克风阵列—变声—voicemeeter input通道—A1—虚拟扬声器—通路—虚拟麦克风——通话
-
-1.3错误检查
-
-系统未静音
-
-通话输入为虚拟麦克风，输出为耳机&#x2F;扬声器
-
-声音管理中各项目未被禁用，但不必设置默认值(系统输入输出)
-
-上述检查后仍不能解决就重启]]></content>
-  </entry>
-<entry>
     <title>悬子不记</title>
     <url>/music/?song=3442188431</url>
     <content><![CDATA[悬子不记

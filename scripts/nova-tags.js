@@ -18,6 +18,8 @@ const readIdxTop = fs.readFileSync(path.join(idxParts, 'top.html'), 'utf8')
 
 const { SITE } = require('./site-config')
 const { loadSearchSongs } = require('./lib/music-playlist')
+// 工程数据: search.xml 与 sitemap.xml 都要收录工程详情页
+const projectsData = require('./projects-data')
 // 阶段4 · 4.8: search.xml / sitemap.xml / atom.xml 三件套及其依赖已拆到 lib/feeds.js
 const { renderSearchXml, renderSitemap, renderAtom } = require('./lib/feeds')
 // 并列日期时的确定性兜底比较器(详见 lib/sort.js 顶部注释)
@@ -73,8 +75,8 @@ hexo.extend.generator.register('nova-tags', async function (locals) {
   const searchSongs = await loadSearchSongs()
 
   const files = [
-    { path: 'search.xml', data: renderSearchXml(posts, searchSongs) },
-    { path: 'sitemap.xml', data: renderSitemap(posts) },
+    { path: 'search.xml', data: renderSearchXml(posts, searchSongs, projectsData) },
+    { path: 'sitemap.xml', data: renderSitemap(posts, projectsData) },
     { path: 'atom.xml', data: renderAtom(posts) },
     {
       path: 'articles/index.html',

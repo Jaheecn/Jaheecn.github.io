@@ -46,7 +46,36 @@ function htmlToText(html) {
     .replace(/\u00a0/g, ' ')
 }
 
-function renderSearchXml(posts, songs) {
+/* 工程条目排序: 日期降序 + id 升序兜底(与文章同理, 保证产物逐字节可复现)。 */
+function byProjectDateDescThenId(a, b) {
+  const d = new Date(b.date || 0) - new Date(a.date || 0)
+  if (d) return d
+  return String(a.id || '') < String(b.id || '') ? -1 : String(a.id || '') > String(b.id || '') ? 1 : 0
+}
+
+/* 工程详情页文案(标题/分类/描述/长文/标签)一并入索引,
+   否则站内搜索搜不到任何工程 —— 例如搜 "VMware" 会空结果, 但 /projects/ 里明明有。 */
+function projectSearchText(p) {
+  const parts = [
+    p.title,
+    p.category,
+    p.subtitle,
+    p.description,
+    p.intro,
+    (p.tags || []).join(' '),
+    (p.categoryKey || '')
+  ]
+  return parts.filter(Boolean).map(s => String(s).trim()).filter(Boolean).join('\n')
+}
+
+/* 工程的 date 是纯字符串 'YYYY-MM-DD'(不是 moment/Date 对象),
+   fmtDate 只接受 moment/Date, 故工程侧直接用原字符串。 */
+function projectLastmod(p) {
+  const s = String(p.date || '').trim()
+  return /^\d{4}-\d{2}-\d{2}/.test(s) ? s.slice(0, 10) : ''
+}
+
+function renderSearchXml(posts, songs, projects) {
   const entries = posts
     .slice()
     .sort(byDateDescThenPath)
@@ -77,13 +106,27 @@ function renderSearchXml(posts, songs) {
     })
     .filter(Boolean)
     .join('\n')
+  // 工程条目: 点击直达 /projects/<id>/。
+  const projectEntries = (projects || [])
+    .slice()
+    .sort(byProjectDateDescThenId)
+    .map(p => {
+      const id = String(p.id || '').trim()
+      const title = String(p.title || '').trim()
+      if (!id || !title) return ''
+      const content = projectSearchText(p).replace(/\]\]>/g, '] ]>')
+      return '<entry>\n    <title>' + escXml(title) + '</title>\n    <url>/projects/' + encodeURIComponent(id) + '/</url>\n    <content><![CDATA[' + content + ']]></content>\n  </entry>'
+    })
+    .filter(Boolean)
+    .join('\n')
   return '<?xml version="1.0" encoding="utf-8"?>\n<search>\n'
     + (entries ? entries + '\n' : '')
     + (musicEntries ? musicEntries + '\n' : '')
+    + (projectEntries ? projectEntries + '\n' : '')
     + '</search>\n'
 }
 
-function renderSitemap(posts) {
+function renderSitemap(posts, projects) {
   const urls = posts
     .slice()
     .sort(byDateDescThenPath)
@@ -91,7 +134,21 @@ function renderSitemap(posts) {
       return '  <url>\n    <loc>' + escXml(encodeURI(SITE + postUrl(p))) + '</loc>\n    <lastmod>' + fmtDate(p.date) + '</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>'
     })
     .join('\n')
-  return '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + urls + '\n</urlset>\n'
+  // 工程详情页同样要进 sitemap(此前只收录文章, /projects/* 全部缺失)。
+  const projectUrls = (projects || [])
+    .slice()
+    .sort(byProjectDateDescThenId)
+    .map(p => {
+      const id = String(p.id || '').trim()
+      if (!id) return ''
+      const loc = SITE + '/projects/' + encodeURIComponent(id) + '/'
+      const lastmod = projectLastmod(p)
+      return '  <url>\n    <loc>' + escXml(encodeURI(loc)) + '</loc>\n    <lastmod>' + lastmod + '</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>'
+    })
+    .filter(Boolean)
+    .join('\n')
+  const all = [urls, projectUrls].filter(Boolean).join('\n')
+  return '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + all + '\n</urlset>\n'
 }
 
 function renderAtom(posts) {
@@ -136,5 +193,8 @@ module.exports = {
   renderSitemap,
   renderAtom,
   postUrl,
-  byDateDescThenPath
+  byDateDescThenPath,
+  byProjectDateDescThenId,
+  projectSearchText,
+  projectLastmod
 }

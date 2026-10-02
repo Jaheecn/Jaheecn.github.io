@@ -1,6 +1,6 @@
 # views-cache.json — 浏览量缓存说明
 
-> **文件位置**：`scripts/views-cache.json`（与本文档同目录）
+> **文件位置**：`data/views-cache.json`（与本文档同目录）
 > **本文件是唯一的浏览量存储**：精选工程 / 最新文章 / LATEST SIGNAL 的排序全部读取它。
 
 ---
@@ -9,11 +9,12 @@
 
 | 项 | 说明 |
 |---|---|
-| 谁写入 | `scripts/lib/fetch-views.js`——从 busuanzi 服务端 API 拉取各页**真实浏览量**（部署前运行一次即可，24h 内重复运行不重复抓取） |
+| 谁写入 | `scripts/lib/fetch-views.js`——从 busuanzi 服务端 API 拉取各页**真实浏览量**（`npm run build` 的 prebuild 会跑一次，24h 内不重复抓取） |
 | 谁读取 | `scripts/home-generator.js`（`loadViewMap()`）→ 页面排序在 `hexo generate` 时重算 |
 | 显示值 | `pv` 段里的数字 = 排序用数值 = **busuanzi 真实值 + shift 人工偏移** |
 | 手动修改 | **只改 `pv` 段对应路径的数字**（见下方代码块标注）。下次抓取自动保留差值偏移，在手动值基础上累加真实增量，**不会覆盖** |
 | 回到纯自动 | 删掉 `shift` 段里对应路径的键，下次抓取自动归位 |
+| 当前状态 | 换站后已清空（`pv` / `shift` / `lastRaw` / `lastDisplay` 全为空对象）—— **浏览量从 0 重新累计**，属预期 |
 
 ---
 
@@ -25,22 +26,26 @@
 ```jsonc
 // ======================= 你只需要改这里 =======================
 {
-  "fetchedAt": 1787856564137,              // 上次抓取时间(毫秒) —— 不要动
+  "fetchedAt": 0,                          // 上次抓取时间(毫秒) —— 不要动
   "pv": {                                  // ★ 显示值 = 排序用的数值 —— ★★ 手动修改就改这里 ★★
-    "/posts/LM-Studio-OpenCode 接入指南/": 6,   // 文章页示例格式：/posts/<文章名>/   —— 可改数字
-    "/posts/Markdown 入门指南/": 6,             //   ↑ 改成你想要的值(如 500)即可
-    "/posts/Markdown 基本语法/": 5,
-    "/posts/Markdown 实用语法/": 5,
-    "/posts/Markdown 扩展语法/": 5,
-    "/posts/Markdown 语法速查表/": 5,
-    "/posts/变声器操作记录/": 5,
-    "/posts/绘世-Stable Diffusion/": 5,
-    "/projects/drone/": 13,                // 工程页示例格式：/projects/<工程id>/ —— 可改数字
-    "/projects/line-car/": 5,              //   ↑ 琛光无人机当前 13, 想看多就改大
-    "/projects/led-matrix/": 5,
-    "/projects/kurtips/": 6,
-    "/projects/shaper/": 5,
-    "/": 201                               // 首页 —— 一般不用改
+    "/posts/Markdown 入门指南/": 0,             // 文章页格式：/posts/<文章名>/  —— 可改数字
+    "/posts/Markdown 基本语法/": 0,             //   ↑ 改成你想要的值(如 500)即可
+    "/posts/Markdown 实用语法/": 0,
+    "/posts/Markdown 扩展语法/": 0,
+    "/posts/Markdown 语法速查表/": 0,
+    "/posts/别赋/": 0,
+    "/posts/哀江南赋/": 0,
+    "/posts/月下小令/": 0,
+    "/posts/洛神赋/": 0,
+    "/posts/离骚/": 0,
+    "/posts/西江月·春色三分过二/": 0,
+    "/posts/雪赋/": 0,
+    "/projects/vmware/": 0,                 // 工程页格式：/projects/<工程id>/ —— 可改数字
+    "/projects/ssms/": 0,
+    "/projects/phpstudy/": 0,
+    "/projects/bluelotus/": 0,
+    "/projects/pikachu/": 0,
+    "/": 0                                  // 首页 —— 一般不用改
   },
   "shift": {},                             // 人工偏移(脚本自动维护) —— 不要动
   "lastRaw": { /* ... 与 pv 同结构 ... */ },   // 上次抓取的 busuanzi 真实值 —— 不要动
@@ -63,22 +68,26 @@
 
 ## 三、操作步骤（手动调浏览量）
 
-1. 打开 `scripts/views-cache.json`
-2. 在 `pv` 段里找到对应路径（如 `"/projects/drone/": 13`），把数字改成想要的（如 `500`）
+1. 打开 `data/views-cache.json`
+2. 在 `pv` 段里找到对应路径（如 `"/projects/pikachu/": 0`），把数字改成想要的（如 `500`）
 3. 保存 → 运行 `hexo generate` → 生效（排序立即按新值）
-4. 之后每次部署前跑 `node scripts/lib/fetch-views.js`，脚本会：
+4. 之后每次 `npm run build` 的 prebuild 会跑 `node scripts/lib/fetch-views.js`，脚本会：
    - 检测到你改过 → 差值并入 `shift`（永久保留）
    - 显示值 = busuanzi 真实值 + shift → **在手动值上继续累加真实增量**，不会再重置
 
+> `pv` 段里的键**必须与真实页面路径一致**才会被读到。文章的键就是 `/posts/<文件名去扩展名>/`；
+> 工程是 `/projects/<工程 id>/`（id 见 `scripts/projects-data.js`）。新增文章 / 工程后，
+> 什么都不用做——下次抓取会自动补上新键；想提前看到数字就手动加一行。
+
 ## 四、举例
 
-想把琛光无人机设为 500 起步：
+想把 Pikachu 设为 500 起步：
 
 ```jsonc
-"/projects/drone/": 500,   // 之前是 13
+"/projects/pikachu/": 500,   // 之前是 0
 ```
 
-下次抓取时若 busuanzi 真实值从 13 涨到 15，显示值会变成 `15 + (500-13) = 502` —— 手动基数保留，增量继续累加。
+下次抓取时若 busuanzi 真实值从 0 涨到 2，显示值会变成 `2 + (500-0) = 502` —— 手动基数保留，增量继续累加。
 
 ## 五、常见问题
 
@@ -86,3 +95,4 @@
 - **数值被"重置"了？** 检查 `shift` 段：若对应路径的键为 0 或不存在，说明该页此前从未手动改过（纯自动模式，显示值=真实值，正常现象）。
 - **想彻底回到纯自动？** 删掉 `shift` 段里该路径的键（或把值改成 0），下次抓取自动归位。
 - **文件里的注释能加吗？** 不能——JSON 不支持注释；本说明文档就是给注释用的"阅读版"。
+- **离线时会怎样？** `fetch-views.js` 连续 3 条失败即判定网络不可用，提前结束本轮抓取，**保留旧缓存**，不阻断构建。

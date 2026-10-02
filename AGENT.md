@@ -191,7 +191,7 @@ Select-String -Path .\docs\posts\<标题>\index.html -Pattern 'dateModified'
 
 - **`hexo generate` 直接输出到这里**（`_config.yml` 的 `public_dir: docs`），`npm run build` 之后还会被 `tools/minify.js` 就地压缩（不改文件数）；产物**已被 git 跟踪**，随 `main` 一起提交推送 —— GitHub Pages 直接以 **main 分支的 `/docs` 目录**为发布源，**`docs/` 里有什么，线上就有什么**。
 - 纪律：**不要把非产物文件放进 `docs/`**（`.nojekyll` 是必需的例外）；`public/` 目录**已永久退役**，不要再手工创建它或往里搬东西。
-- **仓库文档资源不在产物里**：README 的深浅主题预览图（`preview-dark.png` / `preview-light.png`，2026-09-03 由 source 移出并更新为当前首页截图）与 `主题升级指南.md`（**nova 主题维护指南** —— nova 的结构、每类文件来源与维护方式，阶段6 主题迁移的产出；文内提到生成用的 `_snapshots/` 核算脚本已于 2026-09-13 随快照目录删除，需重算时按文内说明重建）现放在**仓库根目录的 `repository-docs/`**，不进产物、不会被 Pages 发布。
+- **仓库文档资源不在产物里**：README 的深浅主题预览图（`preview-dark.webp` / `preview-light.webp`，2026-10-02 用无头 Chrome 按 `?theme=dark|light` 重截当前站点并转 WebP，合计 272 KB，取代原站长时期的 3.8 MB PNG）与 `主题升级指南.md`（**nova 主题维护指南** —— nova 的结构、每类文件来源与维护方式，阶段6 主题迁移的产出；文内提到生成用的 `_snapshots/` 核算脚本已于 2026-09-13 随快照目录删除，需重算时按文内说明重建）现放在**仓库根目录的 `repository-docs/`**，不进产物、不会被 Pages 发布。
   → 它们原先与产物混在同一个 `docs/` 目录里（`hexo generate` 不删孤儿文件，见 Hexo 坑⑦），2026-10-01 已移出：**`docs/` 现在是纯产物 = 123 文件**，`test/baseline.json` 的 `publicFiles` 也是 123；将来再挪动这类文件，记得移完重新构建并刷新基线（`npm run verify -- --update-baseline`），否则 `--strict` 会一直拿旧数字比对。
 
 ### `source/rose-galaxy/vendor/`（第三方库本地化，**勿删**）

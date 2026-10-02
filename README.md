@@ -6,7 +6,7 @@
 
 | 深色主题 | 浅色主题 |
 | --- | --- |
-| ![深色主题预览](repository-docs/preview-dark.png) | ![浅色主题预览](repository-docs/preview-light.png) |
+| ![深色主题预览](repository-docs/preview-dark.webp) | ![浅色主题预览](repository-docs/preview-light.webp) |
 
 **站点由四类内容构成**
 
